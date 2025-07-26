@@ -1,0 +1,40 @@
+{
+    "name": "ysocode/berry",
+    "description": "Berry is easy, fast and extremely uncomplicated. Create and manage your routes",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Yuri Oliveira",
+            "email": "yuri.oliveira@ysocode.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "YSOCode\\Berry\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^8.4"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.1",
+        "laravel/pint": "^1.24",
+        "captainhook/captainhook": "^5.25",
+        "captainhook/hook-installer": "^1.0",
+        "ramsey/conventional-commits": "^1.6",
+        "phpunit/phpunit": "^12.2",
+        "rector/rector": "^2.1"
+    },
+    "minimum-stability": "stable",
+    "config": {
+        "allow-plugins": {
+            "captainhook/hook-installer": true
+        }
+    }
+}
