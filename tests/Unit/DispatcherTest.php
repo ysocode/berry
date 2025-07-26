@@ -19,15 +19,9 @@ class DispatcherTest extends TestCase
     {
         $router = new Router;
 
-        $handler = new class
-        {
-            public function handle(Request $request): Response
-            {
-                return new Response(Status::OK, 'Hello from handler');
-            }
-        };
+        $handler = fn (): Response => new Response(Status::OK, 'Hello from handler');
 
-        $router->get(new Path('/hello'), $handler->handle(...));
+        $router->get(new Path('/hello'), $handler);
 
         $dispatcher = new Dispatcher($router);
 
