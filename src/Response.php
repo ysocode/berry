@@ -4,4 +4,10 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry;
 
-class Response {}
+final readonly class Response
+{
+    public function __construct(
+        public Status $status,
+        public string $body = ''
+    ) {}
+}
