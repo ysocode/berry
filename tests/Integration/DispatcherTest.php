@@ -14,7 +14,7 @@ use YSOCode\Berry\Response;
 use YSOCode\Berry\Router;
 use YSOCode\Berry\Status;
 
-class DispatcherTest extends TestCase
+final class DispatcherTest extends TestCase
 {
     public function test_it_dispatches_request_to_correct_handler(): void
     {
