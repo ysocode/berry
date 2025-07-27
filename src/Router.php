@@ -15,38 +15,45 @@ final class Router
     private array $routes = [];
 
     /**
+     * @var array<string, Route>
+     */
+    private array $namedRoutes = [];
+
+    /**
      * @var array<string, true>
      */
     private array $registeredPaths = [];
 
-    public function get(Path $path, Closure $handler): void
+    public function get(Path $path, Closure $handler, ?Name $name = null): void
     {
-        $this->addRoute(Method::GET, $path, $handler);
+        $this->addRoute(Method::GET, $path, $handler, $name);
     }
 
-    public function put(Path $path, Closure $handler): void
+    public function put(Path $path, Closure $handler, ?Name $name = null): void
     {
-        $this->addRoute(Method::PUT, $path, $handler);
+        $this->addRoute(Method::PUT, $path, $handler, $name);
     }
 
-    public function post(Path $path, Closure $handler): void
+    public function post(Path $path, Closure $handler, ?Name $name = null): void
     {
-        $this->addRoute(Method::POST, $path, $handler);
+        $this->addRoute(Method::POST, $path, $handler, $name);
     }
 
-    public function delete(Path $path, Closure $handler): void
+    public function delete(Path $path, Closure $handler, ?Name $name = null): void
     {
-        $this->addRoute(Method::DELETE, $path, $handler);
+        $this->addRoute(Method::DELETE, $path, $handler, $name);
     }
 
-    public function patch(Path $path, Closure $handler): void
+    public function patch(Path $path, Closure $handler, ?Name $name = null): void
     {
-        $this->addRoute(Method::PATCH, $path, $handler);
+        $this->addRoute(Method::PATCH, $path, $handler, $name);
     }
 
-    private function addRoute(Method $method, Path $path, Closure $handler): void
+    private function addRoute(Method $method, Path $path, Closure $handler, ?Name $name = null): void
     {
-        if ($this->routeExists($method, $path)) {
+        $pathKey = (string) $path;
+
+        if (isset($this->routes[$method->value][$pathKey])) {
             throw new LogicException(sprintf(
                 'Route %s %s already exists.',
                 $method->value,
@@ -54,28 +61,27 @@ final class Router
             ));
         }
 
-        $pathKey = (string) $path;
+        $route = new Route($method, $path, $handler, $name);
 
-        $this->routes[$method->value][$pathKey] = new Route(
-            $method,
-            $path,
-            $handler
-        );
+        $this->routes[$method->value][$pathKey] = $route;
+
+        if ($name instanceof Name) {
+            $nameKey = (string) $name;
+
+            if (isset($this->namedRoutes[$nameKey])) {
+                throw new LogicException(sprintf(
+                    'Route name "%s" already exists.',
+                    $name
+                ));
+            }
+
+            $this->namedRoutes[$nameKey] = $route;
+        }
 
         $this->registeredPaths[$pathKey] = true;
     }
 
-    private function routeExists(Method $method, Path $path): bool
-    {
-        $routes = $this->routes[$method->value] ?? null;
-        if (! is_array($routes)) {
-            return false;
-        }
-
-        return array_key_exists((string) $path, $routes);
-    }
-
-    public function match(Request $request): Route|Error
+    public function getMatchedRoute(Request $request): Route|Error
     {
         $method = $request->method;
         $path = $request->path;
@@ -93,5 +99,10 @@ final class Router
         }
 
         return new Error('Route not found.');
+    }
+
+    public function getRouteByName(string $name): ?Route
+    {
+        return $this->namedRoutes[$name] ?? null;
     }
 }

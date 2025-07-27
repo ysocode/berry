@@ -11,6 +11,7 @@ final readonly class Route
     public function __construct(
         public Method $method,
         public Path $path,
-        public Closure $handler
+        public Closure $handler,
+        public ?Name $name = null,
     ) {}
 }

@@ -12,7 +12,7 @@ final readonly class Dispatcher
 
     public function dispatch(Request $request): Response
     {
-        $route = $this->router->match($request);
+        $route = $this->router->getMatchedRoute($request);
         if ($route instanceof Error) {
             return match (true) {
                 $route->equals(new Error('Method not allowed.')) => new Response(Status::METHOD_NOT_ALLOWED, (string) $route),
