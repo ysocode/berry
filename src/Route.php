@@ -8,6 +8,9 @@ use Closure;
 
 final readonly class Route
 {
+    /**
+     * @param  Handler|Closure(Request): Response  $handler
+     */
     public function __construct(
         public Method $method,
         public Path $path,
