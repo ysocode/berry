@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration;
 
+use Closure;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Tests\Fixtures\DummyController;
@@ -191,5 +192,91 @@ final class DispatcherTest extends TestCase
 
         $this->assertEquals(Status::OK, $response->status);
         $this->assertEquals('ok', $response->body);
+    }
+
+    public function test_it_dispatches_with_one_global_middleware(): void
+    {
+        $router = new Router;
+
+        $router->get(new Path('/one'), fn (Request $r): Response => new Response(Status::OK, 'handler'));
+
+        $dispatcher = new Dispatcher($router);
+
+        $dispatcher->addMiddleware(function (Request $request, Closure $next): Response {
+            $response = $next($request);
+
+            return new Response($response->status, 'mw1 > '.$response->body);
+        });
+
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/one')));
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame('mw1 > handler', $response->body);
+    }
+
+    public function test_it_dispatches_with_multiple_global_middlewares_in_order(): void
+    {
+        $router = new Router;
+
+        $router->get(new Path('/multi'), fn (Request $r): Response => new Response(Status::OK, 'handler'));
+
+        $dispatcher = new Dispatcher($router);
+
+        $dispatcher->addMiddleware(function (Request $request, Closure $next): Response {
+            $response = $next($request);
+
+            return new Response($response->status, 'mw1 > '.$response->body);
+        });
+
+        $dispatcher->addMiddleware(function (Request $request, Closure $next): Response {
+            $response = $next($request);
+
+            return new Response($response->status, 'mw2 > '.$response->body);
+        });
+
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/multi')));
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame('mw1 > mw2 > handler', $response->body);
+    }
+
+    public function test_it_stops_chain_if_middleware_returns_early(): void
+    {
+        $router = new Router;
+
+        $router->get(new Path('/stop'), fn (Request $r): Response => new Response(Status::OK, 'handler'));
+
+        $dispatcher = new Dispatcher($router);
+
+        $dispatcher->addMiddleware(fn (Request $request, Closure $next): Response => new Response(Status::FORBIDDEN, 'blocked by mw'));
+
+        $dispatcher->addMiddleware(function (Request $request, Closure $next): Response {
+            $response = $next($request);
+
+            return new Response($response->status, 'mw2 > '.$response->body);
+        });
+
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/stop')));
+
+        $this->assertSame(Status::FORBIDDEN, $response->status);
+        $this->assertSame('blocked by mw', $response->body);
+    }
+
+    public function test_dispatcher_returns_500_if_middleware_does_not_return_response(): void
+    {
+        $router = new Router;
+
+        $router->get(new Path('/hello'), fn (): Response => new Response(Status::OK, 'OK'));
+
+        $dispatcher = new Dispatcher($router);
+
+        $dispatcher->addMiddleware(function (Request $request, Closure $next): void {
+            $next($request);
+        });
+
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/hello')));
+
+        $this->assertSame(Status::INTERNAL_SERVER_ERROR, $response->status);
+        $this->assertSame('Middleware chain did not return a valid response.', $response->body);
     }
 }
