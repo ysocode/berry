@@ -9,7 +9,7 @@ use Closure;
 final class Dispatcher
 {
     /**
-     * @var array<Closure(Request, Closure): Response>
+     * @var array<Middleware|Closure(Request, Closure): Response>
      */
     private array $middlewares = [];
 
@@ -18,9 +18,9 @@ final class Dispatcher
     ) {}
 
     /**
-     * @param  Closure(Request, Closure): Response  $middleware
+     * @param  Middleware|Closure(Request, Closure): Response  $middleware
      */
-    public function addMiddleware(Closure $middleware): self
+    public function addMiddleware(Middleware|Closure $middleware): self
     {
         $this->middlewares[] = $middleware;
 
@@ -56,7 +56,10 @@ final class Dispatcher
         $pipeline = $core;
         foreach (array_reverse($this->middlewares) as $middleware) {
             $pipeline = function (Request $request) use ($middleware, $pipeline): Response {
-                $response = $middleware($request, $pipeline);
+                $response = match (true) {
+                    $middleware instanceof Middleware => $middleware->invoke($request, $pipeline),
+                    default => $middleware($request, $pipeline),
+                };
 
                 if (! $response instanceof Response) {
                     return new Response(Status::INTERNAL_SERVER_ERROR, 'Middleware chain did not return a valid response.');

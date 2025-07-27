@@ -152,7 +152,7 @@ final class RouterTest extends TestCase
         );
     }
 
-    public function test_router_accepts_handler_value_object(): void
+    public function test_it_accepts_handler_value_object(): void
     {
         $router = new Router;
 

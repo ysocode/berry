@@ -8,9 +8,11 @@ use Closure;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Tests\Fixtures\DummyController;
+use Tests\Fixtures\DummyMiddleware;
 use YSOCode\Berry\Dispatcher;
 use YSOCode\Berry\Handler;
 use YSOCode\Berry\Method;
+use YSOCode\Berry\Middleware;
 use YSOCode\Berry\Name;
 use YSOCode\Berry\Path;
 use YSOCode\Berry\Request;
@@ -278,5 +280,18 @@ final class DispatcherTest extends TestCase
 
         $this->assertSame(Status::INTERNAL_SERVER_ERROR, $response->status);
         $this->assertSame('Middleware chain did not return a valid response.', $response->body);
+    }
+
+    public function test_it_accepts_middleware_value_object(): void
+    {
+        $router = new Router;
+        $router->get(new Path('/test'), fn (): Response => new Response(Status::OK, 'ok'));
+
+        $dispatcher = new Dispatcher($router);
+
+        $dispatcher->addMiddleware(new Middleware(DummyMiddleware::class, 'execute'));
+
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/test')));
+        $this->assertSame('dummy execute > ok', $response->body);
     }
 }
