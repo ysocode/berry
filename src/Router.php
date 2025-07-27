@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace YSOCode\Berry;
 
 use Closure;
+use LogicException;
 
 final class Router
 {
@@ -12,6 +13,11 @@ final class Router
      * @var array<string, array<string, Route>>
      */
     private array $routes = [];
+
+    /**
+     * @var array<string, true>
+     */
+    private array $registeredPaths = [];
 
     public function get(Path $path, Closure $handler): void
     {
@@ -40,17 +46,52 @@ final class Router
 
     private function addRoute(Method $method, Path $path, Closure $handler): void
     {
-        $this->routes[$method->value][(string) $path] = new Route(
+        if ($this->routeExists($method, $path)) {
+            throw new LogicException(sprintf(
+                'Route %s %s already exists.',
+                $method->value,
+                $path
+            ));
+        }
+
+        $pathKey = (string) $path;
+
+        $this->routes[$method->value][$pathKey] = new Route(
+            $method,
             $path,
             $handler
         );
+
+        $this->registeredPaths[$pathKey] = true;
     }
 
-    public function match(Request $request): ?Route
+    private function routeExists(Method $method, Path $path): bool
+    {
+        $routes = $this->routes[$method->value] ?? null;
+        if (! is_array($routes)) {
+            return false;
+        }
+
+        return array_key_exists((string) $path, $routes);
+    }
+
+    public function match(Request $request): Route|Error
     {
         $method = $request->method;
         $path = $request->path;
 
-        return $this->routes[$method->value][(string) $path] ?? null;
+        $pathKey = (string) $path;
+
+        $route = $this->routes[$method->value][$pathKey] ?? null;
+
+        if ($route instanceof Route) {
+            return $route;
+        }
+
+        if ($this->registeredPaths[$pathKey] ?? false) {
+            return new Error('Method not allowed.');
+        }
+
+        return new Error('Route not found.');
     }
 }
