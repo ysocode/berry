@@ -7,6 +7,8 @@ namespace YSOCode\Berry;
 use Closure;
 use InvalidArgumentException;
 use LogicException;
+use ReflectionMethod;
+use ReflectionNamedType;
 
 final readonly class Middleware
 {
@@ -47,6 +49,32 @@ final readonly class Middleware
 
         if (! method_exists($class, $method)) {
             return new Error("Method {$class}::{$method} does not exist.");
+        }
+
+        $reflection = new ReflectionMethod($class, $method);
+
+        if (! $reflection->isPublic()) {
+            return new Error("Middleware method {$class}::{$method} is not public.");
+        }
+
+        $params = $reflection->getParameters();
+        if (count($params) !== 2) {
+            return new Error("Middleware method {$class}::{$method} must accept exactly 2 parameters.");
+        }
+
+        $param1Type = $params[0]->getType();
+        if (! $param1Type instanceof ReflectionNamedType || $param1Type->getName() !== Request::class) {
+            return new Error("First parameter of {$class}::{$method} must be type-hinted as Request.");
+        }
+
+        $param2Type = $params[1]->getType();
+        if (! $param2Type instanceof ReflectionNamedType || $param2Type->getName() !== Closure::class) {
+            return new Error("Second parameter of {$class}::{$method} must be type-hinted as Closure.");
+        }
+
+        $returnType = $reflection->getReturnType();
+        if (! $returnType instanceof ReflectionNamedType || $returnType->getName() !== Response::class) {
+            return new Error("Middleware method {$class}::{$method} must have return type Response.");
         }
 
         return true;

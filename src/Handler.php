@@ -6,6 +6,8 @@ namespace YSOCode\Berry;
 
 use InvalidArgumentException;
 use LogicException;
+use ReflectionMethod;
+use ReflectionNamedType;
 
 final readonly class Handler
 {
@@ -46,6 +48,31 @@ final readonly class Handler
 
         if (! method_exists($class, $method)) {
             return new Error("Method {$class}::{$method} does not exist.");
+        }
+
+        $reflection = new ReflectionMethod($class, $method);
+
+        if (! $reflection->isPublic()) {
+            return new Error("Handler method {$class}::{$method} is not public.");
+        }
+
+        $params = $reflection->getParameters();
+        $paramCount = count($params);
+
+        if ($paramCount > 1) {
+            return new Error("Handler method {$class}::{$method} must accept 0 or 1 parameter(s).");
+        }
+
+        if ($paramCount === 1) {
+            $paramType = $params[0]->getType();
+            if (! $paramType instanceof ReflectionNamedType || $paramType->getName() !== Request::class) {
+                return new Error("Handler method {$class}::{$method} parameter must be type-hinted as Request.");
+            }
+        }
+
+        $returnType = $reflection->getReturnType();
+        if (! $returnType instanceof ReflectionNamedType || $returnType->getName() !== Response::class) {
+            return new Error("Handler method {$class}::{$method} must have return type Response.");
         }
 
         return true;
