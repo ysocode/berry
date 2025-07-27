@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use LogicException;
 use PHPUnit\Framework\TestCase;
 use YSOCode\Berry\Dispatcher;
 use YSOCode\Berry\Method;
@@ -82,5 +83,55 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(Status::OK, $response->status);
         $this->assertEquals('Profile', $response->body);
+    }
+
+    public function test_it_returns_500_if_handler_does_not_return_response(): void
+    {
+        $router = new Router;
+        $router->get(new Path('/broken'), fn (): string => 'not a response');
+
+        $dispatcher = new Dispatcher($router);
+        $request = new Request(Method::GET, new Path('/broken'));
+        $response = $dispatcher->dispatch($request);
+
+        $this->assertEquals(Status::INTERNAL_SERVER_ERROR, $response->status);
+        $this->assertEquals('Handler did not return a valid response.', $response->body);
+    }
+
+    public function test_it_throws_exception_if_route_already_exists(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Route GET /duplicate already exists.');
+
+        $router = new Router;
+        $router->get(new Path('/duplicate'), fn (): Response => new Response(Status::OK, 'First'));
+        $router->get(new Path('/duplicate'), fn (): Response => new Response(Status::OK, 'Second'));
+    }
+
+    public function test_it_allows_same_path_with_different_methods(): void
+    {
+        $router = new Router;
+        $router->get(new Path('/multi'), fn (): Response => new Response(Status::OK, 'GET'));
+        $router->post(new Path('/multi'), fn (): Response => new Response(Status::OK, 'POST'));
+
+        $dispatcher = new Dispatcher($router);
+
+        $getResponse = $dispatcher->dispatch(new Request(Method::GET, new Path('/multi')));
+        $postResponse = $dispatcher->dispatch(new Request(Method::POST, new Path('/multi')));
+
+        $this->assertEquals('GET', $getResponse->body);
+        $this->assertEquals('POST', $postResponse->body);
+    }
+
+    public function test_it_handles_path_with_hyphens(): void
+    {
+        $router = new Router;
+        $router->get(new Path('/user-profile/view'), fn (): Response => new Response(Status::OK, 'Hyphen'));
+
+        $dispatcher = new Dispatcher($router);
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/user-profile/view')));
+
+        $this->assertEquals(Status::OK, $response->status);
+        $this->assertEquals('Hyphen', $response->body);
     }
 }
