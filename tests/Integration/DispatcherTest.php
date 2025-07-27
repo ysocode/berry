@@ -8,9 +8,11 @@ use LogicException;
 use PHPUnit\Framework\TestCase;
 use YSOCode\Berry\Dispatcher;
 use YSOCode\Berry\Method;
+use YSOCode\Berry\Name;
 use YSOCode\Berry\Path;
 use YSOCode\Berry\Request;
 use YSOCode\Berry\Response;
+use YSOCode\Berry\Route;
 use YSOCode\Berry\Router;
 use YSOCode\Berry\Status;
 
@@ -133,5 +135,44 @@ final class DispatcherTest extends TestCase
 
         $this->assertEquals(Status::OK, $response->status);
         $this->assertEquals('Hyphen', $response->body);
+    }
+
+    public function test_it_handles_redirect_with_manual_url_and_named_route(): void
+    {
+        $router = new Router;
+
+        $router->get(
+            new Path('/new-location'),
+            fn (): Response => new Response(Status::OK, 'New location'),
+            new Name('new.location')
+        );
+
+        $router->get(
+            new Path('/redirect-manual'),
+            fn (): Response => new Response(Status::MOVED_PERMANENTLY, null, [
+                'Location' => 'https://example.com/manual-url',
+            ])
+        );
+
+        $router->get(new Path('/redirect-named'), function () use ($router): Response {
+            $targetRoute = $router->getRouteByName('new.location');
+            $location = $targetRoute instanceof Route ? (string) $targetRoute->path : '/fallback';
+
+            return new Response(Status::MOVED_PERMANENTLY, null, [
+                'Location' => $location,
+            ]);
+        });
+
+        $dispatcher = new Dispatcher($router);
+
+        $responseManual = $dispatcher->dispatch(new Request(Method::GET, new Path('/redirect-manual')));
+        $this->assertEquals(Status::MOVED_PERMANENTLY, $responseManual->status);
+        $this->assertNull($responseManual->body);
+        $this->assertEquals('https://example.com/manual-url', $responseManual->headers['Location']);
+
+        $responseNamed = $dispatcher->dispatch(new Request(Method::GET, new Path('/redirect-named')));
+        $this->assertEquals(Status::MOVED_PERMANENTLY, $responseNamed->status);
+        $this->assertNull($responseNamed->body);
+        $this->assertEquals('/new-location', $responseNamed->headers['Location']);
     }
 }
