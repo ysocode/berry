@@ -6,7 +6,9 @@ namespace Tests\Integration;
 
 use LogicException;
 use PHPUnit\Framework\TestCase;
+use Tests\Fixtures\DummyController;
 use YSOCode\Berry\Dispatcher;
+use YSOCode\Berry\Handler;
 use YSOCode\Berry\Method;
 use YSOCode\Berry\Name;
 use YSOCode\Berry\Path;
@@ -174,5 +176,20 @@ final class DispatcherTest extends TestCase
         $this->assertEquals(Status::MOVED_PERMANENTLY, $responseNamed->status);
         $this->assertNull($responseNamed->body);
         $this->assertEquals('/new-location', $responseNamed->headers['Location']);
+    }
+
+    public function test_dispatcher_executes_handler_defined_as_value_object(): void
+    {
+        $router = new Router;
+
+        $router->get(new Path('/handler'), new Handler(DummyController::class, 'index'));
+
+        $dispatcher = new Dispatcher($router);
+
+        $request = new Request(Method::GET, new Path('/handler'));
+        $response = $dispatcher->dispatch($request);
+
+        $this->assertEquals(Status::OK, $response->status);
+        $this->assertEquals('ok', $response->body);
     }
 }

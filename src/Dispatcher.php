@@ -21,7 +21,12 @@ final readonly class Dispatcher
             };
         }
 
-        $response = ($route->handler)($request);
+        $handler = $route->handler;
+
+        $response = match (true) {
+            $handler instanceof Handler => $handler->invoke($request),
+            default => $handler($request),
+        };
 
         if (! $response instanceof Response) {
             return new Response(Status::INTERNAL_SERVER_ERROR, 'Handler did not return a valid response.');

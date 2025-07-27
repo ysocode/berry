@@ -7,7 +7,9 @@ namespace Tests\Unit;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use Tests\Fixtures\DummyController;
 use YSOCode\Berry\Error;
+use YSOCode\Berry\Handler;
 use YSOCode\Berry\Method;
 use YSOCode\Berry\Name;
 use YSOCode\Berry\Path;
@@ -148,5 +150,19 @@ final class RouterTest extends TestCase
             fn (): Response => new Response(Status::OK, 'B'),
             new Name('duplicate')
         );
+    }
+
+    public function test_router_accepts_handler_value_object(): void
+    {
+        $router = new Router;
+
+        $router->get(new Path('/controller'), new Handler(DummyController::class, 'index'));
+
+        $route = $router->getMatchedRoute(new Request(Method::GET, new Path('/controller')));
+
+        $this->assertInstanceOf(Route::class, $route);
+
+        $response = $route->handler->invoke(new Request(Method::GET, new Path('/controller')));
+        $this->assertSame('ok', $response->body);
     }
 }

@@ -24,32 +24,32 @@ final class Router
      */
     private array $registeredPaths = [];
 
-    public function get(Path $path, Closure $handler, ?Name $name = null): void
+    public function get(Path $path, Handler|Closure $handler, ?Name $name = null): void
     {
         $this->addRoute(Method::GET, $path, $handler, $name);
     }
 
-    public function put(Path $path, Closure $handler, ?Name $name = null): void
+    public function put(Path $path, Handler|Closure $handler, ?Name $name = null): void
     {
         $this->addRoute(Method::PUT, $path, $handler, $name);
     }
 
-    public function post(Path $path, Closure $handler, ?Name $name = null): void
+    public function post(Path $path, Handler|Closure $handler, ?Name $name = null): void
     {
         $this->addRoute(Method::POST, $path, $handler, $name);
     }
 
-    public function delete(Path $path, Closure $handler, ?Name $name = null): void
+    public function delete(Path $path, Handler|Closure $handler, ?Name $name = null): void
     {
         $this->addRoute(Method::DELETE, $path, $handler, $name);
     }
 
-    public function patch(Path $path, Closure $handler, ?Name $name = null): void
+    public function patch(Path $path, Handler|Closure $handler, ?Name $name = null): void
     {
         $this->addRoute(Method::PATCH, $path, $handler, $name);
     }
 
-    private function addRoute(Method $method, Path $path, Closure $handler, ?Name $name = null): void
+    private function addRoute(Method $method, Path $path, Handler|Closure $handler, ?Name $name = null): void
     {
         $pathKey = (string) $path;
 
