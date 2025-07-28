@@ -32,7 +32,8 @@ final readonly class Path implements Stringable
             return new Error('Path cannot be empty.');
         }
 
-        if (in_array(preg_match('#^/[a-zA-Z0-9/_\-{}]*$#', $value), [0, false], true)) {
+        $pattern = '#^/(?:[a-zA-Z0-9_\-{}]+/?)*$#';
+        if (in_array(preg_match($pattern, $value), [0, false], true)) {
             return new Error('Invalid path format.');
         }
 
