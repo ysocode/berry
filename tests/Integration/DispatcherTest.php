@@ -32,7 +32,7 @@ final class DispatcherTest extends TestCase
         $this->container = new Container;
     }
 
-    public function test_it_dispatches_request_to_correct_handler(): void
+    public function test_it_should_dispatch_request_to_correct_handler(): void
     {
         $router = new Router;
 
@@ -46,7 +46,7 @@ final class DispatcherTest extends TestCase
         $this->assertEquals('Hello from handler', $response->body);
     }
 
-    public function test_it_returns_404_when_route_is_not_found(): void
+    public function test_it_should_return_404_when_route_is_not_found(): void
     {
         $router = new Router;
         $dispatcher = new Dispatcher($router);
@@ -57,7 +57,7 @@ final class DispatcherTest extends TestCase
         $this->assertEquals('Route not found.', $response->body);
     }
 
-    public function test_it_returns_405_when_method_is_not_allowed(): void
+    public function test_it_should_return_405_when_method_is_not_allowed(): void
     {
         $router = new Router;
         $router->get(new Path('/hello'), fn (Request $request): Response => new Response(Status::OK, 'GET handler'));
@@ -69,7 +69,7 @@ final class DispatcherTest extends TestCase
         $this->assertEquals('Method not allowed.', $response->body);
     }
 
-    public function test_it_matches_correct_route_among_multiple(): void
+    public function test_it_should_match_correct_route_among_multiple(): void
     {
         $router = new Router;
         $router->get(new Path('/hello'), fn (Request $request): Response => new Response(Status::OK, 'GET'));
@@ -82,7 +82,7 @@ final class DispatcherTest extends TestCase
         $this->assertEquals('POST', $response->body);
     }
 
-    public function test_it_matches_nested_paths(): void
+    public function test_it_should_match_nested_paths(): void
     {
         $router = new Router;
         $router->get(new Path('/user/profile'), fn (Request $request): Response => new Response(Status::OK, 'Profile'));
@@ -94,7 +94,7 @@ final class DispatcherTest extends TestCase
         $this->assertEquals('Profile', $response->body);
     }
 
-    public function test_it_returns_500_when_handler_does_not_return_response(): void
+    public function test_it_should_return_500_when_handler_does_not_return_response(): void
     {
         $router = new Router;
         $router->get(new Path('/broken'), fn (): string => 'not a response');
@@ -106,7 +106,7 @@ final class DispatcherTest extends TestCase
         $this->assertEquals('Handler did not return a valid response.', $response->body);
     }
 
-    public function test_it_allows_same_path_with_different_methods(): void
+    public function test_it_should_allow_same_path_with_different_methods(): void
     {
         $router = new Router;
         $router->get(new Path('/multi'), fn (Request $request): Response => new Response(Status::OK, 'GET'));
@@ -121,7 +121,7 @@ final class DispatcherTest extends TestCase
         $this->assertEquals('POST', $postResponse->body);
     }
 
-    public function test_it_handles_paths_with_hyphens(): void
+    public function test_it_should_handle_paths_with_hyphens(): void
     {
         $router = new Router;
         $router->get(new Path('/user-profile/view'), fn (Request $request): Response => new Response(Status::OK, 'Hyphen'));
@@ -133,7 +133,7 @@ final class DispatcherTest extends TestCase
         $this->assertEquals('Hyphen', $response->body);
     }
 
-    public function test_it_handles_redirect_with_manual_url_and_named_route(): void
+    public function test_it_should_handle_redirect_with_manual_url_and_named_route(): void
     {
         $router = new Router;
 
@@ -173,7 +173,7 @@ final class DispatcherTest extends TestCase
         $this->assertEquals('/new-location', $responseNamed->headers['Location']);
     }
 
-    public function test_it_dispatches_handler_defined_as_value_object(): void
+    public function test_it_should_dispatch_handler_defined_as_value_object(): void
     {
         $router = new Router;
 
@@ -187,7 +187,7 @@ final class DispatcherTest extends TestCase
         $this->assertEquals('ok', $response->body);
     }
 
-    public function test_it_dispatches_with_one_global_middleware(): void
+    public function test_it_should_dispatch_with_one_global_middleware(): void
     {
         $router = new Router;
 
@@ -206,7 +206,7 @@ final class DispatcherTest extends TestCase
         $this->assertSame('mw1 > handler', $response->body);
     }
 
-    public function test_it_dispatches_with_multiple_global_middlewares_in_order(): void
+    public function test_it_should_dispatch_with_multiple_global_middlewares_in_order(): void
     {
         $router = new Router;
 
@@ -231,7 +231,7 @@ final class DispatcherTest extends TestCase
         $this->assertSame('mw1 > mw2 > handler', $response->body);
     }
 
-    public function test_it_stops_middleware_chain_if_response_returned_early(): void
+    public function test_it_should_stop_middleware_chain_if_response_returned_early(): void
     {
         $router = new Router;
 
@@ -253,7 +253,7 @@ final class DispatcherTest extends TestCase
         $this->assertSame('blocked by mw', $response->body);
     }
 
-    public function test_it_returns_500_when_middleware_does_not_return_response(): void
+    public function test_it_should_return_500_when_middleware_does_not_return_response(): void
     {
         $router = new Router;
 
@@ -271,7 +271,7 @@ final class DispatcherTest extends TestCase
         $this->assertSame('Middleware chain did not return a valid response.', $response->body);
     }
 
-    public function test_it_accepts_middleware_as_value_object(): void
+    public function test_it_should_accept_middleware_as_value_object(): void
     {
         $router = new Router;
         $router->get(new Path('/test'), fn (Request $request): Response => new Response(Status::OK, 'ok'));

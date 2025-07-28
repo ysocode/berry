@@ -10,7 +10,7 @@ use YSOCode\Berry\Status;
 
 final class ResponseTest extends TestCase
 {
-    public function test_it_adds_headers_immutably(): void
+    public function test_it_should_add_headers_immutably(): void
     {
         $response = new Response(Status::OK);
         $newResponse = $response->withHeader('Content-Type', 'application/json');
@@ -21,7 +21,7 @@ final class ResponseTest extends TestCase
         $this->assertEmpty($response->headers);
     }
 
-    public function test_it_changes_status_immutably(): void
+    public function test_it_should_change_status_immutably(): void
     {
         $response = new Response(Status::OK);
         $newResponse = $response->withStatus(Status::NOT_FOUND);

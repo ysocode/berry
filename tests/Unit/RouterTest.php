@@ -31,7 +31,7 @@ final class RouterTest extends TestCase
         $this->container = new Container;
     }
 
-    public function test_it_adds_and_matches_route(): void
+    public function test_it_should_add_and_match_route(): void
     {
         $router = new Router;
 
@@ -46,7 +46,7 @@ final class RouterTest extends TestCase
         $this->assertSame($handler, $route->handler);
     }
 
-    public function test_it_throws_exception_when_adding_duplicate_route(): void
+    public function test_it_should_throw_exception_when_adding_duplicate_route(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Route GET /duplicate already exists.');
@@ -58,7 +58,7 @@ final class RouterTest extends TestCase
         $router->get($path, fn (Request $request): Response => new Response(Status::OK, 'second'));
     }
 
-    public function test_it_returns_error_when_route_is_not_found(): void
+    public function test_it_should_return_error_when_route_is_not_found(): void
     {
         $router = new Router;
 
@@ -68,7 +68,7 @@ final class RouterTest extends TestCase
         $this->assertEquals('Route not found.', (string) $result);
     }
 
-    public function test_it_returns_error_when_method_is_not_allowed(): void
+    public function test_it_should_return_error_when_method_is_not_allowed(): void
     {
         $router = new Router;
 
@@ -81,7 +81,7 @@ final class RouterTest extends TestCase
         $this->assertEquals('Method not allowed.', (string) $result);
     }
 
-    public function test_it_registers_routes_for_all_http_methods(): void
+    public function test_it_should_register_routes_for_all_http_methods(): void
     {
         $router = new Router;
         $path = new Path('/resource');
@@ -107,7 +107,7 @@ final class RouterTest extends TestCase
         }
     }
 
-    public function test_it_updates_registered_paths_when_adding_route(): void
+    public function test_it_should_update_registered_paths_when_adding_route(): void
     {
         $router = new Router;
         $path = new Path('/registered');
@@ -124,7 +124,7 @@ final class RouterTest extends TestCase
         $this->assertTrue($registeredPaths[$pathKey]);
     }
 
-    public function test_it_registers_and_retrieves_named_route(): void
+    public function test_it_should_register_and_retrieve_named_route(): void
     {
         $router = new Router;
 
@@ -148,14 +148,14 @@ final class RouterTest extends TestCase
         $this->assertEquals(Method::GET, $route->method);
     }
 
-    public function test_it_returns_null_when_named_route_is_not_found(): void
+    public function test_it_should_return_null_when_named_route_is_not_found(): void
     {
         $router = new Router;
 
         $this->assertNull($router->getRouteByName(new Name('nonExistent')));
     }
 
-    public function test_it_throws_exception_when_named_route_is_duplicated(): void
+    public function test_it_should_throw_exception_when_named_route_is_duplicated(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Route name "duplicate" already exists.');
@@ -174,7 +174,7 @@ final class RouterTest extends TestCase
         );
     }
 
-    public function test_it_accepts_handler_as_value_object(): void
+    public function test_it_should_accept_handler_as_value_object(): void
     {
         $router = new Router;
 

@@ -35,7 +35,7 @@ final class BerryTest extends TestCase
         $this->container = $builder->build();
     }
 
-    public function test_berry_processes_request_and_sends_response(): void
+    public function test_it_should_process_request_and_send_response(): void
     {
         $router = new Router;
 
@@ -54,7 +54,7 @@ final class BerryTest extends TestCase
         $this->assertSame(200, http_response_code());
     }
 
-    public function test_handler_resolves_dependencies_via_container(): void
+    public function test_it_should_resolve_handler_dependencies_via_container(): void
     {
         $router = new Router;
 
@@ -73,7 +73,7 @@ final class BerryTest extends TestCase
         $this->assertSame(200, http_response_code());
     }
 
-    public function test_middleware_resolves_dependencies_via_container(): void
+    public function test_it_should_resolve_middleware_dependencies_via_container(): void
     {
         $router = new Router;
 
