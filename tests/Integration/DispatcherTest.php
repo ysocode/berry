@@ -28,6 +28,7 @@ final class DispatcherTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->container = new Container;
     }
 
