@@ -10,9 +10,6 @@ use YSOCode\Berry\Response;
 
 final class DummyMiddleware
 {
-    /**
-     * @param  Closure(Request, Closure): Response  $next
-     */
     public function execute(Request $request, Closure $next): Response
     {
         $response = $next($request);

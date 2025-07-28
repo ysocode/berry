@@ -9,7 +9,7 @@ use Closure;
 final class Dispatcher
 {
     /**
-     * @var array<Middleware|Closure(Request, Closure): Response>
+     * @var array<Middleware|Closure(Request, Closure(Request): Response): Response>
      */
     private array $middlewares = [];
 
@@ -18,7 +18,7 @@ final class Dispatcher
     ) {}
 
     /**
-     * @param  Middleware|Closure(Request, Closure): Response  $middleware
+     * @param  Middleware|Closure(Request, Closure(Request): Response): Response  $middleware
      */
     public function addMiddleware(Middleware|Closure $middleware): self
     {

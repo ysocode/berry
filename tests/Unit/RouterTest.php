@@ -25,7 +25,7 @@ final class RouterTest extends TestCase
     {
         $router = new Router;
 
-        $handler = fn (): Response => new Response(Status::OK, 'ok');
+        $handler = fn (Request $request): Response => new Response(Status::OK, 'ok');
 
         $path = new Path('/test');
         $router->get($path, $handler);
@@ -44,8 +44,8 @@ final class RouterTest extends TestCase
         $router = new Router;
 
         $path = new Path('/duplicate');
-        $router->get($path, fn (): Response => new Response(Status::OK, 'first'));
-        $router->get($path, fn (): Response => new Response(Status::OK, 'second'));
+        $router->get($path, fn (Request $request): Response => new Response(Status::OK, 'first'));
+        $router->get($path, fn (Request $request): Response => new Response(Status::OK, 'second'));
     }
 
     public function test_it_returns_error_when_route_is_not_found(): void
@@ -63,7 +63,7 @@ final class RouterTest extends TestCase
         $router = new Router;
 
         $path = new Path('/path');
-        $router->get($path, fn (): Response => new Response(Status::OK, 'ok'));
+        $router->get($path, fn (Request $request): Response => new Response(Status::OK, 'ok'));
 
         $result = $router->getMatchedRoute(new Request(Method::POST, $path));
 
@@ -76,11 +76,11 @@ final class RouterTest extends TestCase
         $router = new Router;
         $path = new Path('/resource');
 
-        $router->get($path, fn (): Response => new Response(Status::OK, 'get'));
-        $router->post($path, fn (): Response => new Response(Status::OK, 'post'));
-        $router->put($path, fn (): Response => new Response(Status::OK, 'put'));
-        $router->delete($path, fn (): Response => new Response(Status::OK, 'delete'));
-        $router->patch($path, fn (): Response => new Response(Status::OK, 'patch'));
+        $router->get($path, fn (Request $request): Response => new Response(Status::OK, 'get'));
+        $router->post($path, fn (Request $request): Response => new Response(Status::OK, 'post'));
+        $router->put($path, fn (Request $request): Response => new Response(Status::OK, 'put'));
+        $router->delete($path, fn (Request $request): Response => new Response(Status::OK, 'delete'));
+        $router->patch($path, fn (Request $request): Response => new Response(Status::OK, 'patch'));
 
         $methods = [
             Method::GET,
@@ -102,7 +102,7 @@ final class RouterTest extends TestCase
         $router = new Router;
         $path = new Path('/registered');
 
-        $router->get($path, fn (): Response => new Response(Status::OK, 'ok'));
+        $router->get($path, fn (Request $request): Response => new Response(Status::OK, 'ok'));
 
         $reflection = new ReflectionClass($router);
         $property = $reflection->getProperty('registeredPaths');
@@ -119,7 +119,7 @@ final class RouterTest extends TestCase
         $router = new Router;
 
         $path = new Path('/named');
-        $handler = fn (): Response => new Response(Status::OK, 'named');
+        $handler = fn (Request $request): Response => new Response(Status::OK, 'named');
         $name = new Name('namedRoute');
 
         $router->get(
@@ -154,12 +154,12 @@ final class RouterTest extends TestCase
 
         $router->get(
             new Path('/a'),
-            fn (): Response => new Response(Status::OK, 'A'),
+            fn (Request $request): Response => new Response(Status::OK, 'A'),
             new Name('duplicate')
         );
         $router->get(
             new Path('/b'),
-            fn (): Response => new Response(Status::OK, 'B'),
+            fn (Request $request): Response => new Response(Status::OK, 'B'),
             new Name('duplicate')
         );
     }

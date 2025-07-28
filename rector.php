@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedConstructorParamRector;
+use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPrivateMethodParameterRector;
+use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPublicMethodParameterRector;
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 
 return RectorConfig::configure()
@@ -22,4 +25,9 @@ return RectorConfig::configure()
         earlyReturn: true,
         strictBooleans: true
     )
+    ->withSkip([
+        RemoveUnusedConstructorParamRector::class,
+        RemoveUnusedPublicMethodParameterRector::class,
+        RemoveUnusedPrivateMethodParameterRector::class,
+    ])
     ->withPhpSets();
