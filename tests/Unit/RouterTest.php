@@ -21,21 +21,22 @@ use YSOCode\Berry\Status;
 
 final class RouterTest extends TestCase
 {
-    public function test_add_and_match_route(): void
+    public function test_it_adds_and_matches_route(): void
     {
         $router = new Router;
 
-        $handler = fn (): string => 'handler';
+        $handler = fn (): Response => new Response(Status::OK, 'ok');
 
         $path = new Path('/test');
         $router->get($path, $handler);
 
         $route = $router->getMatchedRoute(new Request(Method::GET, $path));
+
         $this->assertInstanceOf(Route::class, $route);
         $this->assertSame($handler, $route->handler);
     }
 
-    public function test_add_route_throws_exception_if_duplicate(): void
+    public function test_it_throws_exception_when_adding_duplicate_route(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Route GET /duplicate already exists.');
@@ -43,41 +44,43 @@ final class RouterTest extends TestCase
         $router = new Router;
 
         $path = new Path('/duplicate');
-        $router->get($path, fn (): string => 'first');
-        $router->get($path, fn (): string => 'second');
+        $router->get($path, fn (): Response => new Response(Status::OK, 'first'));
+        $router->get($path, fn (): Response => new Response(Status::OK, 'second'));
     }
 
-    public function test_match_returns_error_for_not_found(): void
+    public function test_it_returns_error_when_route_is_not_found(): void
     {
         $router = new Router;
 
         $result = $router->getMatchedRoute(new Request(Method::GET, new Path('/nope')));
+
         $this->assertInstanceOf(Error::class, $result);
         $this->assertEquals('Route not found.', (string) $result);
     }
 
-    public function test_match_returns_error_for_method_not_allowed(): void
+    public function test_it_returns_error_when_method_is_not_allowed(): void
     {
         $router = new Router;
 
         $path = new Path('/path');
-        $router->get($path, fn (): string => 'ok');
+        $router->get($path, fn (): Response => new Response(Status::OK, 'ok'));
 
         $result = $router->getMatchedRoute(new Request(Method::POST, $path));
+
         $this->assertInstanceOf(Error::class, $result);
         $this->assertEquals('Method not allowed.', (string) $result);
     }
 
-    public function test_it_registers_routes_for_all_methods(): void
+    public function test_it_registers_routes_for_all_http_methods(): void
     {
         $router = new Router;
         $path = new Path('/resource');
 
-        $router->get($path, fn (): string => 'get');
-        $router->post($path, fn (): string => 'post');
-        $router->put($path, fn (): string => 'put');
-        $router->delete($path, fn (): string => 'delete');
-        $router->patch($path, fn (): string => 'patch');
+        $router->get($path, fn (): Response => new Response(Status::OK, 'get'));
+        $router->post($path, fn (): Response => new Response(Status::OK, 'post'));
+        $router->put($path, fn (): Response => new Response(Status::OK, 'put'));
+        $router->delete($path, fn (): Response => new Response(Status::OK, 'delete'));
+        $router->patch($path, fn (): Response => new Response(Status::OK, 'patch'));
 
         $methods = [
             Method::GET,
@@ -89,51 +92,60 @@ final class RouterTest extends TestCase
 
         foreach ($methods as $method) {
             $route = $router->getMatchedRoute(new Request($method, $path));
+
             $this->assertEquals($method, $route->method);
         }
     }
 
-    public function test_registered_paths_is_updated_on_add_route(): void
+    public function test_it_updates_registered_paths_when_adding_route(): void
     {
         $router = new Router;
         $path = new Path('/registered');
 
-        $router->get($path, fn (): string => 'ok');
+        $router->get($path, fn (): Response => new Response(Status::OK, 'ok'));
 
         $reflection = new ReflectionClass($router);
         $property = $reflection->getProperty('registeredPaths');
         $registeredPaths = $property->getValue($router);
 
-        $this->assertArrayHasKey((string) $path, $registeredPaths);
-        $this->assertTrue($registeredPaths[(string) $path]);
+        $pathKey = (string) $path;
+
+        $this->assertArrayHasKey($pathKey, $registeredPaths);
+        $this->assertTrue($registeredPaths[$pathKey]);
     }
 
-    public function test_named_route_is_registered_and_retrievable(): void
+    public function test_it_registers_and_retrieves_named_route(): void
     {
         $router = new Router;
 
+        $path = new Path('/named');
+        $handler = fn (): Response => new Response(Status::OK, 'named');
+        $name = new Name('namedRoute');
+
         $router->get(
-            new Path('/home'),
-            fn (): Response => new Response(Status::OK, 'home'),
-            new Name('home')
+            $path,
+            $handler,
+            $name
         );
 
-        $route = $router->getRouteByName('home');
+        $route = $router->getRouteByName($name);
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertEquals('/home', (string) $route->path);
-        $this->assertEquals('home', $route->name);
+
+        $this->assertEquals($path, $route->path);
+        $this->assertEquals($name, $route->name);
+        $this->assertEquals($handler, $route->handler);
         $this->assertEquals(Method::GET, $route->method);
     }
 
-    public function test_named_route_returns_null_when_not_found(): void
+    public function test_it_returns_null_when_named_route_is_not_found(): void
     {
         $router = new Router;
 
-        $this->assertNull($router->getRouteByName('non-existent'));
+        $this->assertNull($router->getRouteByName(new Name('nonExistent')));
     }
 
-    public function test_duplicate_route_name_throws_exception(): void
+    public function test_it_throws_exception_when_named_route_is_duplicated(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Route name "duplicate" already exists.');
@@ -152,17 +164,24 @@ final class RouterTest extends TestCase
         );
     }
 
-    public function test_it_accepts_handler_value_object(): void
+    public function test_it_accepts_handler_as_value_object(): void
     {
         $router = new Router;
 
-        $router->get(new Path('/controller'), new Handler(DummyController::class, 'index'));
+        $path = new Path('/controller');
+        $handler = new Handler(DummyController::class, 'index');
 
-        $route = $router->getMatchedRoute(new Request(Method::GET, new Path('/controller')));
+        $router->get(
+            $path,
+            $handler
+        );
+
+        $route = $router->getMatchedRoute(new Request(Method::GET, $path));
+        $response = $route->handler->invoke(new Request(Method::GET, $path));
 
         $this->assertInstanceOf(Route::class, $route);
-
-        $response = $route->handler->invoke(new Request(Method::GET, new Path('/controller')));
+        $this->assertEquals($path, $route->path);
+        $this->assertEquals($handler, $route->handler);
         $this->assertSame('ok', $response->body);
     }
 }

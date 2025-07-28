@@ -119,8 +119,8 @@ final class Router
         return new Error('Route not found.');
     }
 
-    public function getRouteByName(string $name): ?Route
+    public function getRouteByName(Name $name): ?Route
     {
-        return $this->namedRoutes[$name] ?? null;
+        return $this->namedRoutes[(string) $name] ?? null;
     }
 }

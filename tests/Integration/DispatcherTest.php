@@ -160,7 +160,7 @@ final class DispatcherTest extends TestCase
         );
 
         $router->get(new Path('/redirect-named'), function () use ($router): Response {
-            $targetRoute = $router->getRouteByName('new.location');
+            $targetRoute = $router->getRouteByName(new Name('new.location'));
             $location = $targetRoute instanceof Route ? (string) $targetRoute->path : '/fallback';
 
             return new Response(Status::MOVED_PERMANENTLY, null, [
