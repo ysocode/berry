@@ -21,7 +21,7 @@ final class ResponseTest extends TestCase
         $this->assertEmpty($response->headers);
     }
 
-    public function test_it_can_change_status(): void
+    public function test_it_changes_status_immutably(): void
     {
         $response = new Response(Status::OK);
         $newResponse = $response->withStatus(Status::NOT_FOUND);
