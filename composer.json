@@ -29,7 +29,8 @@
         "captainhook/hook-installer": "^1.0",
         "ramsey/conventional-commits": "^1.6",
         "phpunit/phpunit": "^12.2",
-        "rector/rector": "^2.1"
+        "rector/rector": "^2.1",
+        "php-di/php-di": "^7.0"
     },
     "minimum-stability": "stable",
     "config": {

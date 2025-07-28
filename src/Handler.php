@@ -6,6 +6,7 @@ namespace YSOCode\Berry;
 
 use InvalidArgumentException;
 use LogicException;
+use Psr\Container\ContainerInterface;
 use ReflectionMethod;
 use ReflectionNamedType;
 
@@ -57,17 +58,13 @@ final readonly class Handler
         }
 
         $params = $reflection->getParameters();
-        $paramCount = count($params);
-
-        if ($paramCount > 1) {
-            return new Error("Handler method {$class}::{$method} must accept 0 or 1 parameter(s).");
+        if (count($params) !== 1) {
+            return new Error("Handler method {$class}::{$method} must accept exactly 1 parameter.");
         }
 
-        if ($paramCount === 1) {
-            $paramType = $params[0]->getType();
-            if (! $paramType instanceof ReflectionNamedType || $paramType->getName() !== Request::class) {
-                return new Error("Handler method {$class}::{$method} parameter must be type-hinted as Request.");
-            }
+        $paramType = $params[0]->getType();
+        if (! $paramType instanceof ReflectionNamedType || $paramType->getName() !== Request::class) {
+            return new Error("Handler method {$class}::{$method} parameter must be type-hinted as Request.");
         }
 
         $returnType = $reflection->getReturnType();
@@ -83,9 +80,9 @@ final readonly class Handler
         return $this->class === $other->class && $this->method === $other->method;
     }
 
-    public function invoke(Request $request): Response
+    public function invoke(Request $request, ContainerInterface $container): Response
     {
-        $instance = new $this->class;
+        $instance = $container->get($this->class);
 
         $method = $this->method;
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration;
 
 use Closure;
+use DI\Container;
 use PHPUnit\Framework\TestCase;
 use Tests\Fixtures\DummyController;
 use Tests\Fixtures\DummyMiddleware;
@@ -22,6 +23,14 @@ use YSOCode\Berry\Status;
 
 final class DispatcherTest extends TestCase
 {
+    private Container $container;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->container = new Container;
+    }
+
     public function test_it_dispatches_request_to_correct_handler(): void
     {
         $router = new Router;
@@ -30,7 +39,7 @@ final class DispatcherTest extends TestCase
         $router->get(new Path('/hello'), $handler);
 
         $dispatcher = new Dispatcher($router);
-        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/hello')));
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/hello')), $this->container);
 
         $this->assertEquals(Status::OK, $response->status);
         $this->assertEquals('Hello from handler', $response->body);
@@ -41,7 +50,7 @@ final class DispatcherTest extends TestCase
         $router = new Router;
         $dispatcher = new Dispatcher($router);
 
-        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/not-found')));
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/not-found')), $this->container);
 
         $this->assertEquals(Status::NOT_FOUND, $response->status);
         $this->assertEquals('Route not found.', $response->body);
@@ -53,7 +62,7 @@ final class DispatcherTest extends TestCase
         $router->get(new Path('/hello'), fn (Request $request): Response => new Response(Status::OK, 'GET handler'));
 
         $dispatcher = new Dispatcher($router);
-        $response = $dispatcher->dispatch(new Request(Method::POST, new Path('/hello')));
+        $response = $dispatcher->dispatch(new Request(Method::POST, new Path('/hello')), $this->container);
 
         $this->assertEquals(Status::METHOD_NOT_ALLOWED, $response->status);
         $this->assertEquals('Method not allowed.', $response->body);
@@ -66,7 +75,7 @@ final class DispatcherTest extends TestCase
         $router->post(new Path('/hello'), fn (Request $request): Response => new Response(Status::OK, 'POST'));
 
         $dispatcher = new Dispatcher($router);
-        $response = $dispatcher->dispatch(new Request(Method::POST, new Path('/hello')));
+        $response = $dispatcher->dispatch(new Request(Method::POST, new Path('/hello')), $this->container);
 
         $this->assertEquals(Status::OK, $response->status);
         $this->assertEquals('POST', $response->body);
@@ -78,7 +87,7 @@ final class DispatcherTest extends TestCase
         $router->get(new Path('/user/profile'), fn (Request $request): Response => new Response(Status::OK, 'Profile'));
 
         $dispatcher = new Dispatcher($router);
-        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/user/profile')));
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/user/profile')), $this->container);
 
         $this->assertEquals(Status::OK, $response->status);
         $this->assertEquals('Profile', $response->body);
@@ -90,7 +99,7 @@ final class DispatcherTest extends TestCase
         $router->get(new Path('/broken'), fn (): string => 'not a response');
 
         $dispatcher = new Dispatcher($router);
-        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/broken')));
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/broken')), $this->container);
 
         $this->assertEquals(Status::INTERNAL_SERVER_ERROR, $response->status);
         $this->assertEquals('Handler did not return a valid response.', $response->body);
@@ -104,8 +113,8 @@ final class DispatcherTest extends TestCase
 
         $dispatcher = new Dispatcher($router);
 
-        $getResponse = $dispatcher->dispatch(new Request(Method::GET, new Path('/multi')));
-        $postResponse = $dispatcher->dispatch(new Request(Method::POST, new Path('/multi')));
+        $getResponse = $dispatcher->dispatch(new Request(Method::GET, new Path('/multi')), $this->container);
+        $postResponse = $dispatcher->dispatch(new Request(Method::POST, new Path('/multi')), $this->container);
 
         $this->assertEquals('GET', $getResponse->body);
         $this->assertEquals('POST', $postResponse->body);
@@ -117,7 +126,7 @@ final class DispatcherTest extends TestCase
         $router->get(new Path('/user-profile/view'), fn (Request $request): Response => new Response(Status::OK, 'Hyphen'));
 
         $dispatcher = new Dispatcher($router);
-        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/user-profile/view')));
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/user-profile/view')), $this->container);
 
         $this->assertEquals(Status::OK, $response->status);
         $this->assertEquals('Hyphen', $response->body);
@@ -151,8 +160,8 @@ final class DispatcherTest extends TestCase
 
         $dispatcher = new Dispatcher($router);
 
-        $responseManual = $dispatcher->dispatch(new Request(Method::GET, new Path('/redirect-manual')));
-        $responseNamed = $dispatcher->dispatch(new Request(Method::GET, new Path('/redirect-named')));
+        $responseManual = $dispatcher->dispatch(new Request(Method::GET, new Path('/redirect-manual')), $this->container);
+        $responseNamed = $dispatcher->dispatch(new Request(Method::GET, new Path('/redirect-named')), $this->container);
 
         $this->assertEquals(Status::MOVED_PERMANENTLY, $responseManual->status);
         $this->assertNull($responseManual->body);
@@ -171,7 +180,7 @@ final class DispatcherTest extends TestCase
 
         $dispatcher = new Dispatcher($router);
 
-        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/handler')));
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/handler')), $this->container);
 
         $this->assertEquals(Status::OK, $response->status);
         $this->assertEquals('ok', $response->body);
@@ -191,7 +200,7 @@ final class DispatcherTest extends TestCase
             return new Response($response->status, 'mw1 > '.$response->body);
         });
 
-        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/one')));
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/one')), $this->container);
 
         $this->assertSame('mw1 > handler', $response->body);
     }
@@ -216,7 +225,7 @@ final class DispatcherTest extends TestCase
             return new Response($response->status, 'mw2 > '.$response->body);
         });
 
-        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/multi')));
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/multi')), $this->container);
 
         $this->assertSame('mw1 > mw2 > handler', $response->body);
     }
@@ -237,7 +246,7 @@ final class DispatcherTest extends TestCase
             return new Response($response->status, 'mw2 > '.$response->body);
         });
 
-        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/stop')));
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/stop')), $this->container);
 
         $this->assertSame(Status::FORBIDDEN, $response->status);
         $this->assertSame('blocked by mw', $response->body);
@@ -255,7 +264,7 @@ final class DispatcherTest extends TestCase
             $next($request);
         });
 
-        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/hello')));
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/hello')), $this->container);
 
         $this->assertSame(Status::INTERNAL_SERVER_ERROR, $response->status);
         $this->assertSame('Middleware chain did not return a valid response.', $response->body);
@@ -269,7 +278,7 @@ final class DispatcherTest extends TestCase
         $dispatcher = new Dispatcher($router);
 
         $dispatcher->addMiddleware(new Middleware(DummyMiddleware::class, 'execute'));
-        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/test')));
+        $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/test')), $this->container);
 
         $this->assertSame('dummy execute > ok', $response->body);
     }

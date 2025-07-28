@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use DI\Container;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
@@ -21,6 +22,14 @@ use YSOCode\Berry\Status;
 
 final class RouterTest extends TestCase
 {
+    private Container $container;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->container = new Container;
+    }
+
     public function test_it_adds_and_matches_route(): void
     {
         $router = new Router;
@@ -177,7 +186,7 @@ final class RouterTest extends TestCase
         );
 
         $route = $router->getMatchedRoute(new Request(Method::GET, $path));
-        $response = $route->handler->invoke(new Request(Method::GET, $path));
+        $response = $route->handler->invoke(new Request(Method::GET, $path), $this->container);
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals($path, $route->path);

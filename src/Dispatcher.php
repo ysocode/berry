@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace YSOCode\Berry;
 
 use Closure;
+use Psr\Container\ContainerInterface;
 
 final class Dispatcher
 {
@@ -27,7 +28,7 @@ final class Dispatcher
         return $this;
     }
 
-    public function dispatch(Request $request): Response
+    public function dispatch(Request $request, ContainerInterface $container): Response
     {
         $route = $this->router->getMatchedRoute($request);
         if ($route instanceof Error) {
@@ -40,9 +41,9 @@ final class Dispatcher
 
         $handler = $route->handler;
 
-        $core = function (Request $request) use ($handler): Response {
+        $core = function (Request $request) use ($handler, $container): Response {
             $response = match (true) {
-                $handler instanceof Handler => $handler->invoke($request),
+                $handler instanceof Handler => $handler->invoke($request, $container),
                 default => $handler($request),
             };
 
@@ -55,9 +56,9 @@ final class Dispatcher
 
         $pipeline = $core;
         foreach (array_reverse($this->middlewares) as $middleware) {
-            $pipeline = function (Request $request) use ($middleware, $pipeline): Response {
+            $pipeline = function (Request $request) use ($middleware, $pipeline, $container): Response {
                 $response = match (true) {
-                    $middleware instanceof Middleware => $middleware->invoke($request, $pipeline),
+                    $middleware instanceof Middleware => $middleware->invoke($request, $pipeline, $container),
                     default => $middleware($request, $pipeline),
                 };
 

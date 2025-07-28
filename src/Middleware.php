@@ -7,6 +7,7 @@ namespace YSOCode\Berry;
 use Closure;
 use InvalidArgumentException;
 use LogicException;
+use Psr\Container\ContainerInterface;
 use ReflectionMethod;
 use ReflectionNamedType;
 
@@ -88,9 +89,9 @@ final readonly class Middleware
     /**
      * @param  Closure(Request): Response  $next
      */
-    public function invoke(Request $request, Closure $next): Response
+    public function invoke(Request $request, Closure $next, ContainerInterface $container): Response
     {
-        $instance = new $this->class;
+        $instance = $container->get($this->class);
 
         $method = $this->method;
 
