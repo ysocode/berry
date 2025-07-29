@@ -14,4 +14,29 @@ final readonly class DummyController
     {
         return new Response(Status::OK, 'ok');
     }
+
+    public function anotherMethod(Request $request): Response
+    {
+        return new Response(Status::OK, 'ok');
+    }
+
+    private function privateMethod(Request $request): Response
+    {
+        return new Response(Status::OK, 'ok');
+    }
+
+    public function invalidParamCount(): Response
+    {
+        return new Response(Status::OK, 'ok');
+    }
+
+    public function invalidParamType(string $invalidParamType): Response
+    {
+        return new Response(Status::OK, 'ok');
+    }
+
+    public function invalidReturnType(Request $request): string
+    {
+        return 'invalid return type';
+    }
 }
