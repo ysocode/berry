@@ -97,7 +97,9 @@ final class DispatcherTest extends TestCase
     public function test_it_should_return_500_when_handler_does_not_return_response(): void
     {
         $router = new Router;
-        $router->get(new Path('/broken'), fn (): string => 'not a response');
+
+        /** @phpstan-ignore-next-line */
+        $router->get(new Path('/broken'), fn (Request $request): string => 'not a response');
 
         $dispatcher = new Dispatcher($router);
         $response = $dispatcher->dispatch(new Request(Method::GET, new Path('/broken')), $this->container);
@@ -261,6 +263,7 @@ final class DispatcherTest extends TestCase
 
         $dispatcher = new Dispatcher($router);
 
+        /** @phpstan-ignore-next-line */
         $dispatcher->addMiddleware(function (Request $request, Closure $next): void {
             $next($request);
         });

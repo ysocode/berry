@@ -103,6 +103,7 @@ final class RouterTest extends TestCase
         foreach ($methods as $method) {
             $route = $router->getMatchedRoute(new Request($method, $path));
 
+            $this->assertInstanceOf(Route::class, $route);
             $this->assertEquals($method, $route->method);
         }
     }
@@ -120,6 +121,7 @@ final class RouterTest extends TestCase
 
         $pathKey = (string) $path;
 
+        $this->assertIsArray($registeredPaths);
         $this->assertArrayHasKey($pathKey, $registeredPaths);
         $this->assertTrue($registeredPaths[$pathKey]);
     }
@@ -187,9 +189,12 @@ final class RouterTest extends TestCase
         );
 
         $route = $router->getMatchedRoute(new Request(Method::GET, $path));
-        $response = $route->handler->invoke(new Request(Method::GET, $path), $this->container);
 
         $this->assertInstanceOf(Route::class, $route);
+        $this->assertInstanceOf(Handler::class, $route->handler);
+
+        $response = $route->handler->invoke(new Request(Method::GET, $path), $this->container);
+
         $this->assertEquals($path, $route->path);
         $this->assertEquals($handler, $route->handler);
         $this->assertSame('ok', $response->body);
