@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Tests\Integration;
 
 use Closure;
-use DI\Container;
+use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Tests\Fixtures\DummyController;
 use Tests\Fixtures\DummyMiddleware;
 use YSOCode\Berry\Dispatcher;
@@ -23,13 +24,16 @@ use YSOCode\Berry\Status;
 
 final class DispatcherTest extends TestCase
 {
-    private Container $container;
+    private ContainerInterface $container;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->container = new Container;
+        $builder = new ContainerBuilder;
+        $builder->useAutowiring(true);
+
+        $this->container = $builder->build();
     }
 
     public function test_it_should_dispatch_request_to_correct_handler(): void

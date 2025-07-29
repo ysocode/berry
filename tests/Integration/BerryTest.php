@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Integration;
 
-use DI\Container;
 use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Tests\Fixtures\DummyController;
 use Tests\Fixtures\DummyWithDependencyController;
 use Tests\Fixtures\DummyWithDependencyMiddleware;
@@ -23,7 +23,7 @@ use YSOCode\Berry\Status;
 
 final class BerryTest extends TestCase
 {
-    private Container $container;
+    private ContainerInterface $container;
 
     protected function setUp(): void
     {
