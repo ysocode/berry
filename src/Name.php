@@ -34,7 +34,7 @@ final readonly class Name implements Stringable
             return new Error('Name must be between 3 and 255 characters.');
         }
 
-        $pattern = '/^[A-Za-z][A-Za-z0-9.]*$/';
+        $pattern = '/^[A-Za-z0-9](?:[A-Za-z0-9.]*[A-Za-z0-9])?$/';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
             return new Error('Name must start with a letter and contain only letters, numbers, and dots.');
         }
