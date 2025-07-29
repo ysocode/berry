@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use YSOCode\Berry\Name;
+use YSOCode\Berry\Domain\ValueObjects\Name;
 
 final class NameTest extends TestCase
 {

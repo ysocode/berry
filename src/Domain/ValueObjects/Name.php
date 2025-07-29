@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry;
+namespace YSOCode\Berry\Domain\ValueObjects;
 
 use InvalidArgumentException;
 use Stringable;

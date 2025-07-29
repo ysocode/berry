@@ -2,15 +2,18 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry;
+namespace YSOCode\Berry\Domain\ValueObjects;
 
+use Closure;
 use InvalidArgumentException;
 use LogicException;
 use Psr\Container\ContainerInterface;
 use ReflectionMethod;
 use ReflectionNamedType;
+use YSOCode\Berry\Infra\Request;
+use YSOCode\Berry\Infra\Response;
 
-final readonly class Handler
+final readonly class Middleware
 {
     public string $class;
 
@@ -44,7 +47,7 @@ final readonly class Handler
     private static function validate(string $class, string $method): true|Error
     {
         if (! class_exists($class)) {
-            return new Error("Handler class {$class} does not exist.");
+            return new Error("Middleware class {$class} does not exist.");
         }
 
         if (! method_exists($class, $method)) {
@@ -54,22 +57,27 @@ final readonly class Handler
         $reflection = new ReflectionMethod($class, $method);
 
         if (! $reflection->isPublic()) {
-            return new Error("Handler method {$class}::{$method} is not public.");
+            return new Error("Middleware method {$class}::{$method} is not public.");
         }
 
         $params = $reflection->getParameters();
-        if (count($params) !== 1) {
-            return new Error("Handler method {$class}::{$method} must accept exactly 1 parameter.");
+        if (count($params) !== 2) {
+            return new Error("Middleware method {$class}::{$method} must accept exactly 2 parameters.");
         }
 
-        $paramType = $params[0]->getType();
-        if (! $paramType instanceof ReflectionNamedType || $paramType->getName() !== Request::class) {
-            return new Error("Handler method {$class}::{$method} parameter must be type-hinted as Request.");
+        $param1Type = $params[0]->getType();
+        if (! $param1Type instanceof ReflectionNamedType || $param1Type->getName() !== Request::class) {
+            return new Error("First parameter of {$class}::{$method} must be type-hinted as Request.");
+        }
+
+        $param2Type = $params[1]->getType();
+        if (! $param2Type instanceof ReflectionNamedType || $param2Type->getName() !== Closure::class) {
+            return new Error("Second parameter of {$class}::{$method} must be type-hinted as Closure.");
         }
 
         $returnType = $reflection->getReturnType();
         if (! $returnType instanceof ReflectionNamedType || $returnType->getName() !== Response::class) {
-            return new Error("Handler method {$class}::{$method} must have return type Response.");
+            return new Error("Middleware method {$class}::{$method} must have return type Response.");
         }
 
         return true;
@@ -80,16 +88,19 @@ final readonly class Handler
         return $this->class === $other->class && $this->method === $other->method;
     }
 
-    public function invoke(Request $request, ContainerInterface $container): Response
+    /**
+     * @param  Closure(Request): Response  $next
+     */
+    public function invoke(Request $request, Closure $next, ContainerInterface $container): Response
     {
         $instance = $container->get($this->class);
 
         $method = $this->method;
 
-        $response = $instance->$method($request);
+        $response = $instance->$method($request, $next);
 
         if (! $response instanceof Response) {
-            throw new LogicException("Handler method {$this->class}::{$this->method} must return an instance of Response.");
+            throw new LogicException("Middleware method {$this->class}::{$this->method} must return an instance of Response.");
         }
 
         return $response;

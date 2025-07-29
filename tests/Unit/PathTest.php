@@ -6,7 +6,7 @@ namespace Tests\Unit;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use YSOCode\Berry\Path;
+use YSOCode\Berry\Domain\ValueObjects\Path;
 
 final class PathTest extends TestCase
 {

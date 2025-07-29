@@ -2,10 +2,18 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry;
+namespace YSOCode\Berry\Application;
 
 use Closure;
 use LogicException;
+use YSOCode\Berry\Domain\Entities\Route;
+use YSOCode\Berry\Domain\ValueObjects\Error;
+use YSOCode\Berry\Domain\ValueObjects\Handler;
+use YSOCode\Berry\Domain\ValueObjects\Method;
+use YSOCode\Berry\Domain\ValueObjects\Name;
+use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Infra\Request;
+use YSOCode\Berry\Infra\Response;
 
 final class Router
 {

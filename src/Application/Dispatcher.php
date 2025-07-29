@@ -2,10 +2,16 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry;
+namespace YSOCode\Berry\Application;
 
 use Closure;
 use Psr\Container\ContainerInterface;
+use YSOCode\Berry\Domain\ValueObjects\Error;
+use YSOCode\Berry\Domain\ValueObjects\Handler;
+use YSOCode\Berry\Domain\ValueObjects\Middleware;
+use YSOCode\Berry\Domain\ValueObjects\Status;
+use YSOCode\Berry\Infra\Request;
+use YSOCode\Berry\Infra\Response;
 
 final class Dispatcher
 {

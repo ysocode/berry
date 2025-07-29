@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry;
+namespace YSOCode\Berry\Application;
 
 use Psr\Container\ContainerInterface;
+use YSOCode\Berry\Infra\Request;
 
 final readonly class Berry
 {

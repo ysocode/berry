@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry;
+namespace YSOCode\Berry\Infra;
+
+use YSOCode\Berry\Domain\ValueObjects\Method;
+use YSOCode\Berry\Domain\ValueObjects\Path;
 
 final readonly class Request
 {

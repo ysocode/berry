@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Fixtures;
 
 use Closure;
-use YSOCode\Berry\Request;
-use YSOCode\Berry\Response;
-use YSOCode\Berry\Status;
+use YSOCode\Berry\Domain\ValueObjects\Status;
+use YSOCode\Berry\Infra\Request;
+use YSOCode\Berry\Infra\Response;
 
 final readonly class DummyMiddleware
 {

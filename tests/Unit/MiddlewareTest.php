@@ -9,12 +9,12 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Tests\Fixtures\DummyMiddleware;
-use YSOCode\Berry\Method;
-use YSOCode\Berry\Middleware;
-use YSOCode\Berry\Path;
-use YSOCode\Berry\Request;
-use YSOCode\Berry\Response;
-use YSOCode\Berry\Status;
+use YSOCode\Berry\Domain\ValueObjects\Method;
+use YSOCode\Berry\Domain\ValueObjects\Middleware;
+use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Domain\ValueObjects\Status;
+use YSOCode\Berry\Infra\Request;
+use YSOCode\Berry\Infra\Response;
 
 final class MiddlewareTest extends TestCase
 {

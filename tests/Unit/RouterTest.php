@@ -10,16 +10,16 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use Tests\Fixtures\DummyController;
-use YSOCode\Berry\Error;
-use YSOCode\Berry\Handler;
-use YSOCode\Berry\Method;
-use YSOCode\Berry\Name;
-use YSOCode\Berry\Path;
-use YSOCode\Berry\Request;
-use YSOCode\Berry\Response;
-use YSOCode\Berry\Route;
-use YSOCode\Berry\Router;
-use YSOCode\Berry\Status;
+use YSOCode\Berry\Application\Router;
+use YSOCode\Berry\Domain\Entities\Route;
+use YSOCode\Berry\Domain\ValueObjects\Error;
+use YSOCode\Berry\Domain\ValueObjects\Handler;
+use YSOCode\Berry\Domain\ValueObjects\Method;
+use YSOCode\Berry\Domain\ValueObjects\Name;
+use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Domain\ValueObjects\Status;
+use YSOCode\Berry\Infra\Request;
+use YSOCode\Berry\Infra\Response;
 
 final class RouterTest extends TestCase
 {

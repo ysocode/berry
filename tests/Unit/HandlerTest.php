@@ -6,11 +6,11 @@ use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Tests\Fixtures\DummyController;
-use YSOCode\Berry\Handler;
-use YSOCode\Berry\Method;
-use YSOCode\Berry\Path;
-use YSOCode\Berry\Request;
-use YSOCode\Berry\Status;
+use YSOCode\Berry\Domain\ValueObjects\Handler;
+use YSOCode\Berry\Domain\ValueObjects\Method;
+use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Domain\ValueObjects\Status;
+use YSOCode\Berry\Infra\Request;
 
 final class HandlerTest extends TestCase
 {

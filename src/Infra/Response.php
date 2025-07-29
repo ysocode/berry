@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry;
+namespace YSOCode\Berry\Infra;
+
+use YSOCode\Berry\Domain\ValueObjects\Status;
 
 final readonly class Response
 {

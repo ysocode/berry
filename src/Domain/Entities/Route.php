@@ -2,9 +2,15 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry;
+namespace YSOCode\Berry\Domain\Entities;
 
 use Closure;
+use YSOCode\Berry\Domain\ValueObjects\Handler;
+use YSOCode\Berry\Domain\ValueObjects\Method;
+use YSOCode\Berry\Domain\ValueObjects\Name;
+use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Infra\Request;
+use YSOCode\Berry\Infra\Response;
 
 final readonly class Route
 {

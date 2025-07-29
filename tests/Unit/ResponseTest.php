@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use YSOCode\Berry\Response;
-use YSOCode\Berry\Status;
+use YSOCode\Berry\Domain\ValueObjects\Status;
+use YSOCode\Berry\Infra\Response;
 
 final class ResponseTest extends TestCase
 {
