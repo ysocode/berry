@@ -7,6 +7,7 @@ namespace Tests\Fixtures;
 use Closure;
 use YSOCode\Berry\Infra\Request;
 use YSOCode\Berry\Infra\Response;
+use YSOCode\Berry\Infra\StreamFactory;
 
 final readonly class DummyWithDependencyMiddleware
 {
@@ -20,6 +21,6 @@ final readonly class DummyWithDependencyMiddleware
         $response = $next($request);
         $message = $this->service->getMessage().' > '.$response->body;
 
-        return new Response($response->status, $message, $response->headers);
+        return new Response($response->status, $response->headers, new StreamFactory()->createFromString($message));
     }
 }

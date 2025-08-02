@@ -20,10 +20,14 @@ use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Status;
 use YSOCode\Berry\Infra\Request;
 use YSOCode\Berry\Infra\Response;
+use YSOCode\Berry\Infra\StreamFactory;
+use YSOCode\Berry\Infra\Uri;
 
 final class RouterTest extends TestCase
 {
     private ContainerInterface $container;
+
+    private Uri $uri;
 
     protected function setUp(): void
     {
@@ -33,18 +37,20 @@ final class RouterTest extends TestCase
         $builder->useAutowiring(true);
 
         $this->container = $builder->build();
+
+        $this->uri = new Uri('https://example.com');
     }
 
     public function test_it_should_add_and_match_route(): void
     {
         $router = new Router;
 
-        $handler = fn (Request $request): Response => new Response(Status::OK, 'ok');
+        $handler = fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('ok'));
 
         $path = new Path('/test');
         $router->get($path, $handler);
 
-        $route = $router->getMatchedRoute(new Request(Method::GET, $path));
+        $route = $router->getMatchedRoute(new Request(Method::GET, $this->uri->withPath($path)));
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertSame($handler, $route->handler);
@@ -58,15 +64,15 @@ final class RouterTest extends TestCase
         $router = new Router;
 
         $path = new Path('/duplicate');
-        $router->get($path, fn (Request $request): Response => new Response(Status::OK, 'first'));
-        $router->get($path, fn (Request $request): Response => new Response(Status::OK, 'second'));
+        $router->get($path, fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('first')));
+        $router->get($path, fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('second')));
     }
 
     public function test_it_should_return_error_when_route_is_not_found(): void
     {
         $router = new Router;
 
-        $result = $router->getMatchedRoute(new Request(Method::GET, new Path('/nope')));
+        $result = $router->getMatchedRoute(new Request(Method::GET, $this->uri->withPath(new Path('/nope'))));
 
         $this->assertInstanceOf(Error::class, $result);
         $this->assertEquals('Route not found.', (string) $result);
@@ -77,9 +83,9 @@ final class RouterTest extends TestCase
         $router = new Router;
 
         $path = new Path('/path');
-        $router->get($path, fn (Request $request): Response => new Response(Status::OK, 'ok'));
+        $router->get($path, fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('ok')));
 
-        $result = $router->getMatchedRoute(new Request(Method::POST, $path));
+        $result = $router->getMatchedRoute(new Request(Method::POST, $this->uri->withPath($path)));
 
         $this->assertInstanceOf(Error::class, $result);
         $this->assertEquals('Method not allowed.', (string) $result);
@@ -90,11 +96,11 @@ final class RouterTest extends TestCase
         $router = new Router;
         $path = new Path('/resource');
 
-        $router->get($path, fn (Request $request): Response => new Response(Status::OK, 'get'));
-        $router->post($path, fn (Request $request): Response => new Response(Status::OK, 'post'));
-        $router->put($path, fn (Request $request): Response => new Response(Status::OK, 'put'));
-        $router->delete($path, fn (Request $request): Response => new Response(Status::OK, 'delete'));
-        $router->patch($path, fn (Request $request): Response => new Response(Status::OK, 'patch'));
+        $router->get($path, fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('get')));
+        $router->post($path, fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('post')));
+        $router->put($path, fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('put')));
+        $router->delete($path, fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('delete')));
+        $router->patch($path, fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('patch')));
 
         $methods = [
             Method::GET,
@@ -105,7 +111,7 @@ final class RouterTest extends TestCase
         ];
 
         foreach ($methods as $method) {
-            $route = $router->getMatchedRoute(new Request($method, $path));
+            $route = $router->getMatchedRoute(new Request($method, $this->uri->withPath($path)));
 
             $this->assertInstanceOf(Route::class, $route);
             $this->assertEquals($method, $route->method);
@@ -117,7 +123,7 @@ final class RouterTest extends TestCase
         $router = new Router;
         $path = new Path('/registered');
 
-        $router->get($path, fn (Request $request): Response => new Response(Status::OK, 'ok'));
+        $router->get($path, fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('ok')));
 
         $reflection = new ReflectionClass($router);
         $property = $reflection->getProperty('registeredPaths');
@@ -135,7 +141,7 @@ final class RouterTest extends TestCase
         $router = new Router;
 
         $path = new Path('/named');
-        $handler = fn (Request $request): Response => new Response(Status::OK, 'named');
+        $handler = fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('named'));
         $name = new Name('namedRoute');
 
         $router->get(
@@ -170,12 +176,12 @@ final class RouterTest extends TestCase
 
         $router->get(
             new Path('/a'),
-            fn (Request $request): Response => new Response(Status::OK, 'A'),
+            fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('A')),
             new Name('duplicate')
         );
         $router->get(
             new Path('/b'),
-            fn (Request $request): Response => new Response(Status::OK, 'B'),
+            fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('B')),
             new Name('duplicate')
         );
     }
@@ -192,15 +198,15 @@ final class RouterTest extends TestCase
             $handler
         );
 
-        $route = $router->getMatchedRoute(new Request(Method::GET, $path));
+        $route = $router->getMatchedRoute(new Request(Method::GET, $this->uri->withPath($path)));
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertInstanceOf(Handler::class, $route->handler);
 
-        $response = $route->handler->invoke(new Request(Method::GET, $path), $this->container);
+        $response = $route->handler->invoke(new Request(Method::GET, $this->uri->withPath($path)), $this->container);
 
         $this->assertEquals($path, $route->path);
         $this->assertEquals($handler, $route->handler);
-        $this->assertSame('ok', $response->body);
+        $this->assertSame('ok', (string) $response->body);
     }
 }

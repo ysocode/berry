@@ -20,10 +20,14 @@ use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Status;
 use YSOCode\Berry\Infra\Request;
 use YSOCode\Berry\Infra\Response;
+use YSOCode\Berry\Infra\StreamFactory;
+use YSOCode\Berry\Infra\Uri;
 
 final class BerryTest extends TestCase
 {
     private ContainerInterface $container;
+
+    private Uri $uri;
 
     protected function setUp(): void
     {
@@ -33,6 +37,8 @@ final class BerryTest extends TestCase
         $builder->useAutowiring(true);
 
         $this->container = $builder->build();
+
+        $this->uri = new Uri('https://example.com');
     }
 
     public function test_it_should_process_request_and_send_response(): void
@@ -44,7 +50,7 @@ final class BerryTest extends TestCase
         $dispatcher = new Dispatcher($router);
         $berry = new Berry($dispatcher, $this->container);
 
-        $request = new Request(Method::GET, new Path('/hello'));
+        $request = new Request(Method::GET, $this->uri->withPath(new Path('/hello')));
 
         ob_start();
         $berry->run($request);
@@ -63,7 +69,7 @@ final class BerryTest extends TestCase
         $dispatcher = new Dispatcher($router);
         $berry = new Berry($dispatcher, $this->container);
 
-        $request = new Request(Method::GET, new Path('/handler'));
+        $request = new Request(Method::GET, $this->uri->withPath(new Path('/handler')));
 
         ob_start();
         $berry->run($request);
@@ -77,7 +83,7 @@ final class BerryTest extends TestCase
     {
         $router = new Router;
 
-        $router->get(new Path('/middleware'), fn (Request $request): Response => new Response(Status::OK, 'handler'));
+        $router->get(new Path('/middleware'), fn (Request $request): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('handler')));
 
         $dispatcher = new Dispatcher($router);
 
@@ -85,7 +91,7 @@ final class BerryTest extends TestCase
 
         $berry = new Berry($dispatcher, $this->container);
 
-        $request = new Request(Method::GET, new Path('/middleware'));
+        $request = new Request(Method::GET, $this->uri->withPath(new Path('/middleware')));
 
         ob_start();
         $berry->run($request);

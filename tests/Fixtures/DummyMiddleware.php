@@ -8,6 +8,7 @@ use Closure;
 use YSOCode\Berry\Domain\ValueObjects\Status;
 use YSOCode\Berry\Infra\Request;
 use YSOCode\Berry\Infra\Response;
+use YSOCode\Berry\Infra\StreamFactory;
 
 final readonly class DummyMiddleware
 {
@@ -18,7 +19,7 @@ final readonly class DummyMiddleware
     {
         $response = $next($request);
 
-        return new Response($response->status, 'dummy execute > '.$response->body);
+        return new Response($response->status, [], new StreamFactory()->createFromString('dummy execute > '.$response->body));
     }
 
     /**
@@ -28,7 +29,7 @@ final readonly class DummyMiddleware
     {
         $response = $next($request);
 
-        return new Response($response->status, 'dummy execute > '.$response->body);
+        return new Response($response->status, [], new StreamFactory()->createFromString('dummy execute > '.$response->body));
     }
 
     /**
@@ -38,13 +39,13 @@ final readonly class DummyMiddleware
     {
         $response = $next($request);
 
-        return new Response($response->status, 'dummy execute > '.$response->body);
+        return new Response($response->status, [], new StreamFactory()->createFromString('dummy execute > '.$response->body));
     }
 
     private function invalidParamCount(Request $request): Response
     {
 
-        return new Response(Status::OK, 'dummy execute');
+        return new Response(Status::OK, [], new StreamFactory()->createFromString('dummy execute'));
     }
 
     /**
@@ -52,7 +53,7 @@ final readonly class DummyMiddleware
      */
     private function invalidParamType(string $request, Closure $next): Response
     {
-        return new Response(Status::OK, 'dummy execute');
+        return new Response(Status::OK, [], new StreamFactory()->createFromString('dummy execute'));
     }
 
     /**

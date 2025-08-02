@@ -22,4 +22,26 @@ enum Status: int
     case INTERNAL_SERVER_ERROR = 500;
     case NOT_IMPLEMENTED = 501;
     case SERVICE_UNAVAILABLE = 503;
+
+    public function reason(): string
+    {
+        return match ($this) {
+            self::OK => 'OK',
+            self::CREATED => 'Created',
+            self::NO_CONTENT => 'No Content',
+
+            self::MOVED_PERMANENTLY => 'Moved Permanently',
+            self::FOUND => 'Found',
+
+            self::BAD_REQUEST => 'Bad Request',
+            self::UNAUTHORIZED => 'Unauthorized',
+            self::FORBIDDEN => 'Forbidden',
+            self::NOT_FOUND => 'Not Found',
+            self::METHOD_NOT_ALLOWED => 'Method Not Allowed',
+
+            self::INTERNAL_SERVER_ERROR => 'Internal Server Error',
+            self::NOT_IMPLEMENTED => 'Not Implemented',
+            self::SERVICE_UNAVAILABLE => 'Service Unavailable',
+        };
+    }
 }

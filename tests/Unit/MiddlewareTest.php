@@ -11,10 +11,11 @@ use Psr\Container\ContainerInterface;
 use Tests\Fixtures\DummyMiddleware;
 use YSOCode\Berry\Domain\ValueObjects\Method;
 use YSOCode\Berry\Domain\ValueObjects\Middleware;
-use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Status;
 use YSOCode\Berry\Infra\Request;
 use YSOCode\Berry\Infra\Response;
+use YSOCode\Berry\Infra\StreamFactory;
+use YSOCode\Berry\Infra\Uri;
 
 final class MiddlewareTest extends TestCase
 {
@@ -94,11 +95,16 @@ final class MiddlewareTest extends TestCase
     {
         $middleware = new Middleware(DummyMiddleware::class, 'execute');
 
-        $request = new Request(Method::GET, new Path('/path'));
+        $request = new Request(Method::GET, new Uri('https://example.com'));
 
-        $response = $middleware->invoke($request, fn (Request $r): Response => new Response(Status::OK, 'next'), $this->container);
+        $response = $middleware->invoke($request, fn (Request $r): Response => new Response(Status::OK, [], new StreamFactory()->createFromString('next')), $this->container);
 
         $this->assertEquals(Status::OK, $response->status);
         $this->assertEquals('dummy execute > next', $response->body);
+    }
+
+    public function test_it_should_check_validity_statistically(): void
+    {
+        $this->assertTrue(Middleware::isValid(DummyMiddleware::class, 'execute'));
     }
 }

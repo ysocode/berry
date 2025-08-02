@@ -110,7 +110,7 @@ final class Router
     public function getMatchedRoute(Request $request): Route|Error
     {
         $method = $request->method;
-        $path = $request->path;
+        $path = $request->uri->path;
 
         $pathKey = (string) $path;
 

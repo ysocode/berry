@@ -12,6 +12,7 @@ use YSOCode\Berry\Domain\ValueObjects\Middleware;
 use YSOCode\Berry\Domain\ValueObjects\Status;
 use YSOCode\Berry\Infra\Request;
 use YSOCode\Berry\Infra\Response;
+use YSOCode\Berry\Infra\StreamFactory;
 
 final class Dispatcher
 {
@@ -39,9 +40,9 @@ final class Dispatcher
         $route = $this->router->getMatchedRoute($request);
         if ($route instanceof Error) {
             return match (true) {
-                $route->equals(new Error('Method not allowed.')) => new Response(Status::METHOD_NOT_ALLOWED, (string) $route),
-                $route->equals(new Error('Route not found.')) => new Response(Status::NOT_FOUND, (string) $route),
-                default => new Response(Status::INTERNAL_SERVER_ERROR, 'Unknown routing error.')
+                $route->equals(new Error('Method not allowed.')) => new Response(Status::METHOD_NOT_ALLOWED, [], new StreamFactory()->createFromString((string) $route)),
+                $route->equals(new Error('Route not found.')) => new Response(Status::NOT_FOUND, [], new StreamFactory()->createFromString((string) $route)),
+                default => new Response(Status::INTERNAL_SERVER_ERROR, [], new StreamFactory()->createFromString('Unknown routing error.'))
             };
         }
 
@@ -54,7 +55,7 @@ final class Dispatcher
             };
 
             if (! $response instanceof Response) {
-                return new Response(Status::INTERNAL_SERVER_ERROR, 'Handler did not return a valid response.');
+                return new Response(Status::INTERNAL_SERVER_ERROR, [], new StreamFactory()->createFromString('Handler did not return a valid response.'));
             }
 
             return $response;
@@ -69,7 +70,7 @@ final class Dispatcher
                 };
 
                 if (! $response instanceof Response) {
-                    return new Response(Status::INTERNAL_SERVER_ERROR, 'Middleware chain did not return a valid response.');
+                    return new Response(Status::INTERNAL_SERVER_ERROR, [], new StreamFactory()->createFromString('Middleware chain did not return a valid response.'));
                 }
 
                 return $response;

@@ -8,6 +8,7 @@ use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedConstructorParamRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPrivateMethodParameterRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPrivateMethodRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPublicMethodParameterRector;
+use Rector\DeadCode\Rector\Expression\RemoveDeadStmtRector;
 use Rector\DeadCode\Rector\FunctionLike\RemoveDeadReturnRector;
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 
@@ -58,6 +59,9 @@ return RectorConfig::configure()
             __DIR__.'/tests/Fixtures/DummyController.php',
             __DIR__.'/tests/Fixtures/DummyMiddleware.php',
             __DIR__.'/tests/Fixtures/DummyWithDependencyController.php',
+        ],
+        RemoveDeadStmtRector::class => [
+            __DIR__.'/tests/Unit/UploadedFileTest.php',
         ],
     ])
     ->withPhpSets();

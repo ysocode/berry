@@ -20,12 +20,11 @@ final readonly class Berry
 
         http_response_code($response->status->value);
 
-        foreach ($response->headers as $name => $value) {
-            header("{$name}: {$value}");
+        foreach ($response->headers as $name => $header) {
+            $valueAsString = implode(', ', $header->value);
+            header("{$name}: {$valueAsString}");
         }
 
-        if ($response->body !== null && $response->body !== '') {
-            echo $response->body;
-        }
+        echo $response->body;
     }
 }

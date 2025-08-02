@@ -7,32 +7,33 @@ namespace Tests\Fixtures;
 use YSOCode\Berry\Domain\ValueObjects\Status;
 use YSOCode\Berry\Infra\Request;
 use YSOCode\Berry\Infra\Response;
+use YSOCode\Berry\Infra\StreamFactory;
 
 final readonly class DummyController
 {
     public function index(Request $request): Response
     {
-        return new Response(Status::OK, 'ok');
+        return new Response(Status::OK, [], new StreamFactory()->createFromString('ok'));
     }
 
     public function anotherMethod(Request $request): Response
     {
-        return new Response(Status::OK, 'ok');
+        return new Response(Status::OK, [], new StreamFactory()->createFromString('ok'));
     }
 
     private function privateMethod(Request $request): Response
     {
-        return new Response(Status::OK, 'ok');
+        return new Response(Status::OK, [], new StreamFactory()->createFromString('ok'));
     }
 
     public function invalidParamCount(): Response
     {
-        return new Response(Status::OK, 'ok');
+        return new Response(Status::OK, [], new StreamFactory()->createFromString('ok'));
     }
 
     public function invalidParamType(string $invalidParamType): Response
     {
-        return new Response(Status::OK, 'ok');
+        return new Response(Status::OK, [], new StreamFactory()->createFromString('ok'));
     }
 
     public function invalidReturnType(Request $request): string

@@ -28,7 +28,7 @@
         "captainhook/captainhook": "^5.25",
         "captainhook/hook-installer": "^1.0",
         "ramsey/conventional-commits": "^1.6",
-        "phpunit/phpunit": "^12.2",
+        "phpunit/phpunit": "^12.3",
         "rector/rector": "^2.1",
         "php-di/php-di": "^7.0"
     },

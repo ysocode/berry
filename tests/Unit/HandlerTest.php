@@ -8,9 +8,9 @@ use Psr\Container\ContainerInterface;
 use Tests\Fixtures\DummyController;
 use YSOCode\Berry\Domain\ValueObjects\Handler;
 use YSOCode\Berry\Domain\ValueObjects\Method;
-use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Status;
 use YSOCode\Berry\Infra\Request;
+use YSOCode\Berry\Infra\Uri;
 
 final class HandlerTest extends TestCase
 {
@@ -90,9 +90,14 @@ final class HandlerTest extends TestCase
     {
         $handler = new Handler(DummyController::class, 'index');
 
-        $response = $handler->invoke(new Request(Method::GET, new Path('/path')), $this->container);
+        $response = $handler->invoke(new Request(Method::GET, new Uri('https://example.com')), $this->container);
 
         $this->assertEquals(Status::OK, $response->status);
         $this->assertEquals('ok', $response->body);
+    }
+
+    public function test_it_should_check_validity_statistically(): void
+    {
+        $this->assertTrue(Handler::isValid(DummyController::class, 'index'));
     }
 }
