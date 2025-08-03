@@ -10,8 +10,8 @@ use stdClass;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\Status;
-use YSOCode\Berry\Infra\Response;
-use YSOCode\Berry\Infra\StreamFactory;
+use YSOCode\Berry\Infra\Http\Response;
+use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class ResponseTest extends TestCase
 {

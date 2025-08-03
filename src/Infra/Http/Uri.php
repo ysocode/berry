@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Infra;
+namespace YSOCode\Berry\Infra\Http;
 
 use InvalidArgumentException;
 use Stringable;

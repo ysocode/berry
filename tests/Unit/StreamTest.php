@@ -8,8 +8,8 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\Resource;
 use YSOCode\Berry\Domain\ValueObjects\StreamMode;
-use YSOCode\Berry\Infra\Stream;
-use YSOCode\Berry\Infra\StreamFactory;
+use YSOCode\Berry\Infra\Stream\Stream;
+use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class StreamTest extends TestCase
 {

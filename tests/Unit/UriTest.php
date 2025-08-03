@@ -13,7 +13,7 @@ use YSOCode\Berry\Domain\ValueObjects\Port;
 use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UserInfo;
-use YSOCode\Berry\Infra\Uri;
+use YSOCode\Berry\Infra\Http\Uri;
 
 final class UriTest extends TestCase
 {

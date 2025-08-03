@@ -10,8 +10,8 @@ use LogicException;
 use Psr\Container\ContainerInterface;
 use ReflectionMethod;
 use ReflectionNamedType;
-use YSOCode\Berry\Infra\Request;
-use YSOCode\Berry\Infra\Response;
+use YSOCode\Berry\Infra\Http\Request;
+use YSOCode\Berry\Infra\Http\Response;
 
 final readonly class Middleware
 {

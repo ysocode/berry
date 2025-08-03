@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Infra;
+namespace YSOCode\Berry\Infra\Http;
 
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\FileName;
 use YSOCode\Berry\Domain\ValueObjects\FilePath;
 use YSOCode\Berry\Domain\ValueObjects\UploadError;
+use YSOCode\Berry\Infra\Stream\Stream;
 
 final class UploadedFile
 {

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Fixtures;
 
 use YSOCode\Berry\Domain\ValueObjects\Status;
-use YSOCode\Berry\Infra\Request;
-use YSOCode\Berry\Infra\Response;
-use YSOCode\Berry\Infra\StreamFactory;
+use YSOCode\Berry\Infra\Http\Request;
+use YSOCode\Berry\Infra\Http\Response;
+use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final readonly class DummyWithDependencyController
 {

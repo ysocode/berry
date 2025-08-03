@@ -8,8 +8,8 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\FilePath;
 use YSOCode\Berry\Domain\ValueObjects\StreamMode;
-use YSOCode\Berry\Infra\StreamFactory;
-use YSOCode\Berry\Infra\UploadedFile;
+use YSOCode\Berry\Infra\Http\UploadedFile;
+use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class UploadedFileTest extends TestCase
 {

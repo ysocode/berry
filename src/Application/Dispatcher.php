@@ -10,9 +10,9 @@ use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\Handler;
 use YSOCode\Berry\Domain\ValueObjects\Middleware;
 use YSOCode\Berry\Domain\ValueObjects\Status;
-use YSOCode\Berry\Infra\Request;
-use YSOCode\Berry\Infra\Response;
-use YSOCode\Berry\Infra\StreamFactory;
+use YSOCode\Berry\Infra\Http\Request;
+use YSOCode\Berry\Infra\Http\Response;
+use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class Dispatcher
 {

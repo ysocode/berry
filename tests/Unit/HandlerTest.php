@@ -9,8 +9,8 @@ use Tests\Fixtures\DummyController;
 use YSOCode\Berry\Domain\ValueObjects\Handler;
 use YSOCode\Berry\Domain\ValueObjects\Method;
 use YSOCode\Berry\Domain\ValueObjects\Status;
-use YSOCode\Berry\Infra\Request;
-use YSOCode\Berry\Infra\Uri;
+use YSOCode\Berry\Infra\Http\Request;
+use YSOCode\Berry\Infra\Http\Uri;
 
 final class HandlerTest extends TestCase
 {

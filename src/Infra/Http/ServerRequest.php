@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Infra;
+namespace YSOCode\Berry\Infra\Http;
 
 use InvalidArgumentException;
 use YSOCode\Berry\Domain\ValueObjects\FileName;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\Method;
+use YSOCode\Berry\Infra\Stream\Stream;
 
 final class ServerRequest
 {

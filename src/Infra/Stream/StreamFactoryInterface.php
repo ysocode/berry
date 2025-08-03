@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Infra;
+namespace YSOCode\Berry\Infra\Stream;
 
 use YSOCode\Berry\Domain\ValueObjects\FilePath;
 use YSOCode\Berry\Domain\ValueObjects\StreamMode;

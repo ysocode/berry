@@ -8,9 +8,9 @@ use PHPUnit\Framework\TestCase;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\Method;
-use YSOCode\Berry\Infra\Request;
-use YSOCode\Berry\Infra\StreamFactory;
-use YSOCode\Berry\Infra\Uri;
+use YSOCode\Berry\Infra\Http\Request;
+use YSOCode\Berry\Infra\Http\Uri;
+use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class RequestTest extends TestCase
 {

@@ -2,19 +2,20 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Infra;
+namespace YSOCode\Berry\Infra\Http;
 
 use InvalidArgumentException;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
-use YSOCode\Berry\Domain\ValueObjects\Status;
+use YSOCode\Berry\Domain\ValueObjects\Method;
+use YSOCode\Berry\Infra\Stream\Stream;
 
-final class Response
+final class Request
 {
     /**
      * @var array<string, Header>
      */
-    public private(set) array $headers = [];
+    private array $headers = [];
 
     /**
      * @var array<string, string>
@@ -25,7 +26,8 @@ final class Response
      * @param  array<Header>  $headers
      */
     public function __construct(
-        private(set) Status $status = Status::OK,
+        private(set) Method $method,
+        private(set) Uri $uri,
         array $headers = [],
         private(set) ?Stream $body = null,
     ) {
@@ -47,18 +49,6 @@ final class Response
 
             $this->headers[(string) $header->name] = $header;
         }
-    }
-
-    public function withStatus(Status $status): self
-    {
-        if ($this->status === $status) {
-            return $this;
-        }
-
-        $new = clone $this;
-        $new->status = $status;
-
-        return $new;
     }
 
     public function getHeader(HeaderName $name): ?Header
@@ -127,6 +117,30 @@ final class Response
 
         $new = clone $this;
         $new->body = $body;
+
+        return $new;
+    }
+
+    public function withMethod(Method $method): self
+    {
+        if ($this->method === $method) {
+            return $this;
+        }
+
+        $new = clone $this;
+        $new->method = $method;
+
+        return $new;
+    }
+
+    public function withUri(Uri $uri): self
+    {
+        if ($this->uri === $uri) {
+            return $this;
+        }
+
+        $new = clone $this;
+        $new->uri = $uri;
 
         return $new;
     }

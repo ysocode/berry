@@ -12,8 +12,8 @@ use YSOCode\Berry\Domain\ValueObjects\Handler;
 use YSOCode\Berry\Domain\ValueObjects\Method;
 use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
-use YSOCode\Berry\Infra\Request;
-use YSOCode\Berry\Infra\Response;
+use YSOCode\Berry\Infra\Http\Request;
+use YSOCode\Berry\Infra\Http\Response;
 
 final class Router
 {
