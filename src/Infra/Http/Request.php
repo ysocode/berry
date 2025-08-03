@@ -29,7 +29,7 @@ final class Request
         private(set) Method $method,
         private(set) Uri $uri,
         array $headers = [],
-        private(set) ?Stream $body = null,
+        private(set) ?Stream $body = null
     ) {
         $this->setHeaders($headers);
     }

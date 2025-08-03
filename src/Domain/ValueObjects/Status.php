@@ -9,9 +9,11 @@ enum Status: int
     case OK = 200;
     case CREATED = 201;
     case NO_CONTENT = 204;
+    case RESET_CONTENT = 205;
 
     case MOVED_PERMANENTLY = 301;
     case FOUND = 302;
+    case NOT_MODIFIED = 304;
 
     case BAD_REQUEST = 400;
     case UNAUTHORIZED = 401;
@@ -29,9 +31,11 @@ enum Status: int
             self::OK => 'OK',
             self::CREATED => 'Created',
             self::NO_CONTENT => 'No Content',
+            self::RESET_CONTENT => 'Reset Content',
 
             self::MOVED_PERMANENTLY => 'Moved Permanently',
             self::FOUND => 'Found',
+            self::NOT_MODIFIED => 'Not Modified',
 
             self::BAD_REQUEST => 'Bad Request',
             self::UNAUTHORIZED => 'Unauthorized',

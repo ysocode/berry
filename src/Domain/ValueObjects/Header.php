@@ -45,18 +45,18 @@ final readonly class Header
             return new Error(sprintf('Header value cannot be empty for "%s".', $name));
         }
 
-        foreach ($value as $value) {
-            if (! is_string($value)) {
+        foreach ($value as $v) {
+            if (! is_string($v)) {
                 return new Error(sprintf('Each value for header "%s" must be a string.', $name));
             }
 
             $pattern = '/[\r\n]/';
-            if (preg_match($pattern, $value)) {
+            if (preg_match($pattern, $v)) {
                 return new Error(sprintf('Header value for "%s" contains invalid characters (\\r or \\n).', $name));
             }
 
             $pattern = '/^[\x20-\x7E]*$/';
-            if (in_array(preg_match($pattern, $value), [0, false], true)) {
+            if (in_array(preg_match($pattern, $v), [0, false], true)) {
                 return new Error(sprintf('Header value for "%s" must contain only visible ASCII characters.', $name));
             }
         }

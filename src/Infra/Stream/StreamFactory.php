@@ -9,7 +9,7 @@ use YSOCode\Berry\Domain\ValueObjects\FilePath;
 use YSOCode\Berry\Domain\ValueObjects\Resource;
 use YSOCode\Berry\Domain\ValueObjects\StreamMode;
 
-final readonly class StreamFactory implements StreamFactoryInterface
+final readonly class StreamFactory
 {
     public function createFromString(string $content = ''): Stream
     {

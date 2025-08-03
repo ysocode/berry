@@ -29,6 +29,7 @@ final class Response
         private(set) Status $status = Status::OK,
         array $headers = [],
         private(set) ?Stream $body = null,
+        public readonly string $protocolVersion = '1.1'
     ) {
         $this->setHeaders($headers);
     }
