@@ -11,7 +11,7 @@ use YSOCode\Berry\Infra\Stream\Stream;
 
 final class StreamTest extends TestCase
 {
-    public function test_it_should_be_able_to_accept_valid_resource(): void
+    public function test_it_should_accept_valid_stream_resource(): void
     {
         $resource = fopen('php://temp', 'w+b');
         if (! is_resource($resource)) {
@@ -31,7 +31,7 @@ final class StreamTest extends TestCase
         }
     }
 
-    public function test_it_should_be_able_to_close(): void
+    public function test_it_should_close_stream_and_detach_resource(): void
     {
         $resource = fopen('php://temp', 'w+b');
         if (! is_resource($resource)) {
@@ -46,5 +46,26 @@ final class StreamTest extends TestCase
         $this->assertFalse($stream->isWritable);
         $this->assertFalse($stream->isSeekable);
         $this->assertNull($stream->size);
+    }
+
+    public function test_it_should_write_data_to_stream_resource(): void
+    {
+        $resource = fopen('php://temp', 'w+b');
+        if (! is_resource($resource)) {
+            throw new RuntimeException('Failed to open temporary stream.');
+        }
+
+        $stream = new Stream(new StreamResource($resource));
+        $stream->write('Hello, World!');
+        $stream->rewind();
+
+        try {
+            $this->assertInstanceOf(StreamResource::class, $stream->resource);
+            $this->assertEquals('Hello, World!', $stream->readAll());
+            $this->assertNull($stream->size);
+            $this->assertTrue($stream->isFinished());
+        } finally {
+            $stream->close();
+        }
     }
 }

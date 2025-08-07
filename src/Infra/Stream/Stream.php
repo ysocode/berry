@@ -76,4 +76,65 @@ final class Stream
 
         return $currentResource;
     }
+
+    public function write(string $data): bool
+    {
+        if (! $this->resource instanceof StreamResource) {
+            throw new RuntimeException('Stream is detached.');
+        }
+
+        if (! $this->isWritable) {
+            throw new RuntimeException('Stream is not writable.');
+        }
+
+        if (in_array(fwrite($this->resource->value, $data), [0, false], true)) {
+            throw new RuntimeException('Failed to write data to the stream.');
+        }
+
+        $this->size = null;
+
+        return true;
+    }
+
+    public function rewind(): void
+    {
+        if (! $this->resource instanceof StreamResource) {
+            throw new RuntimeException('Stream is detached.');
+        }
+
+        if (! $this->isSeekable) {
+            throw new RuntimeException('Stream is not seekable.');
+        }
+
+        if (! rewind($this->resource->value)) {
+            throw new RuntimeException('Failed to rewind the stream.');
+        }
+    }
+
+    public function readAll(): string
+    {
+        if (! $this->resource instanceof StreamResource) {
+            throw new RuntimeException('Stream is detached.');
+        }
+
+        if (! $this->isReadable) {
+            throw new RuntimeException('Stream is not readable.');
+        }
+
+        $data = stream_get_contents($this->resource->value);
+        if (! is_string($data)) {
+            throw new RuntimeException('Failed to read data from the stream.');
+        }
+
+        return $data;
+    }
+
+    public function isFinished(): bool
+    {
+        if (! $this->resource instanceof StreamResource) {
+            throw new RuntimeException('Stream is detached.');
+        }
+
+        return feof($this->resource->value);
+    }
 }
