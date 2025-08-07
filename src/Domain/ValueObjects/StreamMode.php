@@ -14,29 +14,56 @@ enum StreamMode: string
     case APPEND_READ = 'a+';
     case EXCLUSIVE_CREATE = 'x';
     case EXCLUSIVE_CREATE_READ = 'x+';
-    case OPEN_READ_WRITE = 'c';
-    case OPEN_READ_WRITE_CREATE = 'c+';
+    case CREATE = 'c';
+    case CREATE_READ = 'c+';
 
+    case READ_BINARY = 'rb';
     case READ_WRITE_BINARY = 'r+b';
+    case WRITE_BINARY = 'wb';
     case WRITE_READ_BINARY = 'w+b';
+    case APPEND_BINARY = 'ab';
     case APPEND_READ_BINARY = 'a+b';
+    case EXCLUSIVE_CREATE_BINARY = 'xb';
     case EXCLUSIVE_CREATE_READ_BINARY = 'x+b';
-    case OPEN_READ_WRITE_CREATE_BINARY = 'c+b';
-
-    case READ_WRITE_TEXT = 'r+t';
-    case WRITE_READ_TEXT = 'w+t';
 
     public function isReadable(): bool
     {
-        return str_contains($this->value, 'r') || str_contains($this->value, '+');
+        return match ($this) {
+            self::READ,
+            self::READ_WRITE,
+            self::WRITE_READ,
+            self::APPEND_READ,
+            self::EXCLUSIVE_CREATE_READ,
+            self::CREATE_READ,
+            self::READ_BINARY,
+            self::READ_WRITE_BINARY,
+            self::WRITE_READ_BINARY,
+            self::APPEND_READ_BINARY,
+            self::EXCLUSIVE_CREATE_READ_BINARY => true,
+            default => false,
+        };
     }
 
     public function isWritable(): bool
     {
-        return str_contains($this->value, 'w')
-            || str_contains($this->value, 'a')
-            || str_contains($this->value, 'x')
-            || str_contains($this->value, 'c')
-            || str_contains($this->value, '+');
+        return match ($this) {
+            self::READ_WRITE,
+            self::WRITE,
+            self::WRITE_READ,
+            self::APPEND,
+            self::APPEND_READ,
+            self::EXCLUSIVE_CREATE,
+            self::EXCLUSIVE_CREATE_READ,
+            self::CREATE,
+            self::CREATE_READ,
+            self::READ_WRITE_BINARY,
+            self::WRITE_BINARY,
+            self::WRITE_READ_BINARY,
+            self::APPEND_BINARY,
+            self::APPEND_READ_BINARY,
+            self::EXCLUSIVE_CREATE_BINARY,
+            self::EXCLUSIVE_CREATE_READ_BINARY => true,
+            default => false,
+        };
     }
 }

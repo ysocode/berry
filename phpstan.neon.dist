@@ -1,7 +1,4 @@
 parameters:
-    treatPhpDocTypesAsCertain: false
-    ignoreErrors:
-        - identifier: method.unused
 
     paths:
         - src/

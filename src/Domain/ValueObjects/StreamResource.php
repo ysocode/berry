@@ -6,10 +6,16 @@ namespace YSOCode\Berry\Domain\ValueObjects;
 
 use InvalidArgumentException;
 
-final readonly class Resource
+final readonly class StreamResource
 {
+    /**
+     * @var resource
+     */
     public mixed $value;
 
+    /**
+     * @param  resource  $value
+     */
     public function __construct(mixed $value)
     {
         $isValid = self::validate($value);
@@ -20,22 +26,23 @@ final readonly class Resource
         $this->value = $value;
     }
 
+    /**
+     * @param  resource  $value
+     */
     public static function isValid(mixed $value): bool
     {
         return self::validate($value) === true;
     }
 
+    /**
+     * @param  resource  $value
+     */
     private static function validate(mixed $value): true|Error
     {
         if (! is_resource($value)) {
-            return new Error('The given value is not a valid resource.');
+            return new Error('Resource must be a valid stream resource.');
         }
 
         return true;
-    }
-
-    public function equals(self $other): bool
-    {
-        return $this->value === $other->value;
     }
 }
