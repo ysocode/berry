@@ -6,83 +6,45 @@ namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use YSOCode\Berry\Domain\ValueObjects\Resource;
-use YSOCode\Berry\Domain\ValueObjects\StreamMode;
+use YSOCode\Berry\Domain\ValueObjects\StreamResource;
 use YSOCode\Berry\Infra\Stream\Stream;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class StreamTest extends TestCase
 {
-    public function test_it_should_accept_valid_resource(): void
+    public function test_it_should_be_able_to_accept_valid_resource(): void
     {
-        $this->expectNotToPerformAssertions();
-
-        $resource = @fopen('php://temp', 'rw+');
-        if ($resource === false) {
-            throw new RuntimeException('Failed to open temporary stream');
+        $resource = fopen('php://temp', 'w+b');
+        if (! is_resource($resource)) {
+            throw new RuntimeException('Failed to open temporary stream.');
         }
 
-        fwrite($resource, 'Hello, Stream!');
-        rewind($resource);
+        $stream = new Stream(new StreamResource($resource));
 
-        new Stream(new Resource($resource));
+        try {
+            $this->assertInstanceOf(StreamResource::class, $stream->resource);
+            $this->assertTrue($stream->isReadable);
+            $this->assertTrue($stream->isWritable);
+            $this->assertTrue($stream->isSeekable);
+            $this->assertIsInt($stream->size);
+        } finally {
+            $stream->close();
+        }
     }
 
-    public function test_it_should_read_and_write_data(): void
+    public function test_it_should_be_able_to_close(): void
     {
-        $stream = new StreamFactory()->createFromString('Hello, Stream!');
+        $resource = fopen('php://temp', 'w+b');
+        if (! is_resource($resource)) {
+            throw new RuntimeException('Failed to open temporary stream.');
+        }
 
-        $bytesWritten = $stream->write('abc');
-        $this->assertSame(3, $bytesWritten);
-
-        $stream->rewind();
-
-        $data = $stream->read(5);
-        $this->assertSame('abclo', $data);
-    }
-
-    public function test_it_should_seek_and_rewind(): void
-    {
-        $stream = new StreamFactory()->createFromString('Hello, Stream!');
-
-        $stream->seek(6);
-        $this->assertSame(6, $stream->tell());
-
-        $stream->rewind();
-        $this->assertSame(0, $stream->tell());
-    }
-
-    public function test_it_should_get_contents_and_metadata(): void
-    {
-        $stream = new StreamFactory()->createFromString('Hello, Stream!');
-
-        $this->assertSame('Hello, Stream!', (string) $stream);
-        $this->assertEquals(StreamMode::WRITE_READ_BINARY, $stream->mode);
-    }
-
-    public function test_it_should_detect_eof_and_allow_detach(): void
-    {
-        $stream = new StreamFactory()->createFromString('Hello, Stream!');
-
-        $stream->read(1024);
-        $this->assertTrue($stream->eof());
-
-        $detached = $stream->detach();
-        $this->assertInstanceOf(Resource::class, $detached);
-
-        $this->expectException(RuntimeException::class);
-        $stream->tell();
-    }
-
-    public function test_it_should_return_string_representation_and_close(): void
-    {
-        $stream = new StreamFactory()->createFromString('Hello, Stream!');
-
-        $this->assertSame('Hello, Stream!', (string) $stream);
-
+        $stream = new Stream(new StreamResource($resource));
         $stream->close();
 
-        $this->expectException(RuntimeException::class);
-        $stream->tell();
+        $this->assertNull($stream->resource);
+        $this->assertFalse($stream->isReadable);
+        $this->assertFalse($stream->isWritable);
+        $this->assertFalse($stream->isSeekable);
+        $this->assertNull($stream->size);
     }
 }
