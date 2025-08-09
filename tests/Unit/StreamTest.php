@@ -80,19 +80,6 @@ final class StreamTest extends TestCase
         $stream->close();
     }
 
-    public function test_it_should_not_write_or_read_an_already_closed_stream(): void
-    {
-        $stream = $this->createStream();
-        $stream->close();
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Stream is detached.');
-
-        $stream->write('This should fail.');
-        $stream->readAll();
-        $stream->read(2);
-    }
-
     public function test_it_should_write_to_stream(): void
     {
         $stream = $this->createStream();
@@ -106,6 +93,17 @@ final class StreamTest extends TestCase
         } finally {
             $stream->close();
         }
+    }
+
+    public function test_it_should_not_write_to_an_already_closed_stream(): void
+    {
+        $stream = $this->createStream();
+        $stream->close();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Stream is detached.');
+
+        $stream->write('This should fail.');
     }
 
     public function test_it_should_not_write_to_an_only_readable_stream(): void
@@ -141,6 +139,17 @@ final class StreamTest extends TestCase
         }
     }
 
+    public function test_it_should_not_read_all_from_an_already_closed_stream(): void
+    {
+        $stream = $this->createStream();
+        $stream->close();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Stream is detached.');
+
+        $stream->readAll();
+    }
+
     public function test_it_should_not_read_all_from_an_only_writable_stream(): void
     {
         $stream = $this->createNotReadableStream();
@@ -174,6 +183,17 @@ final class StreamTest extends TestCase
         } finally {
             $stream->close();
         }
+    }
+
+    public function test_it_should_not_read_exact_number_of_requested_bytes_from_an_already_closed_stream(): void
+    {
+        $stream = $this->createStream();
+        $stream->close();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Stream is detached.');
+
+        $stream->read(2);
     }
 
     public function test_it_should_not_read_when_requested_bytes_is_zero_or_negative(): void
