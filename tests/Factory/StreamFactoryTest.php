@@ -44,9 +44,9 @@ final class StreamFactoryTest extends TestCase
     {
         $tempFilePath = $this->createTempFile();
         $stream = new StreamFactory()->createFromFile(new FilePath($tempFilePath));
-        $stream->write('Hello, World!');
 
         try {
+            $stream->write('Hello, World!');
             $stream->rewind();
 
             $this->assertInstanceOf(StreamResource::class, $stream->resource);
@@ -67,8 +67,15 @@ final class StreamFactoryTest extends TestCase
         $tempFilePath = $this->createTempFile();
 
         try {
+            $exclusiveModes = [
+                StreamMode::EXCLUSIVE_CREATE,
+                StreamMode::EXCLUSIVE_CREATE_READ,
+                StreamMode::EXCLUSIVE_CREATE_BINARY,
+                StreamMode::EXCLUSIVE_CREATE_READ_BINARY,
+            ];
+
             foreach (StreamMode::cases() as $mode) {
-                if (str_starts_with($mode->value, 'x')) {
+                if (in_array($mode, $exclusiveModes)) {
                     continue;
                 }
 
