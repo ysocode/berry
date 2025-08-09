@@ -281,4 +281,30 @@ final class StreamTest extends TestCase
             $stream->close();
         }
     }
+
+    public function test_it_should_tell_the_current_position_in_stream(): void
+    {
+        $stream = $this->createStream();
+
+        try {
+            $stream->write('Hello, World!');
+            $stream->seek(2);
+
+            $this->assertEquals(2, $stream->tell());
+        } finally {
+            $stream->close();
+        }
+    }
+
+    public function test_it_should_not_tell_the_current_position_in_an_already_closed_stream(): void
+    {
+        $stream = $this->createStream();
+        $stream->write('Hello, World!');
+        $stream->close();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Stream is detached.');
+
+        $stream->tell();
+    }
 }

@@ -176,4 +176,18 @@ final class Stream
             throw new RuntimeException('Failed to seek the stream.');
         }
     }
+
+    public function tell(): int
+    {
+        if (! $this->resource instanceof StreamResource) {
+            throw new RuntimeException('Stream is detached.');
+        }
+
+        $tell = ftell($this->resource->value);
+        if (! is_int($tell)) {
+            throw new RuntimeException('Unable to tell the stream.');
+        }
+
+        return $tell;
+    }
 }
