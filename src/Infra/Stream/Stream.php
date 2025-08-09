@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\StreamMode;
 use YSOCode\Berry\Domain\ValueObjects\StreamResource;
+use YSOCode\Berry\Domain\ValueObjects\StreamSeekWhence;
 
 final class Stream
 {
@@ -159,5 +160,20 @@ final class Stream
         }
 
         return $data;
+    }
+
+    public function seek(int $offset, StreamSeekWhence $whence = StreamSeekWhence::SET): void
+    {
+        if (! $this->resource instanceof StreamResource) {
+            throw new RuntimeException('Stream is detached.');
+        }
+
+        if (! $this->isSeekable) {
+            throw new RuntimeException('Stream is not seekable.');
+        }
+
+        if (fseek($this->resource->value, $offset, $whence->value) !== 0) {
+            throw new RuntimeException('Failed to seek the stream.');
+        }
     }
 }

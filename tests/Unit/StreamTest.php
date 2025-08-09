@@ -96,10 +96,11 @@ final class StreamTest extends TestCase
     public function test_it_should_write_to_stream(): void
     {
         $stream = $this->createStream();
-        $stream->write('Hello, World!');
-        $stream->rewind();
 
         try {
+            $stream->write('Hello, World!');
+            $stream->rewind();
+
             $this->assertEquals('Hello, World!', $stream->readAll());
             $this->assertTrue($stream->isFinished());
         } finally {
@@ -128,10 +129,11 @@ final class StreamTest extends TestCase
     public function test_it_should_read_all_from_stream(): void
     {
         $stream = $this->createStream();
-        $stream->write('Hello, World!');
-        $stream->rewind();
 
         try {
+            $stream->write('Hello, World!');
+            $stream->rewind();
+
             $this->assertEquals('Hello, World!', $stream->readAll());
             $this->assertTrue($stream->isFinished());
         } finally {
@@ -142,9 +144,10 @@ final class StreamTest extends TestCase
     public function test_it_should_not_read_all_from_an_only_writable_stream(): void
     {
         $stream = $this->createNotReadableStream();
-        $stream->write('Hello, World!');
 
         try {
+            $stream->write('Hello, World!');
+
             $this->assertFalse($stream->isReadable);
             $this->assertTrue($stream->isWritable);
             $this->assertFalse($stream->isSeekable);
@@ -161,10 +164,11 @@ final class StreamTest extends TestCase
     public function test_it_should_read_exact_number_of_requested_bytes_from_stream(): void
     {
         $stream = $this->createStream();
-        $stream->write('Hello, World!');
-        $stream->rewind();
 
         try {
+            $stream->write('Hello, World!');
+            $stream->rewind();
+
             $this->assertEquals('He', $stream->read(2));
             $this->assertFalse($stream->isFinished());
         } finally {
@@ -175,10 +179,10 @@ final class StreamTest extends TestCase
     public function test_it_should_not_read_when_requested_bytes_is_zero_or_negative(): void
     {
         $stream = $this->createStream();
-        $stream->write('Hello, World!');
-        $stream->rewind();
 
         try {
+            $stream->write('Hello, World!');
+            $stream->rewind();
 
             $this->expectException(InvalidArgumentException::class);
             $this->expectExceptionMessage('Length must be greater than 0.');
@@ -193,10 +197,11 @@ final class StreamTest extends TestCase
     public function test_it_should_rewind_stream(): void
     {
         $stream = $this->createStream();
-        $stream->write('Hello, World!');
-        $stream->rewind();
 
         try {
+            $stream->write('Hello, World!');
+            $stream->rewind();
+
             $this->assertEquals('Hello, World!', $stream->readAll());
 
             $stream->rewind();
@@ -210,15 +215,48 @@ final class StreamTest extends TestCase
     public function test_it_should_not_rewind_a_non_seekable_stream(): void
     {
         $stream = $this->createNotReadableStream();
-        $stream->write('Hello, World!');
 
         try {
+            $stream->write('Hello, World!');
+
             $this->assertFalse($stream->isSeekable);
 
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Stream is not seekable.');
 
             $stream->rewind();
+        } finally {
+            $stream->close();
+        }
+    }
+
+    public function test_it_should_seek_to_an_exact_position_in_stream(): void
+    {
+        $stream = $this->createStream();
+
+        try {
+            $stream->write('Hello, World!');
+            $stream->seek(7);
+
+            $this->assertEquals('World', $stream->read(5));
+        } finally {
+            $stream->close();
+        }
+    }
+
+    public function test_it_should_not_seek_to_an_exact_position_in_a_non_seekable_stream(): void
+    {
+        $stream = $this->createNotReadableStream();
+
+        try {
+            $stream->write('Hello, World!');
+
+            $this->assertFalse($stream->isSeekable);
+
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('Stream is not seekable.');
+
+            $stream->seek(4);
         } finally {
             $stream->close();
         }
