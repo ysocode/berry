@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Infra\Stream;
 
+use InvalidArgumentException;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\StreamMode;
 use YSOCode\Berry\Domain\ValueObjects\StreamResource;
@@ -136,5 +137,27 @@ final class Stream
         }
 
         return feof($this->resource->value);
+    }
+
+    public function read(int $length): string
+    {
+        if ($length <= 0) {
+            throw new InvalidArgumentException('Length must be greater than 0.');
+        }
+
+        if (! $this->resource instanceof StreamResource) {
+            throw new RuntimeException('Stream is detached.');
+        }
+
+        if (! $this->isReadable) {
+            throw new RuntimeException('Stream is not readable.');
+        }
+
+        $data = fread($this->resource->value, $length);
+        if (! is_string($data)) {
+            throw new RuntimeException('Failed to read data from the stream.');
+        }
+
+        return $data;
     }
 }
