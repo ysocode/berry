@@ -12,6 +12,9 @@
          colors="true"
          testdox="true">
     <testsuites>
+        <testsuite name="Factory">
+            <directory>tests/Factory</directory>
+        </testsuite>
         <testsuite name="Integration">
             <directory>tests/Integration</directory>
         </testsuite>

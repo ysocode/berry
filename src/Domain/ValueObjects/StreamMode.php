@@ -25,6 +25,8 @@ enum StreamMode: string
     case APPEND_READ_BINARY = 'a+b';
     case EXCLUSIVE_CREATE_BINARY = 'xb';
     case EXCLUSIVE_CREATE_READ_BINARY = 'x+b';
+    case CREATE_BINARY = 'cb';
+    case CREATE_READ_BINARY = 'c+b';
 
     public function isReadable(): bool
     {
@@ -39,7 +41,8 @@ enum StreamMode: string
             self::READ_WRITE_BINARY,
             self::WRITE_READ_BINARY,
             self::APPEND_READ_BINARY,
-            self::EXCLUSIVE_CREATE_READ_BINARY => true,
+            self::EXCLUSIVE_CREATE_READ_BINARY,
+            self::CREATE_READ_BINARY => true,
             default => false,
         };
     }
@@ -62,7 +65,9 @@ enum StreamMode: string
             self::APPEND_BINARY,
             self::APPEND_READ_BINARY,
             self::EXCLUSIVE_CREATE_BINARY,
-            self::EXCLUSIVE_CREATE_READ_BINARY => true,
+            self::EXCLUSIVE_CREATE_READ_BINARY,
+            self::CREATE_BINARY,
+            self::CREATE_READ_BINARY => true,
             default => false,
         };
     }
