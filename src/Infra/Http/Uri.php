@@ -23,4 +23,13 @@ final class Uri
         private(set) ?Query $query = null,
         private(set) ?Fragment $fragment = null,
     ) {}
+
+    public function getAuthority(): string
+    {
+        if (! $this->userInfo instanceof UserInfo) {
+            return sprintf('%s:%s', $this->host, $this->port->value);
+        }
+
+        return sprintf('%s@%s:%s', $this->userInfo, $this->host, $this->port->value);
+    }
 }
