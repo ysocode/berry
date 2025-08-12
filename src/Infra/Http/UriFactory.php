@@ -22,7 +22,7 @@ final readonly class UriFactory
         }
 
         $parts = parse_url($uri);
-        if ($parts === false) {
+        if (! is_array($parts)) {
             throw new InvalidArgumentException('Failed to parse URL.');
         }
 
@@ -45,7 +45,7 @@ final readonly class UriFactory
         $path = null;
 
         $partPath = $parts['path'] ?? null;
-        if ($partPath !== null) {
+        if (is_string($partPath)) {
             $path = new Path($partPath);
         }
 
@@ -53,21 +53,21 @@ final readonly class UriFactory
 
         $user = $parts['user'] ?? null;
         $pass = $parts['pass'] ?? null;
-        if ($user !== null) {
-            $userInfo = new UserInfo($pass !== null ? "{$user}:{$pass}" : $user);
+        if (is_string($user)) {
+            $userInfo = new UserInfo(is_string($pass) ? "{$user}:{$pass}" : $user);
         }
 
         $query = null;
 
         $partQuery = $parts['query'] ?? null;
-        if ($partQuery !== null) {
+        if (is_string($partQuery)) {
             $query = new Query($partQuery);
         }
 
         $fragment = null;
 
         $partFragment = $parts['fragment'] ?? null;
-        if ($partFragment !== null) {
+        if (is_string($partFragment)) {
             $fragment = new Fragment($partFragment);
         }
 

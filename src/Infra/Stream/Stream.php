@@ -6,11 +6,12 @@ namespace YSOCode\Berry\Infra\Stream;
 
 use InvalidArgumentException;
 use RuntimeException;
+use Stringable;
 use YSOCode\Berry\Domain\ValueObjects\StreamMode;
 use YSOCode\Berry\Domain\ValueObjects\StreamResource;
 use YSOCode\Berry\Domain\ValueObjects\StreamSeekWhence;
 
-final class Stream
+final class Stream implements Stringable
 {
     public private(set) ?StreamResource $resource;
 
@@ -189,5 +190,16 @@ final class Stream
         }
 
         return $tell;
+    }
+
+    public function __toString(): string
+    {
+        if (! $this->resource instanceof StreamResource) {
+            throw new RuntimeException('Stream is detached.');
+        }
+
+        $this->rewind();
+
+        return $this->readAll();
     }
 }
