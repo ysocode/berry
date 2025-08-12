@@ -41,7 +41,13 @@ final readonly class UriFactory
         $host = new Host($host);
 
         $port = new Port($parts['port'] ?? $scheme->defaultPort());
-        $path = new Path($parts['path'] ?? '/');
+
+        $path = null;
+
+        $partPath = $parts['path'] ?? null;
+        if ($partPath !== null) {
+            $path = new Path($partPath);
+        }
 
         $userInfo = null;
 
