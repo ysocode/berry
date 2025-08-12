@@ -6,6 +6,7 @@ namespace Tests\Unit;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\StreamResource;
 use YSOCode\Berry\Infra\Stream\Stream;
@@ -24,27 +25,42 @@ final class StreamTest extends TestCase
 
     private function createNotWritableStream(): Stream
     {
-        $resource = fopen('php://stdin', 'rb');
-        if (! is_resource($resource)) {
-            throw new RuntimeException('Failed to open stdin stream.');
-        }
+        $stream = $this->createStream();
 
-        return new Stream(new StreamResource($resource));
+        $refStream = new ReflectionClass($stream);
+
+        $refIsWritable = $refStream->getProperty('isWritable');
+        $refIsWritable->setValue($stream, false);
+
+        $refIsSeekable = $refStream->getProperty('isSeekable');
+        $refIsSeekable->setValue($stream, false);
+
+        return $stream;
     }
 
     private function createNotReadableStream(): Stream
     {
-        $resource = fopen('php://stdout', 'wb');
-        if (! is_resource($resource)) {
-            throw new RuntimeException('Failed to open stdout stream.');
-        }
+        $stream = $this->createStream();
 
-        return new Stream(new StreamResource($resource));
+        $refStream = new ReflectionClass($stream);
+
+        $refIsReadable = $refStream->getProperty('isReadable');
+        $refIsReadable->setValue($stream, false);
+
+        $refIsSeekable = $refStream->getProperty('isSeekable');
+        $refIsSeekable->setValue($stream, false);
+
+        return $stream;
     }
 
-    public function test_it_should_initialize_with_a_valid_stream(): void
+    public function test_it_should_initialize_with_a_valid_stream_resource(): void
     {
-        $stream = $this->createStream();
+        $resource = fopen('php://memory', 'w+b');
+        if (! is_resource($resource)) {
+            throw new RuntimeException('Failed to open memory stream.');
+        }
+
+        $stream = new Stream(new StreamResource($resource));
 
         try {
             $this->assertInstanceOf(StreamResource::class, $stream->resource);
