@@ -25,7 +25,7 @@ final class UriTest extends TestCase
         $this->assertEquals('example.com:8080', $uriWithoutUserInfo->getAuthority());
     }
 
-    public function test_it_should_change_attributes(): void
+    public function test_it_should_return_cloned_uri_with_changed_properties(): void
     {
         $uri = new UriFactory()->createFromString('http://user:pass@example.com:8080');
 
