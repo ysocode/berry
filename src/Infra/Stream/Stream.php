@@ -15,6 +15,8 @@ final class Stream implements Stringable
 {
     public private(set) ?StreamResource $resource;
 
+    public private(set) ?string $uri;
+
     public private(set) bool $isReadable;
 
     public private(set) bool $isWritable;
@@ -38,6 +40,8 @@ final class Stream implements Stringable
         }
 
         $meta = stream_get_meta_data($this->resource->value);
+
+        $this->uri = $meta['uri'];
 
         $streamMode = StreamMode::from($meta['mode']);
 
@@ -72,6 +76,7 @@ final class Stream implements Stringable
         $currentResource = $this->resource;
 
         $this->resource = null;
+        $this->uri = null;
         $this->isReadable = false;
         $this->isWritable = false;
         $this->isSeekable = false;
@@ -190,6 +195,11 @@ final class Stream implements Stringable
         }
 
         return $tell;
+    }
+
+    public function isAttached(): bool
+    {
+        return $this->resource instanceof StreamResource;
     }
 
     public function __toString(): string
