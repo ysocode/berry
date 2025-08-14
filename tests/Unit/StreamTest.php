@@ -53,7 +53,7 @@ final class StreamTest extends TestCase
         return $stream;
     }
 
-    public function test_it_should_initialize_with_a_valid_stream_resource(): void
+    public function test_it_should_create_a_valid_stream(): void
     {
         $resource = fopen('php://memory', 'w+b');
         if (! is_resource($resource)) {

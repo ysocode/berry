@@ -9,36 +9,37 @@ use Stringable;
 
 final readonly class UserInfo implements Stringable
 {
-    public string $value;
+    public string $user;
 
-    public function __construct(string $value)
+    public ?string $password;
+
+    public function __construct(string $user, ?string $password)
     {
-        $isValid = self::validate($value);
+        $isValid = self::validate($user, $password);
         if ($isValid instanceof Error) {
             throw new InvalidArgumentException((string) $isValid);
         }
 
-        $this->value = $value;
+        $this->user = $user;
+        $this->password = $password;
     }
 
-    public static function isValid(string $value): bool
+    public static function isValid(string $user, ?string $password): bool
     {
-        return self::validate($value) === true;
+        return self::validate($user, $password) === true;
     }
 
-    private static function validate(string $value): true|Error
+    private static function validate(string $user, ?string $password): true|Error
     {
-        if (substr_count($value, ':') > 1) {
-            return new Error('UserInfo must contain at most one colon ":" separating user and password.');
+        if ($user === '' || $user === '0') {
+            return new Error('UserInfo name cannot be empty.');
         }
-
-        [$user, $pass] = array_pad(explode(':', $value, 2), 2, null);
 
         if (! self::validatePart($user)) {
             return new Error('UserInfo user contains invalid characters.');
         }
 
-        if (! self::validatePart($pass)) {
+        if (! self::validatePart($password)) {
             return new Error('UserInfo password contains invalid characters.');
         }
 
@@ -58,6 +59,10 @@ final readonly class UserInfo implements Stringable
 
     public function __toString(): string
     {
-        return $this->value;
+        if (is_string($this->password)) {
+            return "{$this->user}:{$this->password}";
+        }
+
+        return $this->user;
     }
 }

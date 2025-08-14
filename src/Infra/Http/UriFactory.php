@@ -54,7 +54,7 @@ final readonly class UriFactory
         $user = $parts['user'] ?? null;
         $pass = $parts['pass'] ?? null;
         if (is_string($user)) {
-            $userInfo = new UserInfo(is_string($pass) ? "{$user}:{$pass}" : $user);
+            $userInfo = new UserInfo($user, $pass);
         }
 
         $query = null;

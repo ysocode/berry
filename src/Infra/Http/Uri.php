@@ -19,7 +19,7 @@ final class Uri implements Stringable
         private(set) Scheme $scheme,
         private(set) Host $host,
         private(set) Port $port,
-        private(set) ?Path $path,
+        private(set) ?Path $path = null,
         private(set) ?UserInfo $userInfo = null,
         private(set) ?Query $query = null,
         private(set) ?Fragment $fragment = null,

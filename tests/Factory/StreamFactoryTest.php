@@ -27,8 +27,6 @@ final class StreamFactoryTest extends TestCase
         $stream = new StreamFactory()->createFromString('Hello, World!');
 
         try {
-            $stream->rewind();
-
             $this->assertInstanceOf(StreamResource::class, $stream->resource);
             $this->assertEquals('Hello, World!', $stream->readAll());
             $this->assertTrue($stream->isReadable);

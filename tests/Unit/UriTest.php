@@ -12,42 +12,72 @@ use YSOCode\Berry\Domain\ValueObjects\Port;
 use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UserInfo;
-use YSOCode\Berry\Infra\Http\UriFactory;
+use YSOCode\Berry\Infra\Http\Uri;
 
 final class UriTest extends TestCase
 {
+    private function createUri(): Uri
+    {
+        return new Uri(
+            Scheme::HTTPS,
+            new Host('example.com'),
+            new Port(8080),
+            null,
+            new UserInfo('ysocode', 'berry')
+        );
+    }
+
+    public function test_it_should_create_a_valid_uri(): void
+    {
+        $uri = $this->createUri();
+
+        $this->assertEquals('https://ysocode:berry@example.com:8080', (string) $uri);
+        $this->assertEquals(Scheme::HTTPS, $uri->scheme);
+        $this->assertEquals(new Host('example.com'), $uri->host);
+        $this->assertEquals(new Port(8080), $uri->port);
+        $this->assertNull($uri->path);
+        $this->assertEquals(new UserInfo('ysocode', 'berry'), $uri->userInfo);
+        $this->assertNull($uri->query);
+        $this->assertNull($uri->fragment);
+    }
+
     public function test_it_should_return_authority(): void
     {
-        $uri = new UriFactory()->createFromString('https://user:pass@example.com:8080');
-        $uriWithoutUserInfo = new UriFactory()->createFromString('https://example.com:8080');
+        $uri = $this->createUri();
+        $uriWithoutUserInfo = new Uri(
+            Scheme::HTTPS,
+            new Host('example.com'),
+            new Port(8080),
+            null,
+        );
 
-        $this->assertEquals('user:pass@example.com:8080', $uri->getAuthority());
+        $this->assertEquals('ysocode:berry@example.com:8080', $uri->getAuthority());
         $this->assertEquals('example.com:8080', $uriWithoutUserInfo->getAuthority());
     }
 
     public function test_it_should_return_cloned_uri_with_changed_properties(): void
     {
-        $uri = new UriFactory()->createFromString('http://user:pass@example.com:8080');
+        $uri = $this->createUri();
 
-        $newUri = $uri->withScheme(Scheme::HTTPS);
-        $this->assertEquals('https://user:pass@example.com:8080', (string) $newUri);
+        $newUri = $uri->withScheme(Scheme::HTTP);
+        $this->assertEquals('http://ysocode:berry@example.com:8080', (string) $newUri);
 
         $newUri = $newUri->withHost(new Host('example.org'));
-        $this->assertEquals('https://user:pass@example.org:8080', (string) $newUri);
+        $this->assertEquals('http://ysocode:berry@example.org:8080', (string) $newUri);
 
         $newUri = $newUri->withPort(new Port(1234));
-        $this->assertEquals('https://user:pass@example.org:1234', (string) $newUri);
+        $this->assertEquals('http://ysocode:berry@example.org:1234', (string) $newUri);
 
         $newUri = $newUri->withPath(new Path('/newpath'));
-        $this->assertEquals('https://user:pass@example.org:1234/newpath', (string) $newUri);
+        $this->assertEquals('http://ysocode:berry@example.org:1234/newpath', (string) $newUri);
 
-        $newUri = $newUri->withUserInfo(new UserInfo('newuser:newpass'));
-        $this->assertEquals('https://newuser:newpass@example.org:1234/newpath', (string) $newUri);
+        $newUri = $newUri->withUserInfo(new UserInfo('newuser', 'newpass'));
+        $this->assertEquals('http://newuser:newpass@example.org:1234/newpath', (string) $newUri);
 
         $newUri = $newUri->withQuery(new Query('newquery=2'));
-        $this->assertEquals('https://newuser:newpass@example.org:1234/newpath?newquery=2', (string) $newUri);
+        $this->assertEquals('http://newuser:newpass@example.org:1234/newpath?newquery=2', (string) $newUri);
 
         $newUri = $newUri->withFragment(new Fragment('newfrag'));
-        $this->assertEquals('https://newuser:newpass@example.org:1234/newpath?newquery=2#newfrag', (string) $newUri);
+        $this->assertEquals('http://newuser:newpass@example.org:1234/newpath?newquery=2#newfrag', (string) $newUri);
     }
 }
