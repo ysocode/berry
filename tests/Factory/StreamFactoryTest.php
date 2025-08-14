@@ -24,11 +24,11 @@ final class StreamFactoryTest extends TestCase
 
     public function test_it_should_create_a_stream_from_string(): void
     {
-        $stream = new StreamFactory()->createFromString('Hello, World!');
+        $stream = new StreamFactory()->createFromString('Hello, world!');
 
         try {
             $this->assertInstanceOf(StreamResource::class, $stream->resource);
-            $this->assertEquals('Hello, World!', $stream->readAll());
+            $this->assertEquals('Hello, world!', $stream->readAll());
             $this->assertTrue($stream->isReadable);
             $this->assertTrue($stream->isWritable);
             $this->assertTrue($stream->isSeekable);
@@ -44,11 +44,11 @@ final class StreamFactoryTest extends TestCase
         $stream = new StreamFactory()->createFromFile(new FilePath($tempFilePath));
 
         try {
-            $stream->write('Hello, World!');
+            $stream->write('Hello, world!');
             $stream->rewind();
 
             $this->assertInstanceOf(StreamResource::class, $stream->resource);
-            $this->assertEquals('Hello, World!', $stream->readAll());
+            $this->assertEquals('Hello, world!', $stream->readAll());
             $this->assertTrue($stream->isReadable);
             $this->assertTrue($stream->isWritable);
             $this->assertTrue($stream->isSeekable);

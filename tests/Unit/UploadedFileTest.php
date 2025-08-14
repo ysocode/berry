@@ -32,7 +32,7 @@ final class UploadedFileTest extends TestCase
         }
 
         $stream = new Stream(new StreamResource($resource));
-        $stream->write('Hello, World!');
+        $stream->write('Hello, world!');
 
         $uploadedFile = new UploadedFile(
             $stream,
@@ -41,7 +41,7 @@ final class UploadedFileTest extends TestCase
             new MimeType('text/plain'),
         );
 
-        $this->assertEquals('Hello, World!', (string) $uploadedFile->stream);
+        $this->assertEquals('Hello, world!', (string) $uploadedFile->stream);
         $this->assertEquals(UploadStatus::OK, $uploadedFile->status);
         $this->assertEquals(new FileName('test.txt'), $uploadedFile->name);
         $this->assertEquals(new MimeType('text/plain'), $uploadedFile->type);
@@ -66,7 +66,7 @@ final class UploadedFileTest extends TestCase
         }
 
         $stream = new Stream(new StreamResource($resource));
-        $stream->write('Hello, World!');
+        $stream->write('Hello, world!');
 
         $uploadedFile = new UploadedFile(
             $stream,
@@ -89,7 +89,7 @@ final class UploadedFileTest extends TestCase
 
         $copyStream = new Stream(new StreamResource($resource));
 
-        $this->assertEquals('Hello, World!', $copyStream->readAll());
+        $this->assertEquals('Hello, world!', $copyStream->readAll());
 
         unlink($testFilePath);
         unlink($copyTestFilePath);

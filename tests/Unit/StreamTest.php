@@ -101,10 +101,10 @@ final class StreamTest extends TestCase
         $stream = $this->createStream();
 
         try {
-            $stream->write('Hello, World!');
+            $stream->write('Hello, world!');
             $stream->rewind();
 
-            $this->assertEquals('Hello, World!', $stream->readAll());
+            $this->assertEquals('Hello, world!', $stream->readAll());
             $this->assertTrue($stream->isFinished());
         } finally {
             $stream->close();
@@ -145,10 +145,10 @@ final class StreamTest extends TestCase
         $stream = $this->createStream();
 
         try {
-            $stream->write('Hello, World!');
+            $stream->write('Hello, world!');
             $stream->rewind();
 
-            $this->assertEquals('Hello, World!', $stream->readAll());
+            $this->assertEquals('Hello, world!', $stream->readAll());
             $this->assertTrue($stream->isFinished());
         } finally {
             $stream->close();
@@ -171,7 +171,7 @@ final class StreamTest extends TestCase
         $stream = $this->createNotReadableStream();
 
         try {
-            $stream->write('Hello, World!');
+            $stream->write('Hello, world!');
 
             $this->assertFalse($stream->isReadable);
             $this->assertTrue($stream->isWritable);
@@ -191,7 +191,7 @@ final class StreamTest extends TestCase
         $stream = $this->createStream();
 
         try {
-            $stream->write('Hello, World!');
+            $stream->write('Hello, world!');
             $stream->rewind();
 
             $this->assertEquals('He', $stream->read(2));
@@ -217,7 +217,7 @@ final class StreamTest extends TestCase
         $stream = $this->createStream();
 
         try {
-            $stream->write('Hello, World!');
+            $stream->write('Hello, world!');
             $stream->rewind();
 
             $this->expectException(InvalidArgumentException::class);
@@ -235,14 +235,14 @@ final class StreamTest extends TestCase
         $stream = $this->createStream();
 
         try {
-            $stream->write('Hello, World!');
+            $stream->write('Hello, world!');
             $stream->rewind();
 
-            $this->assertEquals('Hello, World!', $stream->readAll());
+            $this->assertEquals('Hello, world!', $stream->readAll());
 
             $stream->rewind();
 
-            $this->assertEquals('Hello, World!', $stream->readAll());
+            $this->assertEquals('Hello, world!', $stream->readAll());
         } finally {
             $stream->close();
         }
@@ -253,7 +253,7 @@ final class StreamTest extends TestCase
         $stream = $this->createNotReadableStream();
 
         try {
-            $stream->write('Hello, World!');
+            $stream->write('Hello, world!');
 
             $this->assertFalse($stream->isSeekable);
 
@@ -271,10 +271,10 @@ final class StreamTest extends TestCase
         $stream = $this->createStream();
 
         try {
-            $stream->write('Hello, World!');
+            $stream->write('Hello, world!');
             $stream->seek(7);
 
-            $this->assertEquals('World', $stream->read(5));
+            $this->assertEquals('world', $stream->read(5));
         } finally {
             $stream->close();
         }
@@ -285,7 +285,7 @@ final class StreamTest extends TestCase
         $stream = $this->createNotReadableStream();
 
         try {
-            $stream->write('Hello, World!');
+            $stream->write('Hello, world!');
 
             $this->assertFalse($stream->isSeekable);
 
@@ -303,7 +303,7 @@ final class StreamTest extends TestCase
         $stream = $this->createStream();
 
         try {
-            $stream->write('Hello, World!');
+            $stream->write('Hello, world!');
             $stream->seek(2);
 
             $this->assertEquals(2, $stream->tell());
@@ -315,7 +315,7 @@ final class StreamTest extends TestCase
     public function test_it_should_not_tell_the_current_position_in_an_already_closed_stream(): void
     {
         $stream = $this->createStream();
-        $stream->write('Hello, World!');
+        $stream->write('Hello, world!');
         $stream->close();
 
         $this->expectException(RuntimeException::class);
