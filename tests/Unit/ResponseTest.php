@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
+use YSOCode\Berry\Domain\ValueObjects\HttpVersion;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
 
@@ -93,9 +94,9 @@ final class ResponseTest extends TestCase
     public function test_it_should_return_cloned_response_with_updated_protocol_version(): void
     {
         $response = $this->createResponse();
-        $newResponse = $response->withProtocolVersion('1.2');
+        $newResponse = $response->withVersion(new HttpVersion('2.0'));
 
         $this->assertNotSame($response, $newResponse);
-        $this->assertEquals('1.2', $newResponse->protocolVersion);
+        $this->assertEquals('2.0', (string) $newResponse->version);
     }
 }
