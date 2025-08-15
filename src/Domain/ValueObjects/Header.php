@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Domain\ValueObjects;
 
 use InvalidArgumentException;
+use RuntimeException;
 use Stringable;
 
 final readonly class Header implements Stringable
@@ -12,47 +13,51 @@ final readonly class Header implements Stringable
     /**
      * @var array<string>
      */
-    public array $value;
+    public array $values;
 
     /**
-     * @param  array<string>  $value
+     * @param  array<string>  $values
      */
     public function __construct(
         public HeaderName $name,
-        array $value
+        array $values
     ) {
-        $isValid = self::validate($value);
+        $isValid = self::validate($values);
         if ($isValid instanceof Error) {
             throw new InvalidArgumentException((string) $isValid);
         }
 
-        $this->value = $value;
+        $this->values = $values;
     }
 
     /**
-     * @param  array<string>  $value
+     * @param  array<string>  $values
      */
-    public static function isValid(array $value): bool
+    public static function isValid(array $values): bool
     {
-        return self::validate($value) === true;
+        return self::validate($values) === true;
     }
 
     /**
-     * @param  array<string>  $value
+     * @param  array<string>  $values
      */
-    private static function validate(array $value): true|Error
+    private static function validate(array $values): true|Error
     {
-        if ($value === []) {
+        if ($values === []) {
             return new Error('Header must have at least one value.');
         }
 
-        foreach ($value as $v) {
-            if (! is_string($v)) {
-                return new Error('Header values must be strings.');
+        foreach ($values as $value) {
+            if (! is_string($value)) {
+                return new Error('Header value must be strings.');
+            }
+
+            if ($value === '' || $value === '0') {
+                return new Error('Header value cannot be empty.');
             }
 
             $pattern = '/[\0\r\n]/';
-            if (preg_match($pattern, $v) === 1) {
+            if (preg_match($pattern, $value) === 1) {
                 return new Error('Header value contains invalid characters.');
             }
         }
@@ -62,6 +67,11 @@ final readonly class Header implements Stringable
 
     public function __toString(): string
     {
-        return $this->name.': '.implode(', ', $this->value);
+        $lowerHeaderName = strtolower((string) $this->name);
+        if ($lowerHeaderName === 'set-cookie' && count($this->values) > 1) {
+            throw new RuntimeException('Set-Cookie cannot be concatenated.');
+        }
+
+        return $this->name.': '.implode(', ', $this->values);
     }
 }

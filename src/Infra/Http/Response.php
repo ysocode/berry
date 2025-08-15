@@ -78,6 +78,24 @@ final class Response
         return $new;
     }
 
+    public function withAddedHeader(Header $header): self
+    {
+        $new = clone $this;
+
+        $lowerHeaderName = strtolower((string) $header->name);
+
+        $mergedHeader = null;
+
+        $currentHeader = $new->headers[$lowerHeaderName] ?? null;
+        if ($currentHeader instanceof Header) {
+            $mergedHeader = new Header($header->name, [...$currentHeader->values, ...$header->values]);
+        }
+
+        $new->headers[$lowerHeaderName] = $mergedHeader ?? $header;
+
+        return $new;
+    }
+
     public function withoutHeader(HeaderName $name): self
     {
         $new = clone $this;
