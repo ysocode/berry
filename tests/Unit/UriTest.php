@@ -22,7 +22,7 @@ final class UriTest extends TestCase
             Scheme::HTTPS,
             new Host('example.com'),
             new Port(8080),
-            null,
+            new Path('/'),
             new UserInfo('ysocode', 'berry')
         );
     }
@@ -31,11 +31,11 @@ final class UriTest extends TestCase
     {
         $uri = $this->createUri();
 
-        $this->assertEquals('https://ysocode:berry@example.com:8080', (string) $uri);
+        $this->assertEquals('https://ysocode:berry@example.com:8080/', (string) $uri);
         $this->assertEquals(Scheme::HTTPS, $uri->scheme);
         $this->assertEquals(new Host('example.com'), $uri->host);
         $this->assertEquals(new Port(8080), $uri->port);
-        $this->assertNull($uri->path);
+        $this->assertEquals(new Path('/'), $uri->path);
         $this->assertEquals(new UserInfo('ysocode', 'berry'), $uri->userInfo);
         $this->assertNull($uri->query);
         $this->assertNull($uri->fragment);
@@ -48,7 +48,7 @@ final class UriTest extends TestCase
             Scheme::HTTPS,
             new Host('example.com'),
             new Port(8080),
-            null,
+            new Path('/'),
         );
 
         $this->assertEquals('ysocode:berry@example.com:8080', $uri->getAuthority());
@@ -60,13 +60,13 @@ final class UriTest extends TestCase
         $uri = $this->createUri();
 
         $newUri = $uri->withScheme(Scheme::HTTP);
-        $this->assertEquals('http://ysocode:berry@example.com:8080', (string) $newUri);
+        $this->assertEquals('http://ysocode:berry@example.com:8080/', (string) $newUri);
 
         $newUri = $newUri->withHost(new Host('example.org'));
-        $this->assertEquals('http://ysocode:berry@example.org:8080', (string) $newUri);
+        $this->assertEquals('http://ysocode:berry@example.org:8080/', (string) $newUri);
 
         $newUri = $newUri->withPort(new Port(1234));
-        $this->assertEquals('http://ysocode:berry@example.org:1234', (string) $newUri);
+        $this->assertEquals('http://ysocode:berry@example.org:1234/', (string) $newUri);
 
         $newUri = $newUri->withPath(new Path('/newpath'));
         $this->assertEquals('http://ysocode:berry@example.org:1234/newpath', (string) $newUri);

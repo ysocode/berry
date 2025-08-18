@@ -19,7 +19,7 @@ final class Uri implements Stringable
         private(set) Scheme $scheme,
         private(set) Host $host,
         private(set) Port $port,
-        private(set) ?Path $path = null,
+        private(set) Path $path,
         private(set) ?UserInfo $userInfo = null,
         private(set) ?Query $query = null,
         private(set) ?Fragment $fragment = null,
@@ -94,9 +94,7 @@ final class Uri implements Stringable
     {
         $uri = $this->scheme->value.'://'.$this->getAuthority();
 
-        if ($this->path instanceof Path) {
-            $uri .= $this->path;
-        }
+        $uri .= $this->path;
 
         if ($this->query instanceof Query) {
             $uri .= '?'.$this->query;
