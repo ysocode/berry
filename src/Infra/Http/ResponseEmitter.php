@@ -88,12 +88,8 @@ final readonly class ResponseEmitter
 
     private function validateDefaultValues(ReflectionParameter $second, ReflectionParameter $third): true|Error
     {
-        if (! $second->isDefaultValueAvailable()) {
-            return new Error('Second parameter of the header emitter must have a default value.');
-        }
-
-        if (! $third->isDefaultValueAvailable()) {
-            return new Error('Third parameter of the header emitter must have a default value.');
+        if (! $second->isDefaultValueAvailable() || ! $third->isDefaultValueAvailable()) {
+            return new Error('Second and third parameters of the header emitter must have default values.');
         }
 
         return true;
