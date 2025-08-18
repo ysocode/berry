@@ -6,14 +6,11 @@ namespace YSOCode\Berry\Infra\Http;
 
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
-use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
 use YSOCode\Berry\Domain\ValueObjects\HttpVersion;
 use YSOCode\Berry\Infra\Stream\Stream;
 
 trait MessageTrait
 {
-    public private(set) HttpStatus $status;
-
     /**
      * @var array<string, Header>
      */
@@ -23,12 +20,15 @@ trait MessageTrait
 
     public private(set) HttpVersion $version;
 
-    public function withStatus(HttpStatus $status): self
+    /**
+     * @param  array<Header>  $headers
+     */
+    private function setHeaders(array $headers): void
     {
-        $new = clone $this;
-        $new->status = $status;
-
-        return $new;
+        foreach ($headers as $header) {
+            $lowerHeaderName = strtolower((string) $header->name);
+            $this->headers[$lowerHeaderName] = $header;
+        }
     }
 
     public function hasHeader(HeaderName $name): bool

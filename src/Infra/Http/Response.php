@@ -18,12 +18,11 @@ final class Response
      * @param  array<Header>  $headers
      */
     public function __construct(
-        HttpStatus $status,
+        private(set) HttpStatus $status,
         array $headers,
         ?Stream $body = null,
         HttpVersion $version = new HttpVersion('1.1'),
     ) {
-        $this->status = $status;
         $this->body = $body ?? new StreamFactory()->createFromString();
 
         $this->setHeaders($headers);
@@ -31,14 +30,11 @@ final class Response
         $this->version = $version;
     }
 
-    /**
-     * @param  array<Header>  $headers
-     */
-    private function setHeaders(array $headers): void
+    public function withStatus(HttpStatus $status): self
     {
-        foreach ($headers as $header) {
-            $lowerHeaderName = strtolower((string) $header->name);
-            $this->headers[$lowerHeaderName] = $header;
-        }
+        $new = clone $this;
+        $new->status = $status;
+
+        return $new;
     }
 }
