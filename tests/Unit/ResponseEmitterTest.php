@@ -120,4 +120,42 @@ final class ResponseEmitterTest extends TestCase
 
         new ResponseEmitter($headerEmitter);
     }
+
+    public function test_it_should_emit_body_based_on_content_length_header(): void
+    {
+        $response = $this->createResponse();
+        $response = $response->withHeader(new Header(new HeaderName('Content-Length'), ['2']));
+
+        $responseEmitter = new ResponseEmitter($this->headerEmitter(...));
+
+        ob_start();
+        $responseEmitter->emit($response);
+        $output = ob_get_clean();
+
+        $this->assertEquals('He', $output);
+    }
+
+    public function test_it_should_emit_set_cookie_headers_with_replace_false(): void
+    {
+        $response = $this->createResponse();
+        $response = $response->withHeader(new Header(new HeaderName('Set-Cookie'), ['cookie1=1', 'cookie2=2']));
+
+        $responseEmitter = new ResponseEmitter($this->headerEmitter(...));
+
+        ob_start();
+        $responseEmitter->emit($response);
+        ob_get_clean();
+
+        [$firstSetCookieEmittedHeader, $secondSetCookieEmittedHeader] = array_values(
+            array_filter(
+                $this->emittedHeaders,
+                fn (array $header): bool => str_contains($header['header'], 'Set-Cookie')
+            )
+        );
+
+        $this->assertEquals('Set-Cookie: cookie1=1', $firstSetCookieEmittedHeader['header']);
+        $this->assertFalse($firstSetCookieEmittedHeader['replace']);
+        $this->assertEquals('Set-Cookie: cookie2=2', $secondSetCookieEmittedHeader['header']);
+        $this->assertFalse($secondSetCookieEmittedHeader['replace']);
+    }
 }
