@@ -19,7 +19,7 @@ final class Response
      */
     public function __construct(
         private(set) HttpStatus $status,
-        array $headers,
+        array $headers = [],
         ?Stream $body = null,
         HttpVersion $version = new HttpVersion('1.1'),
     ) {
