@@ -26,4 +26,18 @@ final class UriFactoryTest extends TestCase
         $this->assertEquals(new Query('query=param'), $uri->query);
         $this->assertEquals(new Fragment('fragment'), $uri->fragment);
     }
+
+    public function test_it_should_use_default_http_port(): void
+    {
+        $uri = new UriFactory()->createFromString('http://example.com/resource');
+
+        $this->assertEquals(new Port(80), $uri->port);
+    }
+
+    public function test_it_should_use_default_https_port(): void
+    {
+        $uri = new UriFactory()->createFromString('https://example.com/secure');
+
+        $this->assertEquals(new Port(443), $uri->port);
+    }
 }
