@@ -30,7 +30,7 @@ final readonly class MimeType implements Stringable
     {
         $pattern = '/^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/i';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
-            return new Error('Invalid MIME type format.');
+            return new Error(sprintf('MIME type "%s" is invalid.', $value));
         }
 
         return true;
