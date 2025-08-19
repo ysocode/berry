@@ -9,7 +9,7 @@ enum Scheme: string
     case HTTP = 'http';
     case HTTPS = 'https';
 
-    public function defaultPort(): int
+    public function getDefaultPort(): int
     {
         return match ($this) {
             self::HTTP => 80,
