@@ -7,6 +7,7 @@ namespace YSOCode\Berry\Infra\Http;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpVersion;
+use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Infra\Stream\Stream;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
@@ -38,7 +39,11 @@ final class Request
 
     private function setTarget(Uri $uri): void
     {
-        $target = (string) $uri->path;
+        $target = '/';
+
+        if ($uri->path instanceof Path) {
+            $target = (string) $uri->path;
+        }
 
         if ($uri->query instanceof Query) {
             $target .= '?'.$uri->query;
