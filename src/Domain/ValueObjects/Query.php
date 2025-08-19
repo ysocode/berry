@@ -28,6 +28,10 @@ final readonly class Query implements Stringable
 
     private static function validate(string $value): true|Error
     {
+        if ($value === '') {
+            return new Error('Query cannot be empty.');
+        }
+
         $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/?]|%[0-9A-Fa-f]{2})*$/u';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
             return new Error('Query contains invalid characters.');
