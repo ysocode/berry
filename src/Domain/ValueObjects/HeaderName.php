@@ -28,7 +28,7 @@ final readonly class HeaderName implements Stringable
 
     private static function validate(string $value): true|Error
     {
-        if ($value === '' || $value === '0') {
+        if ($value === '') {
             return new Error('Header name cannot be empty.');
         }
 
