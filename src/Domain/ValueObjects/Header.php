@@ -47,13 +47,13 @@ final readonly class Header implements Stringable
             return new Error('Header must have at least one value.');
         }
 
-        foreach ($values as $value) {
+        foreach ($values as $index => $value) {
             if (! is_string($value)) {
-                return new Error('Header value must be strings.');
+                return new Error('Header value must be string.');
             }
 
-            if ($value === '' || $value === '0') {
-                return new Error('Header value cannot be empty.');
+            if ($value === '') {
+                return new Error("Header value at index {$index} cannot be empty.");
             }
 
             $pattern = '/[\0\r\n]/';
