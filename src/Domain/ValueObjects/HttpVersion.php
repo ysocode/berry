@@ -29,7 +29,7 @@ final readonly class HttpVersion implements Stringable
     private static function validate(string $value): true|Error
     {
         if (! in_array($value, ['1.0', '1.1', '2.0'], true)) {
-            return new Error('Invalid Http Version.');
+            return new Error(sprintf('HTTP version "%s" is not supported.', $value));
         }
 
         return true;
