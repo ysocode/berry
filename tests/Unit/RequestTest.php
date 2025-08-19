@@ -27,7 +27,7 @@ final class RequestTest extends TestCase
 
         return new Request(
             HttpMethod::GET,
-            new UriFactory()->createFromString('https://example.com/'),
+            new UriFactory()->createFromString('https://example.com'),
             [
                 new Header(new HeaderName('Content-Type'), ['application/json; charset=utf-8']),
                 new Header(new HeaderName('Accept'), ['application/json; charset=utf-8']),
@@ -44,7 +44,7 @@ final class RequestTest extends TestCase
         $acceptHeader = $request->getHeader(new HeaderName('Accept'));
 
         $this->assertEquals(HttpMethod::GET, $request->method);
-        $this->assertEquals('https://example.com:443/', (string) $request->uri);
+        $this->assertEquals('https://example.com:443', (string) $request->uri);
         $this->assertEquals('Content-Type: application/json; charset=utf-8', $contentTypeHeader);
         $this->assertEquals('Accept: application/json; charset=utf-8', $acceptHeader);
         $this->assertJson((string) $request->body);
@@ -76,7 +76,7 @@ final class RequestTest extends TestCase
 
         $this->assertNotSame($request, $newRequest);
         $this->assertEquals('/path/to/resource?query=param', $newRequest->target);
-        $this->assertEquals('https://example.com:443/', (string) $newRequest->uri);
+        $this->assertEquals('https://example.com:443', (string) $newRequest->uri);
     }
 
     public function test_it_should_check_header_existence(): void
@@ -91,7 +91,7 @@ final class RequestTest extends TestCase
     {
         $request = $this->createRequest();
         $newRequest = $request->withHeader(new Header(new HeaderName('Accept'), ['text/html']));
-        $newRequest = $newRequest->withHeader(new Header(new HeaderName('Origin'), ['https://ysocode.com/']));
+        $newRequest = $newRequest->withHeader(new Header(new HeaderName('Origin'), ['https://ysocode.com']));
 
         $acceptHeader = $newRequest->getHeader(new HeaderName('Accept'));
         $originHeader = $newRequest->getHeader(new HeaderName('Origin'));
@@ -100,7 +100,7 @@ final class RequestTest extends TestCase
         $this->assertInstanceOf(Header::class, $acceptHeader);
         $this->assertInstanceOf(Header::class, $originHeader);
         $this->assertEquals('Accept: text/html', (string) $acceptHeader);
-        $this->assertEquals('Origin: https://ysocode.com/', (string) $originHeader);
+        $this->assertEquals('Origin: https://ysocode.com', (string) $originHeader);
     }
 
     public function test_it_should_return_cloned_request_with_added_header_values(): void

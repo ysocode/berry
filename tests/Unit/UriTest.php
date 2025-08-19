@@ -48,7 +48,6 @@ final class UriTest extends TestCase
             Scheme::HTTPS,
             new Host('example.com'),
             new Port(8080),
-            null,
         );
 
         $this->assertEquals('ysocode:berry@example.com:8080', $uri->getAuthority());
