@@ -28,7 +28,8 @@ final readonly class Host implements Stringable
 
     private static function validate(string $value): true|Error
     {
-        if (filter_var(str_replace(['[', ']'], '', $value), FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) {
+        $valueWithoutBrackets = str_replace(['[', ']'], '', $value);
+        if (filter_var($valueWithoutBrackets, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) {
             return true;
         }
 
