@@ -24,12 +24,17 @@ final readonly class Error implements Stringable
 
     private function validate(string $value): true|self
     {
-        $length = mb_strlen($value);
-        if ($length < 3 || $length > 255) {
+        $length = strlen($value);
+        if (! $this->between($length, 3, 255)) {
             return new self('Error must be between 3 and 255 characters.');
         }
 
         return true;
+    }
+
+    private function between(int $value, int $min, int $max): bool
+    {
+        return $value >= $min && $value <= $max;
     }
 
     public function equals(self $other): bool
