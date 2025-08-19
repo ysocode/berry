@@ -32,10 +32,6 @@ final readonly class DirPath implements Stringable
             return new Error('Dir path must point to an existing directory.');
         }
 
-        if (str_ends_with($value, '/')) {
-            return new Error('Dir path must not end with a slash.');
-        }
-
         return true;
     }
 
