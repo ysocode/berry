@@ -31,16 +31,22 @@ final readonly class UserInfo implements Stringable
 
     private static function validate(string $user, ?string $password): true|Error
     {
-        if ($user === '' || $user === '0') {
-            return new Error('UserInfo name cannot be empty.');
+        if ($user === '') {
+            return new Error('User cannot be empty.');
         }
 
         if (! self::validatePart($user)) {
-            return new Error('UserInfo user contains invalid characters.');
+            return new Error('User contains invalid characters.');
         }
 
-        if (! self::validatePart($password)) {
-            return new Error('UserInfo password contains invalid characters.');
+        if (is_string($password)) {
+            if ($password === '') {
+                return new Error('Password cannot be empty.');
+            }
+
+            if (! self::validatePart($password)) {
+                return new Error('Password contains invalid characters.');
+            }
         }
 
         return true;
@@ -48,13 +54,9 @@ final readonly class UserInfo implements Stringable
 
     private static function validatePart(?string $part): bool
     {
-        if (is_null($part)) {
-            return true;
-        }
-
         $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=]|%[0-9A-Fa-f]{2})*$/';
 
-        return preg_match($pattern, $part) === 1;
+        return preg_match($pattern, (string) $part) === 1;
     }
 
     public function __toString(): string
