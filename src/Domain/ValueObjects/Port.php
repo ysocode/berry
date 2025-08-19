@@ -28,10 +28,15 @@ final readonly class Port
 
     private static function validate(int $value): true|Error
     {
-        if ($value < 1 || $value > 65535) {
+        if (! self::between($value, 1, 65535)) {
             return new Error('Port must be between 1 and 65535.');
         }
 
         return true;
+    }
+
+    private static function between(int $value, int $min, int $max): bool
+    {
+        return $value >= $min && $value <= $max;
     }
 }
