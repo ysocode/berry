@@ -44,7 +44,7 @@ final class RequestTest extends TestCase
         $acceptHeader = $request->getHeader(new HeaderName('Accept'));
 
         $this->assertEquals(HttpMethod::GET, $request->method);
-        $this->assertEquals('https://example.com:443', (string) $request->uri);
+        $this->assertEquals('https://example.com', (string) $request->uri);
         $this->assertEquals('Content-Type: application/json; charset=utf-8', $contentTypeHeader);
         $this->assertEquals('Accept: application/json; charset=utf-8', $acceptHeader);
         $this->assertJson((string) $request->body);
@@ -65,7 +65,7 @@ final class RequestTest extends TestCase
         $newRequest = $request->withUri(new UriFactory()->createFromString('https://example.com/path/to/resource?query=param'));
 
         $this->assertNotSame($request, $newRequest);
-        $this->assertEquals('https://example.com:443/path/to/resource?query=param', (string) $newRequest->uri);
+        $this->assertEquals('https://example.com/path/to/resource?query=param', (string) $newRequest->uri);
         $this->assertEquals('/path/to/resource?query=param', $newRequest->target);
     }
 
@@ -76,7 +76,7 @@ final class RequestTest extends TestCase
 
         $this->assertNotSame($request, $newRequest);
         $this->assertEquals('/path/to/resource?query=param', $newRequest->target);
-        $this->assertEquals('https://example.com:443', (string) $newRequest->uri);
+        $this->assertEquals('https://example.com', (string) $newRequest->uri);
     }
 
     public function test_it_should_check_header_existence(): void

@@ -15,23 +15,39 @@ use YSOCode\Berry\Domain\ValueObjects\UserInfo;
 
 final class Uri implements Stringable
 {
+    public private(set) Port $port;
+
+    public bool $withDefaultPort = false;
+
     public function __construct(
         private(set) Scheme $scheme,
         private(set) Host $host,
-        private(set) Port $port,
+        ?Port $port,
         private(set) ?Path $path = null,
         private(set) ?UserInfo $userInfo = null,
         private(set) ?Query $query = null,
         private(set) ?Fragment $fragment = null,
-    ) {}
+    ) {
+        $this->port = $port ?? $scheme->getDefaultPort();
+    }
 
     public function getAuthority(): string
     {
-        if (! $this->userInfo instanceof UserInfo) {
-            return "{$this->host}:{$this->port->value}";
+        $authority = '';
+
+        if ($this->userInfo instanceof UserInfo) {
+            $authority .= $this->userInfo.'@';
         }
 
-        return "{$this->userInfo}@{$this->host}:{$this->port->value}";
+        $authority .= $this->host;
+
+        $isDefaultPort = $this->port->equals($this->scheme->getDefaultPort());
+
+        if ($this->withDefaultPort || ! $isDefaultPort) {
+            $authority .= ':'.$this->port->value;
+        }
+
+        return $authority;
     }
 
     public function withScheme(Scheme $scheme): self

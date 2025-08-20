@@ -95,7 +95,7 @@ final class Stream implements Stringable
             throw new RuntimeException('Stream is not writable.');
         }
 
-        if (in_array(fwrite($this->resource->value, $data), [0, false], true)) {
+        if (! is_int(fwrite($this->resource->value, $data))) {
             throw new RuntimeException('Failed to write data to the stream.');
         }
 
