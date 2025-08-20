@@ -26,7 +26,7 @@ final class UploadedFile
     public function moveTo(TargetFilePath $targetFilePath): void
     {
         if ($this->isMoved) {
-            throw new RuntimeException('Uploaded file is already be moved.');
+            throw new RuntimeException('Uploaded file has already been moved.');
         }
 
         if ($this->status->isError()) {
