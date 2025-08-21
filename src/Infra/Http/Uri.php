@@ -22,7 +22,7 @@ final class Uri implements Stringable
     public function __construct(
         private(set) Scheme $scheme,
         private(set) Host $host,
-        ?Port $port,
+        ?Port $port = null,
         private(set) ?Path $path = null,
         private(set) ?UserInfo $userInfo = null,
         private(set) ?Query $query = null,

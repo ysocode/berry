@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Infra\Http;
 
 use InvalidArgumentException;
+use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\Fragment;
 use YSOCode\Berry\Domain\ValueObjects\Host;
 use YSOCode\Berry\Domain\ValueObjects\Path;
@@ -85,5 +86,81 @@ final readonly class UriFactory
             $query,
             $fragment,
         );
+    }
+
+    public function createFromGlobals(): Uri
+    {
+        [$host, $port] = $this->getHostAndPortFromGlobals();
+
+        return new Uri(
+            $this->getSchemeFromGlobals(),
+            $host,
+            $port,
+            $this->getPathFromGlobals(),
+            null,
+            $this->getQueryFromGlobals(),
+            null,
+        );
+    }
+
+    /**
+     * @return array{Host, Port}
+     */
+    private function getHostAndPortFromGlobals(): array
+    {
+        $httpHost = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? null;
+        if (! is_string($httpHost)) {
+            throw new RuntimeException('Unable to retrieve http host.');
+        }
+
+        if (str_contains($httpHost, ':')) {
+            [$extractedHost, $extractedPort] = explode(':', $httpHost, 2);
+
+            return [new Host($extractedHost), new Port((int) $extractedPort)];
+        }
+
+        $serverPort = $_SERVER['SERVER_PORT'] ?? null;
+        if (! is_int($serverPort)) {
+            throw new RuntimeException('Unable to retrieve server port.');
+        }
+
+        return [new Host($httpHost), new Port($serverPort)];
+    }
+
+    private function getSchemeFromGlobals(): Scheme
+    {
+        $requestScheme = $_SERVER['REQUEST_SCHEME'] ?? null;
+        if (! is_string($requestScheme)) {
+            throw new RuntimeException('Unable to retrieve request scheme.');
+        }
+
+        return Scheme::from($requestScheme);
+    }
+
+    private function getPathFromGlobals(): ?Path
+    {
+        $requestUri = $_SERVER['REQUEST_URI'] ?? null;
+        if (! is_string($requestUri)) {
+            throw new RuntimeException('Unable to retrieve request URI.');
+        }
+
+        $parts = parse_url($requestUri);
+
+        $partPath = $parts['path'] ?? null;
+        if (! is_string($partPath)) {
+            return null;
+        }
+
+        return new Path($partPath);
+    }
+
+    private function getQueryFromGlobals(): ?Query
+    {
+        $queryString = $_SERVER['QUERY_STRING'] ?? null;
+        if (! is_string($queryString)) {
+            return null;
+        }
+
+        return new Query($queryString);
     }
 }

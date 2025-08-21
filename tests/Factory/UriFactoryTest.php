@@ -27,17 +27,29 @@ final class UriFactoryTest extends TestCase
         $this->assertEquals(new Fragment('fragment'), $uri->fragment);
     }
 
-    public function test_it_should_use_default_http_port(): void
+    public function test_it_should_create_a_uri_from_globals(): void
     {
-        $uri = new UriFactory()->createFromString('http://example.com/resource');
+        $headers = [
+            'HTTP_HOST' => 'ysocode.com:8080',
+        ];
 
-        $this->assertEquals(new Port(80), $uri->port);
-    }
+        $_SERVER = [
+            'REQUEST_METHOD' => 'GET',
+            'REQUEST_SCHEME' => 'https',
+            'SERVER_NAME' => 'ysocode.com',
+            'SERVER_PORT' => 8080,
+            'REQUEST_URI' => '/path/to/resource?query=param',
+            'QUERY_STRING' => 'query=param',
+            ...$headers,
+        ];
 
-    public function test_it_should_use_default_https_port(): void
-    {
-        $uri = new UriFactory()->createFromString('https://example.com/secure');
+        $uri = new UriFactory()->createFromGlobals();
 
-        $this->assertEquals(new Port(443), $uri->port);
+        $this->assertEquals(Scheme::HTTPS, $uri->scheme);
+        $this->assertEquals(new Host('ysocode.com'), $uri->host);
+        $this->assertEquals(new Port(8080), $uri->port);
+        $this->assertEquals(new Path('/path/to/resource'), $uri->path);
+        $this->assertEquals(new Query('query=param'), $uri->query);
+        $this->assertNull($uri->fragment);
     }
 }

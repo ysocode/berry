@@ -79,4 +79,19 @@ final class UriTest extends TestCase
         $newUri = $newUri->withFragment(new Fragment('newfrag'));
         $this->assertEquals('http://newuser:newpass@example.org:1234/newpath?newquery=2#newfrag', (string) $newUri);
     }
+
+    public function test_it_should_use_default_port_from_scheme_when_no_port_is_provided(): void
+    {
+        $httpsUri = new Uri(
+            Scheme::HTTPS,
+            new Host('example.com'),
+        );
+        $this->assertEquals(new Port(443), $httpsUri->port);
+
+        $httpUri = new Uri(
+            Scheme::HTTP,
+            new Host('example.com'),
+        );
+        $this->assertEquals(new Port(80), $httpUri->port);
+    }
 }
