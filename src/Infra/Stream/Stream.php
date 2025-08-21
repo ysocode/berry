@@ -50,12 +50,9 @@ final class Stream implements Stringable
 
         $this->isSeekable = $meta['seekable'];
 
-        $stat = fstat($this->resource->value);
-        if (! is_array($stat)) {
-            throw new RuntimeException('Unable to retrieve stream statistics.');
-        }
+        $stat = fstat($this->resource->value) ?: [];
 
-        $this->size = $stat['size'];
+        $this->size = $stat['size'] ?? null;
     }
 
     public function close(): void
