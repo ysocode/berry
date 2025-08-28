@@ -17,81 +17,84 @@ use YSOCode\Berry\Infra\Stream\Stream;
 
 final class UploadedFileTest extends TestCase
 {
-    public function test_it_should_create_a_valid_uploaded_file(): void
+    private function createTempFile(): string
     {
         $tempDir = sys_get_temp_dir();
-        $testFile = 'test.txt';
 
-        $testFilePath = $tempDir.'/'.$testFile;
+        return tempnam($tempDir, 'test_');
+    }
 
-        touch($testFilePath);
+    public function test_it_should_create_a_valid_uploaded_file(): void
+    {
+        $tempFilePath = $this->createTempFile();
 
-        $resource = fopen($testFilePath, 'w+b');
-        if (! is_resource($resource)) {
-            throw new RuntimeException('Failed to open test stream.');
+        try {
+            $resource = fopen($tempFilePath, 'w+b');
+            if (! is_resource($resource)) {
+                throw new RuntimeException('Failed to open test stream.');
+            }
+
+            $stream = new Stream(new StreamResource($resource));
+            $stream->write('Hello, world!');
+
+            $uploadedFile = new UploadedFile(
+                $stream,
+                UploadStatus::OK,
+                new FileName('test.txt'),
+                new MimeType('text/plain'),
+            );
+
+            $this->assertEquals('Hello, world!', (string) $uploadedFile->stream);
+            $this->assertEquals(UploadStatus::OK, $uploadedFile->status);
+            $this->assertEquals(new FileName('test.txt'), $uploadedFile->name);
+            $this->assertEquals(new MimeType('text/plain'), $uploadedFile->type);
+        } finally {
+            unlink($tempFilePath);
         }
-
-        $stream = new Stream(new StreamResource($resource));
-        $stream->write('Hello, world!');
-
-        $uploadedFile = new UploadedFile(
-            $stream,
-            UploadStatus::OK,
-            new FileName('test.txt'),
-            new MimeType('text/plain'),
-        );
-
-        $this->assertEquals('Hello, world!', (string) $uploadedFile->stream);
-        $this->assertEquals(UploadStatus::OK, $uploadedFile->status);
-        $this->assertEquals(new FileName('test.txt'), $uploadedFile->name);
-        $this->assertEquals(new MimeType('text/plain'), $uploadedFile->type);
-
-        unlink($testFilePath);
     }
 
     public function test_it_should_move_an_uploaded_file(): void
     {
+        $tempFilePath = $this->createTempFile();
+
         $tempDir = sys_get_temp_dir();
-        $testFile = 'test.txt';
-        $copyTestFile = 'copy-test.txt';
+        $targetFile = 'copy-test.txt';
+        $targetFilePath = $tempDir.'/'.$targetFile;
 
-        $testFilePath = $tempDir.'/'.$testFile;
-        $copyTestFilePath = $tempDir.'/'.$copyTestFile;
+        try {
+            $resource = fopen($tempFilePath, 'w+b');
+            if (! is_resource($resource)) {
+                throw new RuntimeException('Failed to open test stream.');
+            }
 
-        touch($testFilePath);
+            $stream = new Stream(new StreamResource($resource));
+            $stream->write('Hello, world!');
 
-        $resource = fopen($testFilePath, 'w+b');
-        if (! is_resource($resource)) {
-            throw new RuntimeException('Failed to open test stream.');
+            $uploadedFile = new UploadedFile(
+                $stream,
+                UploadStatus::OK,
+                new FileName('test.txt'),
+                new MimeType('text/plain'),
+            );
+
+            $uploadedFile->moveTo(
+                new TargetFilePath(
+                    new DirPath($tempDir),
+                    new FileName($targetFile)
+                )
+            );
+
+            $resource = fopen($targetFilePath, 'r+b');
+            if (! is_resource($resource)) {
+                throw new RuntimeException('Failed to open copy stream.');
+            }
+
+            $copyStream = new Stream(new StreamResource($resource));
+
+            $this->assertEquals('Hello, world!', $copyStream->readAll());
+        } finally {
+            unlink($tempFilePath);
+            unlink($targetFilePath);
         }
-
-        $stream = new Stream(new StreamResource($resource));
-        $stream->write('Hello, world!');
-
-        $uploadedFile = new UploadedFile(
-            $stream,
-            UploadStatus::OK,
-            new FileName('test.txt'),
-            new MimeType('text/plain'),
-        );
-
-        $uploadedFile->moveTo(
-            new TargetFilePath(
-                new DirPath($tempDir),
-                new FileName($copyTestFile)
-            )
-        );
-
-        $resource = fopen($copyTestFilePath, 'r+b');
-        if (! is_resource($resource)) {
-            throw new RuntimeException('Failed to open copy stream.');
-        }
-
-        $copyStream = new Stream(new StreamResource($resource));
-
-        $this->assertEquals('Hello, world!', $copyStream->readAll());
-
-        unlink($testFilePath);
-        unlink($copyTestFilePath);
     }
 }

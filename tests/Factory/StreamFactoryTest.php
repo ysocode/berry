@@ -15,11 +15,8 @@ final class StreamFactoryTest extends TestCase
     private function createTempFile(): string
     {
         $tempDir = sys_get_temp_dir();
-        $tempFilePath = $tempDir.'/test.txt';
 
-        touch($tempFilePath);
-
-        return $tempFilePath;
+        return tempnam($tempDir, 'test_');
     }
 
     public function test_it_should_create_a_stream_from_string(): void
