@@ -17,24 +17,42 @@ use YSOCode\Berry\Infra\Stream\Stream;
 
 final class UploadedFileTest extends TestCase
 {
-    private function createTempFile(): string
+    /**
+     * @return array{Stream, string}
+     */
+    private function createStream(): array
     {
         $tempDir = sys_get_temp_dir();
+        $tempFilePath = tempnam($tempDir, 'test_');
 
-        return tempnam($tempDir, 'test_');
+        $resource = fopen($tempFilePath, 'w+b');
+        if (! is_resource($resource)) {
+            throw new RuntimeException('Failed to open test stream.');
+        }
+
+        return [
+            new Stream(new StreamResource($resource)),
+            $tempFilePath,
+        ];
+    }
+
+    /**
+     * @return array{string, string, string}
+     */
+    private function getTargetFilePathParts(): array
+    {
+        $tempDir = sys_get_temp_dir();
+        $targetFile = 'copy-test.txt';
+        $targetFilePath = $tempDir.'/'.$targetFile;
+
+        return [$tempDir, $targetFile, $targetFilePath];
     }
 
     public function test_it_should_create_a_valid_uploaded_file(): void
     {
-        $tempFilePath = $this->createTempFile();
+        [$stream, $tempFilePath] = $this->createStream();
 
         try {
-            $resource = fopen($tempFilePath, 'w+b');
-            if (! is_resource($resource)) {
-                throw new RuntimeException('Failed to open test stream.');
-            }
-
-            $stream = new Stream(new StreamResource($resource));
             $stream->write('Hello, world!');
 
             $uploadedFile = new UploadedFile(
@@ -55,19 +73,11 @@ final class UploadedFileTest extends TestCase
 
     public function test_it_should_move_an_uploaded_file(): void
     {
-        $tempFilePath = $this->createTempFile();
+        [$stream, $tempFilePath] = $this->createStream();
 
-        $tempDir = sys_get_temp_dir();
-        $targetFile = 'copy-test.txt';
-        $targetFilePath = $tempDir.'/'.$targetFile;
+        [$tempDir, $targetFile, $targetFilePath] = $this->getTargetFilePathParts();
 
         try {
-            $resource = fopen($tempFilePath, 'w+b');
-            if (! is_resource($resource)) {
-                throw new RuntimeException('Failed to open test stream.');
-            }
-
-            $stream = new Stream(new StreamResource($resource));
             $stream->write('Hello, world!');
 
             $uploadedFile = new UploadedFile(
@@ -95,6 +105,129 @@ final class UploadedFileTest extends TestCase
         } finally {
             unlink($tempFilePath);
             unlink($targetFilePath);
+        }
+    }
+
+    public function test_it_should_not_move_an_uploaded_file_when_already_moved(): void
+    {
+        [$stream, $tempFilePath] = $this->createStream();
+
+        [$tempDir, $targetFile, $targetFilePath] = $this->getTargetFilePathParts();
+
+        try {
+            $stream->write('Hello, world!');
+
+            $uploadedFile = new UploadedFile(
+                $stream,
+                UploadStatus::OK,
+                new FileName('test.txt'),
+                new MimeType('text/plain'),
+            );
+
+            $uploadedFile->moveTo(
+                new TargetFilePath(
+                    new DirPath($tempDir),
+                    new FileName($targetFile)
+                )
+            );
+
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('Uploaded file has already been moved.');
+
+            $uploadedFile->moveTo(
+                new TargetFilePath(
+                    new DirPath($tempDir),
+                    new FileName('new-copy-test.txt')
+                )
+            );
+        } finally {
+            unlink($tempFilePath);
+            unlink($targetFilePath);
+        }
+    }
+
+    public function test_it_should_not_move_an_uploaded_file_when_have_an_error(): void
+    {
+        [$tempDir, $targetFile] = $this->getTargetFilePathParts();
+
+        $uploadStatus = UploadStatus::NO_FILE;
+
+        $uploadedFile = new UploadedFile(
+            null,
+            $uploadStatus,
+            null,
+            null,
+        );
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage($uploadStatus->getMessage());
+
+        $uploadedFile->moveTo(
+            new TargetFilePath(
+                new DirPath($tempDir),
+                new FileName($targetFile)
+            )
+        );
+    }
+
+    public function test_it_should_not_move_an_uploaded_file_when_stream_is_not_available(): void
+    {
+        [$stream, $tempFilePath] = $this->createStream();
+
+        [$tempDir, $targetFile] = $this->getTargetFilePathParts();
+
+        try {
+            $stream->close();
+
+            $uploadedFile = new UploadedFile(
+                $stream,
+                UploadStatus::OK,
+                new FileName('test.txt'),
+                new MimeType('text/plain'),
+            );
+
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('No stream available for uploaded file.');
+
+            $uploadedFile->moveTo(
+                new TargetFilePath(
+                    new DirPath($tempDir),
+                    new FileName($targetFile)
+                )
+            );
+        } finally {
+            unlink($tempFilePath);
+        }
+    }
+
+    public function test_it_should_not_move_an_uploaded_file_when_falsely_marked_as_from_web_server(): void
+    {
+        [$stream, $tempFilePath] = $this->createStream();
+
+        [$tempDir, $targetFile] = $this->getTargetFilePathParts();
+
+        try {
+            $stream->write('Hello, world!');
+
+            $uploadedFile = new UploadedFile(
+                $stream,
+                UploadStatus::OK,
+                new FileName('test.txt'),
+                new MimeType('text/plain'),
+                true
+            );
+
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('Invalid uploaded file.');
+
+            $uploadedFile->moveTo(
+                new TargetFilePath(
+                    new DirPath($tempDir),
+                    new FileName($targetFile)
+                )
+            );
+        } finally {
+            unlink($tempFilePath);
         }
     }
 }
