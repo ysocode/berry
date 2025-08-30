@@ -126,6 +126,7 @@ final class RequestTest extends TestCase
         $newRequest = $request->withoutHeader(new HeaderName('Content-Type'));
 
         $this->assertNotSame($request, $newRequest);
+        $this->assertTrue($request->hasHeader(new HeaderName('Content-Type')));
         $this->assertFalse($newRequest->hasHeader(new HeaderName('Content-Type')));
     }
 

@@ -112,6 +112,7 @@ final class ResponseTest extends TestCase
         $newResponse = $response->withoutHeader(new HeaderName('Content-Type'));
 
         $this->assertNotSame($response, $newResponse);
+        $this->assertTrue($response->hasHeader(new HeaderName('Content-Type')));
         $this->assertFalse($newResponse->hasHeader(new HeaderName('Content-Type')));
     }
 
