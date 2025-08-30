@@ -111,7 +111,7 @@ final class ResponseEmitterTest extends TestCase
     }
 
     #[DataProvider('invalidHeaderEmitters')]
-    public function test_it_should_not_create_a_response_emitter_with_a_non_valid_header_emitter(
+    public function test_it_should_not_create_a_response_emitter(
         Closure $headerEmitter,
         string $expectedMessage
     ): void {
