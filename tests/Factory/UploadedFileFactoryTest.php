@@ -23,21 +23,25 @@ final class UploadedFileFactoryTest extends TestCase
     {
         $tempFilePath = $this->createTempFile();
 
-        $spec = [
-            'name' => 'doc.pdf',
-            'full_path' => 'doc.pdf',
-            'type' => 'application/pdf',
-            'tmp_name' => $tempFilePath,
-            'error' => 0,
-            'size' => 85402,
-        ];
+        try {
+            $spec = [
+                'name' => 'doc.pdf',
+                'full_path' => 'doc.pdf',
+                'type' => 'application/pdf',
+                'tmp_name' => $tempFilePath,
+                'error' => 0,
+                'size' => 85402,
+            ];
 
-        $uploadedFile = new UploadedFileFactory()->createFromSpec($spec);
+            $uploadedFile = new UploadedFileFactory()->createFromSpec($spec);
 
-        $this->assertEquals(UploadStatus::OK, $uploadedFile->status);
-        $this->assertEquals('doc.pdf', (string) $uploadedFile->name);
-        $this->assertEquals('application/pdf', (string) $uploadedFile->type);
-        $this->assertTrue($uploadedFile->fromWebServer);
+            $this->assertEquals(UploadStatus::OK, $uploadedFile->status);
+            $this->assertEquals('doc.pdf', (string) $uploadedFile->name);
+            $this->assertEquals('application/pdf', (string) $uploadedFile->type);
+            $this->assertTrue($uploadedFile->fromWebServer);
+        } finally {
+            unlink($tempFilePath);
+        }
     }
 
     public function test_it_should_create_uploaded_file_from_simple_global_files(): void
