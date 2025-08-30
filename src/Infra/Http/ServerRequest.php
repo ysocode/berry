@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Infra\Http;
 
+use YSOCode\Berry\Domain\ValueObjects\Attribute;
+use YSOCode\Berry\Domain\ValueObjects\AttributeName;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpVersion;
@@ -16,13 +18,18 @@ final class ServerRequest
     use RequestTrait;
 
     /**
+     * @var array<string, Attribute>
+     */
+    public private(set) array $attributes = [];
+
+    /**
      * @param  array<Header>  $headers
      * @param  array<string, mixed>  $serverParams
      * @param  array<string, string>  $cookieParams
      * @param  array<string, string|array<int|string, mixed>>  $queryParams
      * @param  array<string, string|array<int|string, mixed>>  $parsedBody
      * @param  array<string, UploadedFile|array<int|string, mixed>>  $uploadedFiles
-     * @param  array<string, mixed>  $attributes
+     * @param  array<Attribute>  $attributes
      */
     public function __construct(
         HttpMethod $method,
@@ -34,7 +41,7 @@ final class ServerRequest
         private(set) array $queryParams = [],
         private(set) array $parsedBody = [],
         private(set) array $uploadedFiles = [],
-        private(set) array $attributes = [],
+        array $attributes = [],
         HttpVersion $version = new HttpVersion('1.1'),
     ) {
         $this->method = $method;
@@ -47,7 +54,19 @@ final class ServerRequest
 
         $this->setHeaders($headers);
 
+        $this->setAttributes($attributes);
+
         $this->version = $version;
+    }
+
+    /**
+     * @param  array<Attribute>  $attributes
+     */
+    private function setAttributes(array $attributes): void
+    {
+        foreach ($attributes as $attribute) {
+            $this->attributes[(string) $attribute->name] = $attribute;
+        }
     }
 
     /**
@@ -94,23 +113,23 @@ final class ServerRequest
         return $new;
     }
 
-    public function hasAttribute(string $name): bool
+    public function hasAttribute(AttributeName $name): bool
     {
-        return isset($this->attributes[$name]);
+        return isset($this->attributes[(string) $name]);
     }
 
-    public function withAttribute(string $name, mixed $value): self
+    public function withAttribute(Attribute $attribute): self
     {
         $new = clone $this;
-        $new->attributes[$name] = $value;
+        $new->attributes[(string) $attribute->name] = $attribute;
 
         return $new;
     }
 
-    public function withoutAttribute(string $name): self
+    public function withoutAttribute(AttributeName $name): self
     {
         $new = clone $this;
-        unset($new->attributes[$name]);
+        unset($new->attributes[(string) $name]);
 
         return $new;
     }

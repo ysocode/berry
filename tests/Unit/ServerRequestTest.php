@@ -6,6 +6,8 @@ namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use YSOCode\Berry\Domain\ValueObjects\Attribute;
+use YSOCode\Berry\Domain\ValueObjects\AttributeName;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
@@ -37,7 +39,7 @@ final class ServerRequestTest extends TestCase
             ],
             $body,
             attributes: [
-                'generic-attribute' => 'Berry is the best.',
+                new Attribute(new AttributeName('generic-attribute'), 'Berry is the best.'),
             ]
         );
     }
@@ -244,6 +246,14 @@ final class ServerRequestTest extends TestCase
         }
     }
 
+    public function test_it_should_check_attribute_existence(): void
+    {
+        $serverRequest = $this->createServerRequest();
+
+        $this->assertTrue($serverRequest->hasAttribute(new AttributeName('generic-attribute')));
+        $this->assertFalse($serverRequest->hasAttribute(new AttributeName('missing-attribute')));
+    }
+
     public function test_it_should_return_cloned_server_request_with_updated_or_new_attribute(): void
     {
         $serverRequest = $this->createServerRequest();
@@ -259,19 +269,24 @@ final class ServerRequestTest extends TestCase
             ],
         ];
 
-        $newServerRequest = $serverRequest->withAttribute('users', $users);
+        $newServerRequest = $serverRequest->withAttribute(
+            new Attribute(new AttributeName('users'), $users),
+        );
+
+        $usersAttribute = $newServerRequest->attributes['users'];
 
         $this->assertNotSame($serverRequest, $newServerRequest);
-        $this->assertEquals($users, $newServerRequest->attributes['users']);
+        $this->assertInstanceOf(Attribute::class, $usersAttribute);
+        $this->assertEquals($users, $usersAttribute->value);
     }
 
     public function test_it_should_return_cloned_server_request_without_an_indicated_attribute(): void
     {
         $serverRequest = $this->createServerRequest();
-        $newServerRequest = $serverRequest->withoutAttribute('generic-attribute');
+        $newServerRequest = $serverRequest->withoutAttribute(new AttributeName('generic-attribute'));
 
         $this->assertNotSame($serverRequest, $newServerRequest);
-        $this->assertTrue($serverRequest->hasAttribute('generic-attribute'));
-        $this->assertFalse($newServerRequest->hasAttribute('generic-attribute'));
+        $this->assertTrue($serverRequest->hasAttribute(new AttributeName('generic-attribute')));
+        $this->assertFalse($newServerRequest->hasAttribute(new AttributeName('generic-attribute')));
     }
 }
