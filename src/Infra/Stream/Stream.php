@@ -15,7 +15,8 @@ final class Stream implements Stringable
 {
     public private(set) ?StreamResource $resource;
 
-    public private(set) ?string $uri;
+    /** @var array{stream_type: string, wrapper_type: string, uri: string}|null */
+    public private(set) ?array $meta;
 
     public private(set) bool $isReadable;
 
@@ -41,7 +42,11 @@ final class Stream implements Stringable
 
         $meta = stream_get_meta_data($this->resource->value);
 
-        $this->uri = $meta['uri'];
+        $this->meta = [
+            'stream_type' => $meta['stream_type'],
+            'wrapper_type' => $meta['wrapper_type'],
+            'uri' => $meta['uri'],
+        ];
 
         $streamMode = StreamMode::from($meta['mode']);
 
@@ -73,7 +78,7 @@ final class Stream implements Stringable
         $currentResource = $this->resource;
 
         $this->resource = null;
-        $this->uri = null;
+        $this->meta = null;
         $this->isReadable = false;
         $this->isWritable = false;
         $this->isSeekable = false;

@@ -37,19 +37,20 @@ final class UploadedFile
             throw new RuntimeException('No stream available for uploaded file.');
         }
 
-        if (! is_string($this->stream->uri)) {
-            throw new RuntimeException('Stream URI must be a string.');
+        $uri = $this->stream->meta['uri'] ?? null;
+        if (! is_string($uri)) {
+            throw new RuntimeException('Stream URI is missing or invalid.');
         }
 
         try {
             if ($this->fromWebServer) {
-                if (! is_uploaded_file($this->stream->uri)) {
+                if (! is_uploaded_file($uri)) {
                     throw new RuntimeException('Invalid uploaded file.');
                 }
-                if (! move_uploaded_file($this->stream->uri, (string) $targetFilePath)) {
+                if (! move_uploaded_file($uri, (string) $targetFilePath)) {
                     throw new RuntimeException('Failed to move uploaded file.');
                 }
-            } elseif (! copy($this->stream->uri, (string) $targetFilePath)) {
+            } elseif (! copy($uri, (string) $targetFilePath)) {
                 throw new RuntimeException('Failed to copy uploaded file.');
             }
 
