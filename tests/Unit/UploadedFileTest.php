@@ -74,7 +74,6 @@ final class UploadedFileTest extends TestCase
     public function test_it_should_move_an_uploaded_file(): void
     {
         [$stream, $tempFilePath] = $this->createStream();
-
         [$tempDir, $targetFile, $targetFilePath] = $this->getTargetFilePathParts();
 
         try {
@@ -111,7 +110,6 @@ final class UploadedFileTest extends TestCase
     public function test_it_should_not_move_an_uploaded_file_when_already_moved(): void
     {
         [$stream, $tempFilePath] = $this->createStream();
-
         [$tempDir, $targetFile, $targetFilePath] = $this->getTargetFilePathParts();
 
         try {
@@ -146,7 +144,7 @@ final class UploadedFileTest extends TestCase
         }
     }
 
-    public function test_it_should_not_move_an_uploaded_file_when_have_an_error(): void
+    public function test_it_should_not_move_an_uploaded_file_when_error_exists(): void
     {
         [$tempDir, $targetFile] = $this->getTargetFilePathParts();
 
@@ -173,7 +171,6 @@ final class UploadedFileTest extends TestCase
     public function test_it_should_not_move_an_uploaded_file_when_stream_is_not_available(): void
     {
         [$stream, $tempFilePath] = $this->createStream();
-
         [$tempDir, $targetFile] = $this->getTargetFilePathParts();
 
         try {
@@ -203,7 +200,6 @@ final class UploadedFileTest extends TestCase
     public function test_it_should_not_move_an_uploaded_file_when_falsely_marked_as_from_web_server(): void
     {
         [$stream, $tempFilePath] = $this->createStream();
-
         [$tempDir, $targetFile] = $this->getTargetFilePathParts();
 
         try {
