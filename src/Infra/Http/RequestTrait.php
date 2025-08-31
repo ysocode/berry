@@ -7,6 +7,7 @@ namespace YSOCode\Berry\Infra\Http;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Query;
+use YSOCode\Berry\Domain\ValueObjects\RequestTarget;
 
 trait RequestTrait
 {
@@ -14,7 +15,7 @@ trait RequestTrait
 
     public private(set) Uri $uri;
 
-    public private(set) string $target;
+    public private(set) RequestTarget $target;
 
     private function setTarget(Uri $uri): void
     {
@@ -28,7 +29,7 @@ trait RequestTrait
             $target .= '?'.$uri->query;
         }
 
-        $this->target = $target;
+        $this->target = new RequestTarget($target);
     }
 
     public function withMethod(HttpMethod $method): self
@@ -44,12 +45,10 @@ trait RequestTrait
         $new = clone $this;
         $new->uri = $uri;
 
-        $new->setTarget($uri);
-
         return $new;
     }
 
-    public function withTarget(string $target): self
+    public function withTarget(RequestTarget $target): self
     {
         $new = clone $this;
         $new->target = $target;

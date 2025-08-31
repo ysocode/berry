@@ -10,6 +10,7 @@ use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpVersion;
+use YSOCode\Berry\Domain\ValueObjects\RequestTarget;
 use YSOCode\Berry\Infra\Http\Request;
 use YSOCode\Berry\Infra\Http\UriFactory;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
@@ -66,13 +67,12 @@ final class RequestTest extends TestCase
 
         $this->assertNotSame($request, $newRequest);
         $this->assertEquals('https://example.com/path/to/resource?query=param', (string) $newRequest->uri);
-        $this->assertEquals('/path/to/resource?query=param', $newRequest->target);
     }
 
     public function test_it_should_return_cloned_request_with_updated_target(): void
     {
         $request = $this->createRequest();
-        $newRequest = $request->withTarget('/path/to/resource?query=param');
+        $newRequest = $request->withTarget(new RequestTarget('/path/to/resource?query=param'));
 
         $this->assertNotSame($request, $newRequest);
         $this->assertEquals('/path/to/resource?query=param', $newRequest->target);

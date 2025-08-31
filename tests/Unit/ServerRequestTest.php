@@ -12,6 +12,7 @@ use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpVersion;
+use YSOCode\Berry\Domain\ValueObjects\RequestTarget;
 use YSOCode\Berry\Domain\ValueObjects\UploadStatus;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\UploadedFile;
@@ -74,13 +75,12 @@ final class ServerRequestTest extends TestCase
 
         $this->assertNotSame($serverRequest, $newServerRequest);
         $this->assertEquals('https://example.com/path/to/resource?query=param', (string) $newServerRequest->uri);
-        $this->assertEquals('/path/to/resource?query=param', $newServerRequest->target);
     }
 
     public function test_it_should_return_cloned_server_request_with_updated_target(): void
     {
         $serverRequest = $this->createServerRequest();
-        $newServerRequest = $serverRequest->withTarget('/path/to/resource?query=param');
+        $newServerRequest = $serverRequest->withTarget(new RequestTarget('/path/to/resource?query=param'));
 
         $this->assertNotSame($serverRequest, $newServerRequest);
         $this->assertEquals('/path/to/resource?query=param', $newServerRequest->target);
