@@ -29,47 +29,47 @@ class Router
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function get(Path $path, RequestHandlerInterface|Closure $handler): void
+    public function get(Path $path, RequestHandlerInterface|Closure $handler): Route
     {
-        $this->addRoute(HttpMethod::GET, $path, $handler);
+        return $this->addRoute(HttpMethod::GET, $path, $handler);
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function put(Path $path, RequestHandlerInterface|Closure $handler): void
+    public function put(Path $path, RequestHandlerInterface|Closure $handler): Route
     {
-        $this->addRoute(HttpMethod::PUT, $path, $handler);
+        return $this->addRoute(HttpMethod::PUT, $path, $handler);
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function post(Path $path, RequestHandlerInterface|Closure $handler): void
+    public function post(Path $path, RequestHandlerInterface|Closure $handler): Route
     {
-        $this->addRoute(HttpMethod::POST, $path, $handler);
+        return $this->addRoute(HttpMethod::POST, $path, $handler);
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function delete(Path $path, RequestHandlerInterface|Closure $handler): void
+    public function delete(Path $path, RequestHandlerInterface|Closure $handler): Route
     {
-        $this->addRoute(HttpMethod::DELETE, $path, $handler);
+        return $this->addRoute(HttpMethod::DELETE, $path, $handler);
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function patch(Path $path, RequestHandlerInterface|Closure $handler): void
+    public function patch(Path $path, RequestHandlerInterface|Closure $handler): Route
     {
-        $this->addRoute(HttpMethod::PATCH, $path, $handler);
+        return $this->addRoute(HttpMethod::PATCH, $path, $handler);
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    private function addRoute(HttpMethod $method, Path $path, RequestHandlerInterface|Closure $handler): void
+    private function addRoute(HttpMethod $method, Path $path, RequestHandlerInterface|Closure $handler): Route
     {
         if (array_key_exists((string) $path, $this->routes[$method->value] ?? [])) {
             throw new RuntimeException(
@@ -82,6 +82,8 @@ class Router
         $this->routes[$method->value][(string) $path] = $route;
 
         $this->registeredPaths[(string) $path] = true;
+
+        return $route;
     }
 
     public function getMatchedRoute(ServerRequest $request): Route|Error

@@ -10,6 +10,7 @@ use YSOCode\Berry\Application\Router;
 use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
+use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -24,7 +25,7 @@ class RouterTest extends TestCase
         $router->get(
             new Path('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-        );
+        )->setName(new Name('home'));
 
         $reflection = new ReflectionObject($router);
         $routesProperty = $reflection->getProperty('routes');
@@ -40,6 +41,7 @@ class RouterTest extends TestCase
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals('GET', $route->method->value);
         $this->assertEquals('/', (string) $route->path);
+        $this->assertEquals('home', (string) $route->name);
     }
 
     public function test_it_should_register_a_put_route(): void
