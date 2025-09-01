@@ -73,7 +73,7 @@ class Router
     {
         if (array_key_exists((string) $path, $this->routes[$method->value] ?? [])) {
             throw new RuntimeException(
-                sprintf('Route %s %s already exists.', $method->value, (string) $path)
+                sprintf('Route %s %s already exists.', $method->value, $path)
             );
         }
 
