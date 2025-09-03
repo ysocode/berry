@@ -40,6 +40,11 @@ final readonly class Path implements Stringable
         return true;
     }
 
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
+    }
+
     public function __toString(): string
     {
         return $this->value;

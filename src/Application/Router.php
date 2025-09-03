@@ -5,102 +5,99 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Application;
 
 use Closure;
-use RuntimeException;
 use YSOCode\Berry\Domain\Entities\Route;
+use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
+use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
-class Router
+final readonly class Router
 {
-    /**
-     * @var array<string, array<string, Route>>
-     */
-    private array $routes = [];
+    private RouteRegistry $routeRegistry;
 
-    /**
-     * @var array<string, true>
-     */
-    private array $registeredPaths = [];
-
-    /**
-     * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
-     */
-    public function get(Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function __construct()
     {
-        return $this->addRoute(HttpMethod::GET, $path, $handler);
+        $this->routeRegistry = new RouteRegistry;
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function put(Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function get(Path $path, RequestHandlerInterface|Closure $handler): self
     {
-        return $this->addRoute(HttpMethod::PUT, $path, $handler);
+        $this->routeRegistry->addRoute(HttpMethod::GET, $path, $handler);
+
+        return $this;
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function post(Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function put(Path $path, RequestHandlerInterface|Closure $handler): self
     {
-        return $this->addRoute(HttpMethod::POST, $path, $handler);
+        $this->routeRegistry->addRoute(HttpMethod::PUT, $path, $handler);
+
+        return $this;
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function delete(Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function post(Path $path, RequestHandlerInterface|Closure $handler): self
     {
-        return $this->addRoute(HttpMethod::DELETE, $path, $handler);
+        $this->routeRegistry->addRoute(HttpMethod::POST, $path, $handler);
+
+        return $this;
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function patch(Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function delete(Path $path, RequestHandlerInterface|Closure $handler): self
     {
-        return $this->addRoute(HttpMethod::PATCH, $path, $handler);
+        $this->routeRegistry->addRoute(HttpMethod::DELETE, $path, $handler);
+
+        return $this;
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    private function addRoute(HttpMethod $method, Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function patch(Path $path, RequestHandlerInterface|Closure $handler): self
     {
-        if (array_key_exists((string) $path, $this->routes[$method->value] ?? [])) {
-            throw new RuntimeException(
-                sprintf('Route %s %s already exists.', $method->value, $path)
-            );
-        }
+        $this->routeRegistry->addRoute(HttpMethod::PATCH, $path, $handler);
 
-        $route = new Route($method, $path, $handler);
-
-        $this->routes[$method->value][(string) $path] = $route;
-
-        $this->registeredPaths[(string) $path] = true;
-
-        return $route;
+        return $this;
     }
 
     public function getMatchedRoute(ServerRequest $request): Route|Error
     {
         $path = $request->uri->path ?? new Path('/');
 
-        $route = $this->routes[$request->method->value][(string) $path] ?? null;
+        $route = $this->routeRegistry->getRouteByMethodAndPath(
+            $request->method,
+            $path,
+        );
 
         if ($route instanceof Route) {
             return $route;
         }
 
-        $pathExists = $this->registeredPaths[(string) $path] ?? false;
-        if ($pathExists) {
+        if ($this->routeRegistry->hasRouteByPath($path)) {
             return new Error('Method not allowed.');
         }
 
         return new Error('Route not found.');
+    }
+
+    public function withName(Name $name): self
+    {
+        $this->routeRegistry->withName($name);
+
+        return $this;
     }
 }
