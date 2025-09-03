@@ -11,6 +11,7 @@ use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -97,6 +98,16 @@ final readonly class Router
     public function withName(Name $name): self
     {
         $this->routeRegistry->withName($name);
+
+        return $this;
+    }
+
+    /**
+     * @param  MiddlewareInterface|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
+     */
+    public function addMiddleware(MiddlewareInterface|Closure $middleware): self
+    {
+        $this->routeRegistry->addMiddleware($middleware);
 
         return $this;
     }

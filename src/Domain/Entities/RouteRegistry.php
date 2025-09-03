@@ -9,6 +9,7 @@ use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -89,5 +90,17 @@ final class RouteRegistry
     public function hasRouteByPath(Path $path): bool
     {
         return array_any($this->routeCollections, fn ($routeCollection): bool => $routeCollection->hasRouteByPath($path));
+    }
+
+    /**
+     * @param  MiddlewareInterface|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
+     */
+    public function addMiddleware(MiddlewareInterface|Closure $middleware): void
+    {
+        if (! $this->lastUsedMethod instanceof HttpMethod) {
+            throw new RuntimeException('Define a route before calling withName().');
+        }
+
+        $this->routeCollections[$this->lastUsedMethod->value]->addMiddleware($middleware);
     }
 }

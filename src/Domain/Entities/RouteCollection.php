@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Entities;
 
+use Closure;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Infra\Http\MiddlewareInterface;
+use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
+use YSOCode\Berry\Infra\Http\Response;
+use YSOCode\Berry\Infra\Http\ServerRequest;
 
 final class RouteCollection
 {
@@ -76,7 +81,7 @@ final class RouteCollection
         return $this->routes[$routeIndex];
     }
 
-    public function withName(Name $name): self
+    public function withName(Name $name): void
     {
         if ($this->routes === []) {
             throw new RuntimeException('No route to name.');
@@ -95,7 +100,20 @@ final class RouteCollection
 
         $this->routes[$lastIndex] = $route->withName($name);
         $this->routeIndexesByName[(string) $name] = $lastIndex;
+    }
 
-        return $this;
+    /**
+     * @param  MiddlewareInterface|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
+     */
+    public function addMiddleware(MiddlewareInterface|Closure $middleware): void
+    {
+        if ($this->routes === []) {
+            throw new RuntimeException('No route to name.');
+        }
+
+        $lastIndex = array_key_last($this->routes);
+        $route = $this->routes[$lastIndex];
+
+        $route->addMiddleware($middleware);
     }
 }

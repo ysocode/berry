@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use Closure;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use YSOCode\Berry\Application\Router;
@@ -13,6 +14,7 @@ use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
 use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\UriFactory;
@@ -174,5 +176,33 @@ class RouterTest extends TestCase
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals('GET', $route->method->value);
         $this->assertEquals('/', (string) $route->path);
+    }
+
+    public function test_it_should_add_middleware_to_a_route(): void
+    {
+        $router = new Router;
+
+        $router->get(
+            new Path('/dashboard'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        )
+            ->withName(new Name('dashboard'))
+            ->addMiddleware(
+                fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
+            );
+
+        $reflection = new ReflectionObject($router);
+        $property = $reflection->getProperty('routeRegistry');
+
+        /** @var RouteRegistry $routeRegistry */
+        $routeRegistry = $property->getValue($router);
+
+        $route = $routeRegistry->getRouteByName(new Name('dashboard'));
+
+        $this->assertInstanceOf(Route::class, $route);
+
+        $middleware = $route->middlewares[0];
+
+        $this->assertInstanceOf(Closure::class, $middleware);
     }
 }
