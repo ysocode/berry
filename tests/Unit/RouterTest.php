@@ -7,6 +7,7 @@ namespace Tests\Unit;
 use Closure;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
+use RuntimeException;
 use YSOCode\Berry\Application\Router;
 use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
@@ -28,7 +29,7 @@ class RouterTest extends TestCase
         $router->get(
             new Path('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-        )->withName(new Name('home'));
+        )->setName(new Name('home'));
 
         $reflection = new ReflectionObject($router);
         $property = $reflection->getProperty('routeRegistry');
@@ -50,7 +51,7 @@ class RouterTest extends TestCase
         $router->put(
             new Path('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-        )->withName(new Name('users.alter'));
+        )->setName(new Name('users.update.put'));
 
         $reflection = new ReflectionObject($router);
         $property = $reflection->getProperty('routeRegistry');
@@ -58,7 +59,7 @@ class RouterTest extends TestCase
         /** @var RouteRegistry $routeRegistry */
         $routeRegistry = $property->getValue($router);
 
-        $route = $routeRegistry->getRouteByName(new Name('users.alter'));
+        $route = $routeRegistry->getRouteByName(new Name('users.update.put'));
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals('PUT', $route->method->value);
@@ -72,7 +73,7 @@ class RouterTest extends TestCase
         $router->post(
             new Path('/sign-up'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::CREATED)
-        )->withName(new Name('signUp'));
+        )->setName(new Name('signUp'));
 
         $reflection = new ReflectionObject($router);
         $property = $reflection->getProperty('routeRegistry');
@@ -94,7 +95,7 @@ class RouterTest extends TestCase
         $router->delete(
             new Path('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-        )->withName(new Name('users.destroy'));
+        )->setName(new Name('users.destroy'));
 
         $reflection = new ReflectionObject($router);
         $property = $reflection->getProperty('routeRegistry');
@@ -116,7 +117,7 @@ class RouterTest extends TestCase
         $router->patch(
             new Path('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-        )->withName(new Name('users.update'));
+        )->setName(new Name('users.update.patch'));
 
         $reflection = new ReflectionObject($router);
         $property = $reflection->getProperty('routeRegistry');
@@ -124,7 +125,7 @@ class RouterTest extends TestCase
         /** @var RouteRegistry $routeRegistry */
         $routeRegistry = $property->getValue($router);
 
-        $route = $routeRegistry->getRouteByName(new Name('users.update'));
+        $route = $routeRegistry->getRouteByName(new Name('users.update.patch'));
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals('PATCH', $route->method->value);
@@ -138,12 +139,12 @@ class RouterTest extends TestCase
         $router->get(
             new Path('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-        )->withName(new Name('home'));
+        )->setName(new Name('home'));
 
         $router->put(
             new Path('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-        )->withName(new Name('users.alter'));
+        )->setName(new Name('users.update.put'));
 
         $reflection = new ReflectionObject($router);
         $property = $reflection->getProperty('routeRegistry');
@@ -152,12 +153,12 @@ class RouterTest extends TestCase
         $routeRegistry = $property->getValue($router);
 
         $homeRoute = $routeRegistry->getRouteByName(new Name('home'));
-        $usersAlterRoute = $routeRegistry->getRouteByName(new Name('users.alter'));
+        $usersUpdateRoute = $routeRegistry->getRouteByName(new Name('users.update.put'));
 
         $this->assertInstanceOf(Route::class, $homeRoute);
-        $this->assertInstanceOf(Route::class, $usersAlterRoute);
+        $this->assertInstanceOf(Route::class, $usersUpdateRoute);
         $this->assertEquals('home', (string) $homeRoute->name);
-        $this->assertEquals('users.alter', (string) $usersAlterRoute->name);
+        $this->assertEquals('users.update.put', (string) $usersUpdateRoute->name);
     }
 
     public function test_it_should_return_a_route_when_exists(): void
@@ -186,7 +187,7 @@ class RouterTest extends TestCase
             new Path('/dashboard'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )
-            ->withName(new Name('dashboard'))
+            ->setName(new Name('dashboard'))
             ->addMiddleware(
                 fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
             );
@@ -204,5 +205,23 @@ class RouterTest extends TestCase
         $middleware = $route->middlewares[0];
 
         $this->assertInstanceOf(Closure::class, $middleware);
+    }
+
+    public function test_it_should_not_register_a_duplicated_route_name(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Route name "duplicated" already exists.');
+
+        $router = new Router;
+
+        $router->get(
+            new Path('/'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        )->setName(new Name('duplicated'));
+
+        $router->post(
+            new Path('/login'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        )->setName(new Name('duplicated'));
     }
 }

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Domain\Entities;
 
 use Closure;
+use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Domain\ValueObjects\RouteEvent;
 use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
@@ -15,58 +17,59 @@ use YSOCode\Berry\Infra\Http\ServerRequest;
 
 final class Route
 {
+    /** @var array<string, array<Closure(self, array<string, mixed>): void>> */
+    private array $listeners = [];
+
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      * @param  array<MiddlewareInterface|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response>  $middlewares
      */
     public function __construct(
-        private(set) HttpMethod $method,
-        private(set) Path $path,
-        private(set) RequestHandlerInterface|Closure $handler,
+        public readonly HttpMethod $method,
+        public readonly Path $path,
+        public readonly RequestHandlerInterface|Closure $handler,
         private(set) ?Name $name = null,
         private(set) array $middlewares = []
     ) {}
 
-    public function withMethod(HttpMethod $method): self
+    /**
+     * @param  Closure(self, array<string, mixed>): void  $listener
+     */
+    public function on(RouteEvent $event, Closure $listener): void
     {
-        $new = clone $this;
-        $new->method = $method;
-
-        return $new;
-    }
-
-    public function withPath(Path $path): self
-    {
-        $new = clone $this;
-        $new->path = $path;
-
-        return $new;
+        $this->listeners[$event->name][] = $listener;
     }
 
     /**
-     * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
+     * @param  array<string, mixed>  $data
      */
-    public function withHandler(RequestHandlerInterface|Closure $handler): self
+    private function emit(RouteEvent $event, array $data = []): void
     {
-        $new = clone $this;
-        $new->handler = $handler;
-
-        return $new;
+        foreach ($this->listeners[$event->name] ?? [] as $listener) {
+            $listener($this, $data);
+        }
     }
 
-    public function withName(?Name $name): self
+    public function setName(Name $name): self
     {
-        $new = clone $this;
-        $new->name = $name;
+        if ($this->name instanceof Name) {
+            throw new RuntimeException('Name is already set.');
+        }
 
-        return $new;
+        $this->emit(RouteEvent::NAME_CHANGED, ['name' => $name]);
+
+        $this->name = $name;
+
+        return $this;
     }
 
     /**
      * @param  MiddlewareInterface|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
      */
-    public function addMiddleware(MiddlewareInterface|Closure $middleware): void
+    public function addMiddleware(MiddlewareInterface|Closure $middleware): self
     {
         $this->middlewares[] = $middleware;
+
+        return $this;
     }
 }

@@ -9,7 +9,7 @@ use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
-use YSOCode\Berry\Infra\Http\MiddlewareInterface;
+use YSOCode\Berry\Domain\ValueObjects\RouteCollectionEvent;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -21,19 +21,33 @@ final class RouteRegistry
      */
     private array $routeCollections = [];
 
-    private ?HttpMethod $lastUsedMethod = null;
-
-    public function __construct()
-    {
+    public function __construct(
+    ) {
         foreach (HttpMethod::getValues() as $method) {
-            $this->routeCollections[$method] = new RouteCollection;
+            $routeCollection = new RouteCollection;
+            $routeCollection->on(RouteCollectionEvent::ROUTE_NAME_CHANGED, $this->assertUniqueName(...));
+
+            $this->routeCollections[$method] = $routeCollection;
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function assertUniqueName(RouteCollection $routeCollection, array $data): void
+    {
+        /** @var Name $name */
+        $name = $data['routeName'];
+
+        if ($routeCollection->hasRouteByName($name) || $this->hasRouteByName($name)) {
+            throw new RuntimeException(sprintf('Route name "%s" already exists.', $name));
         }
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function addRoute(HttpMethod $method, Path $path, RequestHandlerInterface|Closure $handler): void
+    public function addRoute(HttpMethod $method, Path $path, RequestHandlerInterface|Closure $handler): Route
     {
         $routeCollection = $this->routeCollections[$method->value];
 
@@ -43,27 +57,14 @@ final class RouteRegistry
             );
         }
 
-        $routeCollection->addRoute(
-            new Route($method, $path, $handler)
-        );
+        $route = new Route($method, $path, $handler);
 
-        $this->lastUsedMethod = $method;
+        $routeCollection->addRoute($route);
+
+        return $route;
     }
 
-    public function withName(Name $name): void
-    {
-        if (! $this->lastUsedMethod instanceof HttpMethod) {
-            throw new RuntimeException('Define a route before calling withName().');
-        }
-
-        if ($this->hasRouteByName($name)) {
-            throw new RuntimeException(sprintf('Route name "%s" already exists.', $name));
-        }
-
-        $this->routeCollections[$this->lastUsedMethod->value]->withName($name);
-    }
-
-    private function hasRouteByName(Name $name): bool
+    public function hasRouteByName(Name $name): bool
     {
         return array_any($this->routeCollections, fn ($routeCollection): bool => $routeCollection->hasRouteByName($name));
     }
@@ -90,17 +91,5 @@ final class RouteRegistry
     public function hasRouteByPath(Path $path): bool
     {
         return array_any($this->routeCollections, fn ($routeCollection): bool => $routeCollection->hasRouteByPath($path));
-    }
-
-    /**
-     * @param  MiddlewareInterface|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
-     */
-    public function addMiddleware(MiddlewareInterface|Closure $middleware): void
-    {
-        if (! $this->lastUsedMethod instanceof HttpMethod) {
-            throw new RuntimeException('Define a route before calling withName().');
-        }
-
-        $this->routeCollections[$this->lastUsedMethod->value]->addMiddleware($middleware);
     }
 }

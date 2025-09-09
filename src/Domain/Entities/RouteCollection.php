@@ -8,17 +8,18 @@ use Closure;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
-use YSOCode\Berry\Infra\Http\MiddlewareInterface;
-use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
-use YSOCode\Berry\Infra\Http\Response;
-use YSOCode\Berry\Infra\Http\ServerRequest;
+use YSOCode\Berry\Domain\ValueObjects\RouteCollectionEvent;
+use YSOCode\Berry\Domain\ValueObjects\RouteEvent;
 
 final class RouteCollection
 {
+    /** @var array<string, array<Closure(self, array<string, mixed>): void>> */
+    private array $listeners = [];
+
     /**
      * @var array<Route>
      */
-    private array $routes = [];
+    public array $routes = [];
 
     /**
      * @var array<string, int>
@@ -30,11 +31,48 @@ final class RouteCollection
      */
     private array $routeIndexesByPath = [];
 
+    /**
+     * @param  Closure(self, array<string, mixed>): void  $listener
+     */
+    public function on(RouteCollectionEvent $event, Closure $listener): void
+    {
+        $this->listeners[$event->name][] = $listener;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function emit(RouteCollectionEvent $event, array $data = []): void
+    {
+        foreach ($this->listeners[$event->name] ?? [] as $listener) {
+            $listener($this, $data);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function setRouteIndexForName(Route $route, array $data): void
+    {
+        /** @var Name $name */
+        $name = $data['name'];
+
+        if ($this->hasRouteByName($name)) {
+            throw new RuntimeException(sprintf('Route name "%s" already exists.', $name));
+        }
+
+        $this->emit(RouteCollectionEvent::ROUTE_NAME_CHANGED, ['routeName' => $name]);
+
+        $this->routeIndexesByName[(string) $name] = $this->routeIndexesByPath[(string) $route->path];
+    }
+
     public function addRoute(Route $route): void
     {
         if ($this->hasRouteByPath($route->path)) {
-            throw new RuntimeException('Route path already exists.');
+            throw new RuntimeException(sprintf('Route path "%s" already exists.', $route->path));
         }
+
+        $route->on(RouteEvent::NAME_CHANGED, $this->setRouteIndexForName(...));
 
         $this->routes[] = $route;
 
@@ -44,7 +82,7 @@ final class RouteCollection
 
         if ($route->name instanceof Name) {
             if ($this->hasRouteByName($route->name)) {
-                throw new RuntimeException('Route name already exists.');
+                throw new RuntimeException(sprintf('Route name "%s" already exists.', $route->name));
             }
 
             $this->routeIndexesByName[(string) $route->name] = $lastIndex;
@@ -79,41 +117,5 @@ final class RouteCollection
         }
 
         return $this->routes[$routeIndex];
-    }
-
-    public function withName(Name $name): void
-    {
-        if ($this->routes === []) {
-            throw new RuntimeException('No route to name.');
-        }
-
-        if ($this->hasRouteByName($name)) {
-            throw new RuntimeException(sprintf('Route name "%s" already exists.', $name));
-        }
-
-        $lastIndex = array_key_last($this->routes);
-        $route = $this->routes[$lastIndex];
-
-        if ($route->name instanceof Name) {
-            unset($this->routeIndexesByName[(string) $route->name]);
-        }
-
-        $this->routes[$lastIndex] = $route->withName($name);
-        $this->routeIndexesByName[(string) $name] = $lastIndex;
-    }
-
-    /**
-     * @param  MiddlewareInterface|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
-     */
-    public function addMiddleware(MiddlewareInterface|Closure $middleware): void
-    {
-        if ($this->routes === []) {
-            throw new RuntimeException('No route to name.');
-        }
-
-        $lastIndex = array_key_last($this->routes);
-        $route = $this->routes[$lastIndex];
-
-        $route->addMiddleware($middleware);
     }
 }

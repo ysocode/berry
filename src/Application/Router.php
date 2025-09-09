@@ -9,9 +9,7 @@ use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
-use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
-use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -28,51 +26,41 @@ final readonly class Router
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function get(Path $path, RequestHandlerInterface|Closure $handler): self
+    public function get(Path $path, RequestHandlerInterface|Closure $handler): Route
     {
-        $this->routeRegistry->addRoute(HttpMethod::GET, $path, $handler);
-
-        return $this;
+        return $this->routeRegistry->addRoute(HttpMethod::GET, $path, $handler);
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function put(Path $path, RequestHandlerInterface|Closure $handler): self
+    public function put(Path $path, RequestHandlerInterface|Closure $handler): Route
     {
-        $this->routeRegistry->addRoute(HttpMethod::PUT, $path, $handler);
-
-        return $this;
+        return $this->routeRegistry->addRoute(HttpMethod::PUT, $path, $handler);
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function post(Path $path, RequestHandlerInterface|Closure $handler): self
+    public function post(Path $path, RequestHandlerInterface|Closure $handler): Route
     {
-        $this->routeRegistry->addRoute(HttpMethod::POST, $path, $handler);
-
-        return $this;
+        return $this->routeRegistry->addRoute(HttpMethod::POST, $path, $handler);
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function delete(Path $path, RequestHandlerInterface|Closure $handler): self
+    public function delete(Path $path, RequestHandlerInterface|Closure $handler): Route
     {
-        $this->routeRegistry->addRoute(HttpMethod::DELETE, $path, $handler);
-
-        return $this;
+        return $this->routeRegistry->addRoute(HttpMethod::DELETE, $path, $handler);
     }
 
     /**
      * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function patch(Path $path, RequestHandlerInterface|Closure $handler): self
+    public function patch(Path $path, RequestHandlerInterface|Closure $handler): Route
     {
-        $this->routeRegistry->addRoute(HttpMethod::PATCH, $path, $handler);
-
-        return $this;
+        return $this->routeRegistry->addRoute(HttpMethod::PATCH, $path, $handler);
     }
 
     public function getMatchedRoute(ServerRequest $request): Route|Error
@@ -93,22 +81,5 @@ final readonly class Router
         }
 
         return new Error('Route not found.');
-    }
-
-    public function withName(Name $name): self
-    {
-        $this->routeRegistry->withName($name);
-
-        return $this;
-    }
-
-    /**
-     * @param  MiddlewareInterface|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
-     */
-    public function addMiddleware(MiddlewareInterface|Closure $middleware): self
-    {
-        $this->routeRegistry->addMiddleware($middleware);
-
-        return $this;
     }
 }
