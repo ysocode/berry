@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Application;
+namespace Tests\Integration;
 
 use Closure;
 use PHPUnit\Framework\TestCase;
