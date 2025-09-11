@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain;
 
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteCollection;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
@@ -81,39 +80,32 @@ final class RouteCollectionTest extends TestCase
 
     public function test_it_should_emit_an_event_when_name_changes(): void
     {
-        $called = false;
-        $routeCollectionReceived = null;
-        $dataReceived = null;
+        $routeCollection = new RouteCollection;
+        $eventTriggered = false;
 
-        $closure = function (RouteCollection $routeCollection, array $data) use (&$called, &$routeCollectionReceived, &$dataReceived): void {
-            $called = true;
-            $routeCollectionReceived = $routeCollection;
-            $dataReceived = $data;
-        };
+        $routeCollection->on(
+            RouteCollectionEvent::ROUTE_NAME_CHANGED,
+            function (RouteCollection $routeCollectionReceived, array $data) use (&$eventTriggered, $routeCollection): void {
+                $eventTriggered = true;
 
-        $routeCollection = new RouteCollection()
-            ->on(RouteCollectionEvent::ROUTE_NAME_CHANGED, $closure);
+                $name = $data['routeName'] ?? null;
 
-        $routeCollection->addRoute(
-            new Route(
-                HttpMethod::GET,
-                new Path('/'),
-                fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-            )
+                $this->assertSame($routeCollection, $routeCollectionReceived);
+                $this->assertInstanceOf(Name::class, $name);
+                $this->assertEquals('home', (string) $name);
+            }
         );
 
-        $route = $routeCollection->getRouteByPath(new Path('/'));
-        if (! $route instanceof Route) {
-            throw new RuntimeException('Route not found.');
-        }
+        $route = new Route(
+            HttpMethod::GET,
+            new Path('/'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        );
+
+        $routeCollection->addRoute($route);
 
         $route->setName(new Name('home'));
 
-        $name = $dataReceived['routeName'] ?? null;
-
-        $this->assertTrue($called);
-        $this->assertSame($routeCollection, $routeCollectionReceived);
-        $this->assertInstanceOf(Name::class, $name);
-        $this->assertEquals('home', (string) $name);
+        $this->assertTrue($eventTriggered, 'Event ROUTE_NAME_CHANGED should have been triggered');
     }
 }
