@@ -40,7 +40,7 @@ class RouterTest extends TestCase
         $route = $routeRegistry->getRouteByName(new Name('home'));
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertEquals('GET', $route->method->value);
+        $this->assertEquals(HttpMethod::GET, $route->method);
         $this->assertEquals('/', (string) $route->path);
     }
 
@@ -62,7 +62,7 @@ class RouterTest extends TestCase
         $route = $routeRegistry->getRouteByName(new Name('users.update.put'));
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertEquals('PUT', $route->method->value);
+        $this->assertEquals(HttpMethod::PUT, $route->method);
         $this->assertEquals('/users/8847', (string) $route->path);
     }
 
@@ -84,7 +84,7 @@ class RouterTest extends TestCase
         $route = $routeRegistry->getRouteByName(new Name('signUp'));
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertEquals('POST', $route->method->value);
+        $this->assertEquals(HttpMethod::POST, $route->method);
         $this->assertEquals('/sign-up', (string) $route->path);
     }
 
@@ -106,7 +106,7 @@ class RouterTest extends TestCase
         $route = $routeRegistry->getRouteByName(new Name('users.destroy'));
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertEquals('DELETE', $route->method->value);
+        $this->assertEquals(HttpMethod::DELETE, $route->method);
         $this->assertEquals('/users/8847', (string) $route->path);
     }
 
@@ -128,7 +128,7 @@ class RouterTest extends TestCase
         $route = $routeRegistry->getRouteByName(new Name('users.update.patch'));
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertEquals('PATCH', $route->method->value);
+        $this->assertEquals(HttpMethod::PATCH, $route->method);
         $this->assertEquals('/users/8847', (string) $route->path);
     }
 
@@ -175,7 +175,7 @@ class RouterTest extends TestCase
         );
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertEquals('GET', $route->method->value);
+        $this->assertEquals(HttpMethod::GET, $route->method);
         $this->assertEquals('/', (string) $route->path);
     }
 

@@ -46,8 +46,8 @@ final class RequestTest extends TestCase
 
         $this->assertEquals(HttpMethod::GET, $request->method);
         $this->assertEquals('https://example.com', (string) $request->uri);
-        $this->assertEquals('Content-Type: application/json; charset=utf-8', $contentTypeHeader);
-        $this->assertEquals('Accept: application/json; charset=utf-8', $acceptHeader);
+        $this->assertEquals('Content-Type: application/json; charset=utf-8', (string) $contentTypeHeader);
+        $this->assertEquals('Accept: application/json; charset=utf-8', (string) $acceptHeader);
         $this->assertJson((string) $request->body);
     }
 
@@ -75,7 +75,7 @@ final class RequestTest extends TestCase
         $newRequest = $request->withTarget(new RequestTarget('/path/to/resource?query=param'));
 
         $this->assertNotSame($request, $newRequest);
-        $this->assertEquals('/path/to/resource?query=param', $newRequest->target);
+        $this->assertEquals('/path/to/resource?query=param', (string) $newRequest->target);
         $this->assertEquals('https://example.com', (string) $newRequest->uri);
     }
 

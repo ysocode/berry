@@ -25,7 +25,7 @@ final class RouteTest extends TestCase
             new Name('home')
         );
 
-        $this->assertEquals('GET', $route->method->value);
+        $this->assertEquals(HttpMethod::GET, $route->method);
         $this->assertEquals('/', (string) $route->path);
         $this->assertEquals('home', (string) $route->name);
     }

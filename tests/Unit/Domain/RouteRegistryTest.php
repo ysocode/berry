@@ -74,23 +74,23 @@ final class RouteRegistryTest extends TestCase
         $usersUpdatePatchRoute = $routeRegistry->getRouteByName(new Name('users.update.patch'));
 
         $this->assertInstanceOf(Route::class, $homeRoute);
-        $this->assertEquals('GET', $homeRoute->method->value);
+        $this->assertEquals(HttpMethod::GET, $homeRoute->method);
         $this->assertEquals('/', (string) $homeRoute->path);
 
         $this->assertInstanceOf(Route::class, $usersUpdatePutRoute);
-        $this->assertEquals('PUT', $usersUpdatePutRoute->method->value);
+        $this->assertEquals(HttpMethod::PUT, $usersUpdatePutRoute->method);
         $this->assertEquals('/users/8847', (string) $usersUpdatePutRoute->path);
 
         $this->assertInstanceOf(Route::class, $signUpRoute);
-        $this->assertEquals('POST', $signUpRoute->method->value);
+        $this->assertEquals(HttpMethod::POST, $signUpRoute->method);
         $this->assertEquals('/sign-up', (string) $signUpRoute->path);
 
         $this->assertInstanceOf(Route::class, $destroyRoute);
-        $this->assertEquals('DELETE', $destroyRoute->method->value);
+        $this->assertEquals(HttpMethod::DELETE, $destroyRoute->method);
         $this->assertEquals('/users/8847', (string) $destroyRoute->path);
 
         $this->assertInstanceOf(Route::class, $usersUpdatePatchRoute);
-        $this->assertEquals('PATCH', $usersUpdatePatchRoute->method->value);
+        $this->assertEquals(HttpMethod::PATCH, $usersUpdatePatchRoute->method);
         $this->assertEquals('/users/8847', (string) $usersUpdatePatchRoute->path);
     }
 
@@ -127,7 +127,7 @@ final class RouteRegistryTest extends TestCase
         $homeRoute = $routeRegistry->getRouteByName(new Name('home'));
 
         $this->assertInstanceOf(Route::class, $homeRoute);
-        $this->assertEquals('GET', $homeRoute->method->value);
+        $this->assertEquals(HttpMethod::GET, $homeRoute->method);
         $this->assertEquals('/', (string) $homeRoute->path);
     }
 
@@ -157,7 +157,7 @@ final class RouteRegistryTest extends TestCase
         $homeRoute = $routeRegistry->getRouteByMethodAndPath(HttpMethod::GET, new Path('/'));
 
         $this->assertInstanceOf(Route::class, $homeRoute);
-        $this->assertEquals('GET', $homeRoute->method->value);
+        $this->assertEquals(HttpMethod::GET, $homeRoute->method);
         $this->assertEquals('/', (string) $homeRoute->path);
     }
 

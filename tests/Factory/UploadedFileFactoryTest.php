@@ -158,8 +158,8 @@ final class UploadedFileFactoryTest extends TestCase
             $this->assertInstanceOf(UploadedFile::class, $firstUploadedDoc);
             $this->assertEquals(UploadStatus::OK, $firstUploadedImage->status);
             $this->assertEquals(UploadStatus::OK, $firstUploadedDoc->status);
-            $this->assertEquals('image.png', $firstUploadedImage->name);
-            $this->assertEquals('doc.pdf', $firstUploadedDoc->name);
+            $this->assertEquals('image.png', (string) $firstUploadedImage->name);
+            $this->assertEquals('doc.pdf', (string) $firstUploadedDoc->name);
             $this->assertEquals('image/png', (string) $firstUploadedImage->type);
             $this->assertEquals('application/pdf', (string) $firstUploadedDoc->type);
             $this->assertTrue($firstUploadedImage->fromWebServer);
@@ -238,8 +238,8 @@ final class UploadedFileFactoryTest extends TestCase
             $this->assertInstanceOf(UploadedFile::class, $uploadedImage);
             $this->assertEquals(UploadStatus::OK, $firstUploadedDoc->status);
             $this->assertEquals(UploadStatus::OK, $uploadedImage->status);
-            $this->assertEquals('doc.pdf', $firstUploadedDoc->name);
-            $this->assertEquals('image.png', $uploadedImage->name);
+            $this->assertEquals('doc.pdf', (string) $firstUploadedDoc->name);
+            $this->assertEquals('image.png', (string) $uploadedImage->name);
             $this->assertEquals('application/pdf', (string) $firstUploadedDoc->type);
             $this->assertEquals('image/png', (string) $uploadedImage->type);
             $this->assertTrue($firstUploadedDoc->fromWebServer);

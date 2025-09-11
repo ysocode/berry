@@ -37,7 +37,7 @@ final class RouteCollectionTest extends TestCase
         $route = $routeCollection->getRouteByName(new Name('home'));
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertEquals('GET', $route->method->value);
+        $this->assertEquals(HttpMethod::GET, $route->method);
         $this->assertEquals('/', (string) $route->path);
         $this->assertEquals('home', (string) $route->name);
     }

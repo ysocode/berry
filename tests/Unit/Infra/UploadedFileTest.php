@@ -64,8 +64,8 @@ final class UploadedFileTest extends TestCase
 
             $this->assertEquals('Hello, world!', (string) $uploadedFile->stream);
             $this->assertEquals(UploadStatus::OK, $uploadedFile->status);
-            $this->assertEquals(new FileName('test.txt'), $uploadedFile->name);
-            $this->assertEquals(new MimeType('text/plain'), $uploadedFile->type);
+            $this->assertEquals('test.txt', (string) $uploadedFile->name);
+            $this->assertEquals('text/plain', (string) $uploadedFile->type);
         } finally {
             unlink($tempFilePath);
         }

@@ -33,10 +33,10 @@ final class UriTest extends TestCase
 
         $this->assertEquals('https://ysocode:berry@example.com:8080', (string) $uri);
         $this->assertEquals(Scheme::HTTPS, $uri->scheme);
-        $this->assertEquals(new Host('example.com'), $uri->host);
-        $this->assertEquals(new Port(8080), $uri->port);
+        $this->assertEquals('example.com', (string) $uri->host);
+        $this->assertEquals(8080, $uri->port->value);
         $this->assertNull($uri->path);
-        $this->assertEquals(new UserInfo('ysocode', 'berry'), $uri->userInfo);
+        $this->assertEquals('ysocode:berry', (string) $uri->userInfo);
         $this->assertNull($uri->query);
         $this->assertNull($uri->fragment);
     }
@@ -86,12 +86,12 @@ final class UriTest extends TestCase
             Scheme::HTTPS,
             new Host('example.com'),
         );
-        $this->assertEquals(new Port(443), $httpsUri->port);
+        $this->assertEquals(443, $httpsUri->port->value);
 
         $httpUri = new Uri(
             Scheme::HTTP,
             new Host('example.com'),
         );
-        $this->assertEquals(new Port(80), $httpUri->port);
+        $this->assertEquals(80, $httpUri->port->value);
     }
 }
