@@ -35,9 +35,11 @@ final class Route
     /**
      * @param  Closure(self, array<string, mixed>): void  $listener
      */
-    public function on(RouteEvent $event, Closure $listener): void
+    public function on(RouteEvent $event, Closure $listener): self
     {
         $this->listeners[$event->name][] = $listener;
+
+        return $this;
     }
 
     /**

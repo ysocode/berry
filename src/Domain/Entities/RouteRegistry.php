@@ -21,8 +21,8 @@ final class RouteRegistry
      */
     private array $routeCollections = [];
 
-    public function __construct(
-    ) {
+    public function __construct()
+    {
         foreach (HttpMethod::getValues() as $method) {
             $routeCollection = new RouteCollection;
             $routeCollection->on(RouteCollectionEvent::ROUTE_NAME_CHANGED, $this->assertUniqueName(...));

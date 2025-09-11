@@ -34,9 +34,11 @@ final class RouteCollection
     /**
      * @param  Closure(self, array<string, mixed>): void  $listener
      */
-    public function on(RouteCollectionEvent $event, Closure $listener): void
+    public function on(RouteCollectionEvent $event, Closure $listener): self
     {
         $this->listeners[$event->name][] = $listener;
+
+        return $this;
     }
 
     /**
@@ -66,7 +68,7 @@ final class RouteCollection
         $this->routeIndexesByName[(string) $name] = $this->routeIndexesByPath[(string) $route->path];
     }
 
-    public function addRoute(Route $route): void
+    public function addRoute(Route $route): self
     {
         if ($this->hasRouteByPath($route->path)) {
             throw new RuntimeException(sprintf('Route path "%s" already exists.', $route->path));
@@ -87,6 +89,8 @@ final class RouteCollection
 
             $this->routeIndexesByName[(string) $route->name] = $lastIndex;
         }
+
+        return $this;
     }
 
     public function hasRouteByPath(Path $path): bool
