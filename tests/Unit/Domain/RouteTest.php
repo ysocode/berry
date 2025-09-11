@@ -32,29 +32,29 @@ final class RouteTest extends TestCase
 
     public function test_it_should_emit_an_event_when_name_changes(): void
     {
-        $called = false;
-        $routeReceived = null;
-        $dataReceived = null;
-
-        $closure = function (Route $route, array $data) use (&$called, &$routeReceived, &$dataReceived): void {
-            $called = true;
-            $routeReceived = $route;
-            $dataReceived = $data;
-        };
+        $eventTriggered = false;
 
         $route = new Route(
             HttpMethod::GET,
             new Path('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-        )
-            ->on(RouteEvent::NAME_CHANGED, $closure)
-            ->setName(new Name('home'));
+        );
 
-        $name = $dataReceived['name'] ?? null;
+        $route->on(
+            RouteEvent::NAME_CHANGED,
+            function (Route $routeReceived, array $data) use (&$eventTriggered, $route): void {
+                $eventTriggered = true;
 
-        $this->assertTrue($called);
-        $this->assertSame($route, $routeReceived);
-        $this->assertInstanceOf(Name::class, $name);
-        $this->assertEquals('home', (string) $name);
+                $name = $data['name'] ?? null;
+
+                $this->assertSame($route, $routeReceived);
+                $this->assertInstanceOf(Name::class, $name);
+                $this->assertEquals('home', (string) $name);
+            }
+        );
+
+        $route->setName(new Name('home'));
+
+        $this->assertTrue($eventTriggered);
     }
 }
