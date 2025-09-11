@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\Infra;
 
 use PHPUnit\Framework\TestCase;
 use YSOCode\Berry\Domain\ValueObjects\Header;

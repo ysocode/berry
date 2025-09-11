@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\ValueObjects;
+namespace Tests\Unit\Domain;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;

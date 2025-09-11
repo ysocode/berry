@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\Infra;
 
 use Closure;
 use InvalidArgumentException;
