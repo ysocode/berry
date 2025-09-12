@@ -21,13 +21,13 @@ final class Route
     private array $listeners = [];
 
     /**
-     * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
-     * @param  array<MiddlewareInterface|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response>  $middlewares
+     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
+     * @param  array<class-string<MiddlewareInterface>|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response>  $middlewares
      */
     public function __construct(
         public readonly HttpMethod $method,
         public readonly Path $path,
-        public readonly RequestHandlerInterface|Closure $handler,
+        public readonly string|Closure $handler,
         private(set) ?Name $name = null,
         private(set) array $middlewares = []
     ) {}
@@ -66,9 +66,9 @@ final class Route
     }
 
     /**
-     * @param  MiddlewareInterface|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
+     * @param  class-string<MiddlewareInterface>|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
      */
-    public function addMiddleware(MiddlewareInterface|Closure $middleware): self
+    public function addMiddleware(string|Closure $middleware): self
     {
         $this->middlewares[] = $middleware;
 

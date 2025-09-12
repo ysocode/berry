@@ -45,9 +45,9 @@ final class RouteRegistry
     }
 
     /**
-     * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function addRoute(HttpMethod $method, Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function addRoute(HttpMethod $method, Path $path, string|Closure $handler): Route
     {
         $routeCollection = $this->routeCollections[$method->value];
 

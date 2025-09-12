@@ -24,41 +24,41 @@ final readonly class Router
     }
 
     /**
-     * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function get(Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function get(Path $path, string|Closure $handler): Route
     {
         return $this->routeRegistry->addRoute(HttpMethod::GET, $path, $handler);
     }
 
     /**
-     * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function put(Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function put(Path $path, string|Closure $handler): Route
     {
         return $this->routeRegistry->addRoute(HttpMethod::PUT, $path, $handler);
     }
 
     /**
-     * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function post(Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function post(Path $path, string|Closure $handler): Route
     {
         return $this->routeRegistry->addRoute(HttpMethod::POST, $path, $handler);
     }
 
     /**
-     * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function delete(Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function delete(Path $path, string|Closure $handler): Route
     {
         return $this->routeRegistry->addRoute(HttpMethod::DELETE, $path, $handler);
     }
 
     /**
-     * @param  RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function patch(Path $path, RequestHandlerInterface|Closure $handler): Route
+    public function patch(Path $path, string|Closure $handler): Route
     {
         return $this->routeRegistry->addRoute(HttpMethod::PATCH, $path, $handler);
     }

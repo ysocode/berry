@@ -90,10 +90,10 @@ final class ServerRequestFactoryTest extends TestCase
 
         $serverRequest = new ServerRequestFactory()->fromGlobals();
 
-        $xCustomHeader = $serverRequest->getHeader(new HeaderName('X-Custom'));
+        $customHeader = $serverRequest->getHeader(new HeaderName('X-Custom'));
 
-        $this->assertInstanceOf(Header::class, $xCustomHeader);
-        $this->assertEquals('X-Custom: custom-value', (string) $xCustomHeader);
+        $this->assertInstanceOf(Header::class, $customHeader);
+        $this->assertEquals('X-Custom: custom-value', (string) $customHeader);
 
     }
 
