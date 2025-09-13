@@ -8,41 +8,33 @@ use Closure;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\Error;
-use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
 use YSOCode\Berry\Infra\Http\ClosureHandlerAdapter;
-use YSOCode\Berry\Infra\Http\ClosureMiddlewareAdapter;
-use YSOCode\Berry\Infra\Http\MiddlewareHandlerAdapter;
-use YSOCode\Berry\Infra\Http\MiddlewareInterface;
+use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final readonly class Dispatcher
 {
+    private MiddlewareStackBuilder $middlewareStackBuilder;
+
     public function __construct(
         private ContainerInterface $container,
-        private Router $router
-    ) {}
+        private Router $router,
+    ) {
+        $this->middlewareStackBuilder = new MiddlewareStackBuilder($this->container);
+    }
 
-    public function dispatch(ServerRequest $request): Response
+    public function dispatch(ServerRequest $request): RequestHandlerInterface|Error
     {
-        $routeOrError = $this->router->getMatchedRoute($request);
-
-        if ($routeOrError instanceof Error) {
-            $body = new StreamFactory()->createFromString((string) $routeOrError);
-
-            return match (true) {
-                $routeOrError->equals(new Error('Method not allowed.')) => new Response(HttpStatus::METHOD_NOT_ALLOWED, body: $body),
-                $routeOrError->equals(new Error('Route not found.')) => new Response(HttpStatus::NOT_FOUND, body: $body),
-                default => new Response(HttpStatus::INTERNAL_SERVER_ERROR, body: $body),
-            };
+        $route = $this->router->getMatchedRoute($request);
+        if ($route instanceof Error) {
+            return $route;
         }
 
-        $handler = $this->resolveHandler($routeOrError->handler);
-        $pipeline = $this->buildPipeline($handler, $routeOrError->middlewares);
+        $handler = $this->resolveHandler($route->handler);
 
-        return $pipeline->handle($request);
+        return $this->middlewareStackBuilder->build($handler, $route->middlewares);
     }
 
     /**
@@ -58,42 +50,6 @@ final readonly class Dispatcher
         if (! $resolved instanceof RequestHandlerInterface) {
             throw new RuntimeException(sprintf(
                 'Handler must implement RequestHandlerInterface, got %s',
-                get_debug_type($resolved)
-            ));
-        }
-
-        return $resolved;
-    }
-
-    /**
-     * @param  array<class-string<MiddlewareInterface>|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response>  $middlewares
-     */
-    private function buildPipeline(RequestHandlerInterface $handler, array $middlewares): RequestHandlerInterface
-    {
-        $pipeline = $handler;
-
-        foreach (array_reverse($middlewares) as $middleware) {
-            $resolved = $this->resolveMiddleware($middleware);
-
-            $pipeline = new MiddlewareHandlerAdapter($resolved, $pipeline);
-        }
-
-        return $pipeline;
-    }
-
-    /**
-     * @param  class-string<MiddlewareInterface>|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
-     */
-    private function resolveMiddleware(string|Closure $middleware): MiddlewareInterface
-    {
-        if ($middleware instanceof Closure) {
-            return new ClosureMiddlewareAdapter($middleware);
-        }
-
-        $resolved = $this->container->get($middleware);
-        if (! $resolved instanceof MiddlewareInterface) {
-            throw new RuntimeException(sprintf(
-                'Middleware must implement MiddlewareInterface, got %s',
                 get_debug_type($resolved)
             ));
         }

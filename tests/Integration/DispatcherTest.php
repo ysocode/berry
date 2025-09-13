@@ -10,6 +10,7 @@ use RuntimeException;
 use Tests\Fixtures\DummyHandler;
 use YSOCode\Berry\Application\Dispatcher;
 use YSOCode\Berry\Application\Router;
+use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
@@ -33,7 +34,6 @@ final class DispatcherTest extends TestCase
 
     private function createDispatcher(): Dispatcher
     {
-        $container = new Container;
         $router = new Router;
 
         $router->get(
@@ -48,7 +48,7 @@ final class DispatcherTest extends TestCase
                 )
             );
 
-        return new Dispatcher($container, $router);
+        return new Dispatcher(new Container, $router);
     }
 
     public function test_it_should_dispatch_request(): void
@@ -56,7 +56,12 @@ final class DispatcherTest extends TestCase
         $serverRequest = $this->createServerRequest();
         $dispatcher = $this->createDispatcher();
 
-        $response = $dispatcher->dispatch($serverRequest);
+        $middlewareStack = $dispatcher->dispatch($serverRequest);
+        if ($middlewareStack instanceof Error) {
+            throw new RuntimeException((string) $middlewareStack);
+        }
+
+        $response = $middlewareStack->handle($serverRequest);
 
         $expectedBody = json_encode(['requestId' => 'req-123456'], JSON_PRETTY_PRINT);
         if (! is_string($expectedBody)) {

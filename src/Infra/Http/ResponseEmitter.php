@@ -21,12 +21,14 @@ final readonly class ResponseEmitter
     private Closure $headerEmitter;
 
     /**
-     * @param  Closure(string, bool=, int=): void  $headerEmitter
+     * @param  Closure(string, bool=, int=): void|null  $headerEmitter
      */
     public function __construct(
-        Closure $headerEmitter,
+        ?Closure $headerEmitter = null,
         private int $chunkSize = 4096,
     ) {
+        $headerEmitter ??= header(...);
+
         $isValid = $this->validateHeaderEmitterSignature($headerEmitter);
         if ($isValid instanceof Error) {
             throw new InvalidArgumentException((string) $isValid);
