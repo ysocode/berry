@@ -53,15 +53,15 @@ final class DispatcherTest extends TestCase
 
     public function test_it_should_dispatch_request(): void
     {
-        $serverRequest = $this->createServerRequest();
+        $request = $this->createServerRequest();
         $dispatcher = $this->createDispatcher();
 
-        $middlewareStack = $dispatcher->dispatch($serverRequest);
+        $middlewareStack = $dispatcher->dispatch($request);
         if ($middlewareStack instanceof Error) {
             throw new RuntimeException((string) $middlewareStack);
         }
 
-        $response = $middlewareStack->handle($serverRequest);
+        $response = $middlewareStack->handle($request);
 
         $expectedBody = json_encode(['requestId' => 'req-123456'], JSON_PRETTY_PRINT);
         if (! is_string($expectedBody)) {

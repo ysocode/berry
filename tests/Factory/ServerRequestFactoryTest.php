@@ -59,13 +59,13 @@ final class ServerRequestFactoryTest extends TestCase
 
     public function test_it_should_create_a_server_request_from_globals(): void
     {
-        $serverRequest = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->fromGlobals();
 
-        $acceptEncodingHeader = $serverRequest->getHeader(new HeaderName('Accept-Encoding'));
-        $acceptLanguageHeader = $serverRequest->getHeader(new HeaderName('Accept-Language'));
+        $acceptEncodingHeader = $request->getHeader(new HeaderName('Accept-Encoding'));
+        $acceptLanguageHeader = $request->getHeader(new HeaderName('Accept-Language'));
 
-        $this->assertEquals(HttpMethod::GET, $serverRequest->method);
-        $this->assertEquals('https://ysocode.com/?query=param', (string) $serverRequest->uri);
+        $this->assertEquals(HttpMethod::GET, $request->method);
+        $this->assertEquals('https://ysocode.com/?query=param', (string) $request->uri);
         $this->assertInstanceOf(Header::class, $acceptEncodingHeader);
         $this->assertInstanceOf(Header::class, $acceptLanguageHeader);
         $this->assertEquals(['gzip', 'deflate', 'br', 'zstd'], $acceptEncodingHeader->values);
@@ -76,9 +76,9 @@ final class ServerRequestFactoryTest extends TestCase
     {
         $_SERVER['REDIRECT_HTTP_HOST'] = 'ignored.com';
 
-        $serverRequest = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->fromGlobals();
 
-        $hostHeader = $serverRequest->getHeader(new HeaderName('Host'));
+        $hostHeader = $request->getHeader(new HeaderName('Host'));
 
         $this->assertInstanceOf(Header::class, $hostHeader);
         $this->assertEquals('Host: ysocode.com', (string) $hostHeader);
@@ -88,9 +88,9 @@ final class ServerRequestFactoryTest extends TestCase
     {
         $_SERVER['REDIRECT_HTTP_X_CUSTOM'] = 'custom-value';
 
-        $serverRequest = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->fromGlobals();
 
-        $customHeader = $serverRequest->getHeader(new HeaderName('X-Custom'));
+        $customHeader = $request->getHeader(new HeaderName('X-Custom'));
 
         $this->assertInstanceOf(Header::class, $customHeader);
         $this->assertEquals('X-Custom: custom-value', (string) $customHeader);
@@ -99,34 +99,34 @@ final class ServerRequestFactoryTest extends TestCase
 
     public function test_it_should_include_server_params_from_globals(): void
     {
-        $serverRequest = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->fromGlobals();
 
-        $this->assertEquals('GET', $serverRequest->serverParams['REQUEST_METHOD']);
-        $this->assertEquals('https', $serverRequest->serverParams['REQUEST_SCHEME']);
-        $this->assertEquals('ysocode.com', $serverRequest->serverParams['SERVER_NAME']);
-        $this->assertEquals(443, $serverRequest->serverParams['SERVER_PORT']);
-        $this->assertEquals('/?query=param', $serverRequest->serverParams['REQUEST_URI']);
-        $this->assertEquals('query=param', $serverRequest->serverParams['QUERY_STRING']);
+        $this->assertEquals('GET', $request->serverParams['REQUEST_METHOD']);
+        $this->assertEquals('https', $request->serverParams['REQUEST_SCHEME']);
+        $this->assertEquals('ysocode.com', $request->serverParams['SERVER_NAME']);
+        $this->assertEquals(443, $request->serverParams['SERVER_PORT']);
+        $this->assertEquals('/?query=param', $request->serverParams['REQUEST_URI']);
+        $this->assertEquals('query=param', $request->serverParams['QUERY_STRING']);
     }
 
     public function test_it_should_include_cookie_params_from_globals(): void
     {
-        $serverRequest = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->fromGlobals();
 
-        $this->assertEquals('GA1.1.700403314.1753901012', $serverRequest->cookieParams['_ga']);
-        $this->assertEquals('GS2.1.s1754575621$o1$g1$t1754577353$j60$l0$h0', $serverRequest->cookieParams['_ga_GBVEKN2FFG']);
-        $this->assertEquals('GS2.1.s1754938232$o1$g1$t1754938837$j60$l0$h0', $serverRequest->cookieParams['_ga_BCNNFTTB57']);
-        $this->assertEquals('GS2.1.s1755193176$o5$g1$t1755194514$j60$l0$h0', $serverRequest->cookieParams['_ga_WFERXYKPPF']);
-        $this->assertEquals('GS2.1.s1755193177$o5$g1$t1755194514$j60$l0$h0', $serverRequest->cookieParams['_ga_48TNLV2CVZ']);
-        $this->assertEquals('GS2.1.s1755195347$o1$g1$t1755196281$j60$l0$h0', $serverRequest->cookieParams['_ga_F75NKY8K46']);
-        $this->assertEquals('GS2.1.s1755563079$o5$g0$t1755563079$j60$l0$h178854805', $serverRequest->cookieParams['_ga_JZ9W8T667F']);
+        $this->assertEquals('GA1.1.700403314.1753901012', $request->cookieParams['_ga']);
+        $this->assertEquals('GS2.1.s1754575621$o1$g1$t1754577353$j60$l0$h0', $request->cookieParams['_ga_GBVEKN2FFG']);
+        $this->assertEquals('GS2.1.s1754938232$o1$g1$t1754938837$j60$l0$h0', $request->cookieParams['_ga_BCNNFTTB57']);
+        $this->assertEquals('GS2.1.s1755193176$o5$g1$t1755194514$j60$l0$h0', $request->cookieParams['_ga_WFERXYKPPF']);
+        $this->assertEquals('GS2.1.s1755193177$o5$g1$t1755194514$j60$l0$h0', $request->cookieParams['_ga_48TNLV2CVZ']);
+        $this->assertEquals('GS2.1.s1755195347$o1$g1$t1755196281$j60$l0$h0', $request->cookieParams['_ga_F75NKY8K46']);
+        $this->assertEquals('GS2.1.s1755563079$o5$g0$t1755563079$j60$l0$h178854805', $request->cookieParams['_ga_JZ9W8T667F']);
     }
 
     public function test_it_should_include_query_params_from_globals(): void
     {
-        $serverRequest = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->fromGlobals();
 
-        $this->assertEquals('param', $serverRequest->queryParams['query']);
+        $this->assertEquals('param', $request->queryParams['query']);
     }
 
     public function test_it_should_include_parsed_body_from_globals(): void
@@ -137,11 +137,11 @@ final class ServerRequestFactoryTest extends TestCase
             'password' => 'berryIsTheBest',
         ];
 
-        $serverRequest = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->fromGlobals();
 
-        $this->assertEquals('John Doe', $serverRequest->parsedBody['name']);
-        $this->assertEquals('john.doe@ysocode.com', $serverRequest->parsedBody['email']);
-        $this->assertEquals('berryIsTheBest', $serverRequest->parsedBody['password']);
+        $this->assertEquals('John Doe', $request->parsedBody['name']);
+        $this->assertEquals('john.doe@ysocode.com', $request->parsedBody['email']);
+        $this->assertEquals('berryIsTheBest', $request->parsedBody['password']);
 
         $_POST = [];
     }
@@ -163,8 +163,8 @@ final class ServerRequestFactoryTest extends TestCase
         ];
 
         try {
-            $serverRequest = new ServerRequestFactory()->fromGlobals();
-            $docUploadedFile = $serverRequest->uploadedFiles['doc'];
+            $request = new ServerRequestFactory()->fromGlobals();
+            $docUploadedFile = $request->uploadedFiles['doc'];
 
             $this->assertInstanceOf(UploadedFile::class, $docUploadedFile);
             $this->assertEquals(UploadStatus::OK, $docUploadedFile->status);
