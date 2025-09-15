@@ -34,12 +34,12 @@ final class RouteRegistry
     /**
      * @param  array<string, mixed>  $data
      */
-    private function assertUniqueName(RouteCollection $routeCollection, array $data): void
+    private function assertUniqueName(array $data): void
     {
         /** @var Name $name */
         $name = $data['routeName'];
 
-        if ($routeCollection->hasRouteByName($name) || $this->hasRouteByName($name)) {
+        if ($this->hasRouteByName($name)) {
             throw new RuntimeException(sprintf('Route name "%s" already exists.', $name));
         }
     }

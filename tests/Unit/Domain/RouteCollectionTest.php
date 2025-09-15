@@ -85,12 +85,11 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection->on(
             RouteCollectionEvent::ROUTE_NAME_CHANGED,
-            function (RouteCollection $routeCollectionReceived, array $data) use (&$eventTriggered, $routeCollection): void {
+            function (array $data) use (&$eventTriggered): void {
                 $eventTriggered = true;
 
                 $name = $data['routeName'] ?? null;
 
-                $this->assertSame($routeCollection, $routeCollectionReceived);
                 $this->assertInstanceOf(Name::class, $name);
                 $this->assertEquals('home', (string) $name);
             }

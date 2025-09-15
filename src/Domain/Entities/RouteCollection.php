@@ -13,7 +13,7 @@ use YSOCode\Berry\Domain\ValueObjects\RouteEvent;
 
 final class RouteCollection
 {
-    /** @var array<string, array<Closure(self, array<string, mixed>): void>> */
+    /** @var array<string, array<Closure(array<string, mixed>): void>> */
     private array $listeners = [];
 
     /**
@@ -32,7 +32,7 @@ final class RouteCollection
     private array $routeIndexesByPath = [];
 
     /**
-     * @param  Closure(self, array<string, mixed>): void  $listener
+     * @param  Closure(array<string, mixed>): void  $listener
      */
     public function on(RouteCollectionEvent $event, Closure $listener): self
     {
@@ -47,7 +47,7 @@ final class RouteCollection
     private function emit(RouteCollectionEvent $event, array $data = []): void
     {
         foreach ($this->listeners[$event->name] ?? [] as $listener) {
-            $listener($this, $data);
+            $listener($data);
         }
     }
 
