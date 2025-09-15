@@ -6,11 +6,10 @@ namespace Tests\Integration;
 
 use Closure;
 use PHPUnit\Framework\TestCase;
-use ReflectionObject;
 use RuntimeException;
 use YSOCode\Berry\Application\Router;
 use YSOCode\Berry\Domain\Entities\Route;
-use YSOCode\Berry\Domain\Entities\RouteRegistry;
+use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
 use YSOCode\Berry\Domain\ValueObjects\Name;
@@ -31,13 +30,7 @@ class RouterTest extends TestCase
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 
-        $reflection = new ReflectionObject($router);
-        $property = $reflection->getProperty('routeRegistry');
-
-        /** @var RouteRegistry $routeRegistry */
-        $routeRegistry = $property->getValue($router);
-
-        $route = $routeRegistry->getRouteByName(new Name('home'));
+        $route = $router->routeRegistry->getRouteByName(new Name('home'));
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals(HttpMethod::GET, $route->method);
@@ -53,13 +46,7 @@ class RouterTest extends TestCase
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.update.put'));
 
-        $reflection = new ReflectionObject($router);
-        $property = $reflection->getProperty('routeRegistry');
-
-        /** @var RouteRegistry $routeRegistry */
-        $routeRegistry = $property->getValue($router);
-
-        $route = $routeRegistry->getRouteByName(new Name('users.update.put'));
+        $route = $router->routeRegistry->getRouteByName(new Name('users.update.put'));
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals(HttpMethod::PUT, $route->method);
@@ -75,13 +62,7 @@ class RouterTest extends TestCase
             fn (ServerRequest $request): Response => new Response(HttpStatus::CREATED)
         )->setName(new Name('signUp'));
 
-        $reflection = new ReflectionObject($router);
-        $property = $reflection->getProperty('routeRegistry');
-
-        /** @var RouteRegistry $routeRegistry */
-        $routeRegistry = $property->getValue($router);
-
-        $route = $routeRegistry->getRouteByName(new Name('signUp'));
+        $route = $router->routeRegistry->getRouteByName(new Name('signUp'));
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals(HttpMethod::POST, $route->method);
@@ -97,13 +78,7 @@ class RouterTest extends TestCase
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.destroy'));
 
-        $reflection = new ReflectionObject($router);
-        $property = $reflection->getProperty('routeRegistry');
-
-        /** @var RouteRegistry $routeRegistry */
-        $routeRegistry = $property->getValue($router);
-
-        $route = $routeRegistry->getRouteByName(new Name('users.destroy'));
+        $route = $router->routeRegistry->getRouteByName(new Name('users.destroy'));
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals(HttpMethod::DELETE, $route->method);
@@ -119,13 +94,7 @@ class RouterTest extends TestCase
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.update.patch'));
 
-        $reflection = new ReflectionObject($router);
-        $property = $reflection->getProperty('routeRegistry');
-
-        /** @var RouteRegistry $routeRegistry */
-        $routeRegistry = $property->getValue($router);
-
-        $route = $routeRegistry->getRouteByName(new Name('users.update.patch'));
+        $route = $router->routeRegistry->getRouteByName(new Name('users.update.patch'));
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals(HttpMethod::PATCH, $route->method);
@@ -146,14 +115,8 @@ class RouterTest extends TestCase
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.update.put'));
 
-        $reflection = new ReflectionObject($router);
-        $property = $reflection->getProperty('routeRegistry');
-
-        /** @var RouteRegistry $routeRegistry */
-        $routeRegistry = $property->getValue($router);
-
-        $homeRoute = $routeRegistry->getRouteByName(new Name('home'));
-        $usersUpdateRoute = $routeRegistry->getRouteByName(new Name('users.update.put'));
+        $homeRoute = $router->routeRegistry->getRouteByName(new Name('home'));
+        $usersUpdateRoute = $router->routeRegistry->getRouteByName(new Name('users.update.put'));
 
         $this->assertInstanceOf(Route::class, $homeRoute);
         $this->assertInstanceOf(Route::class, $usersUpdateRoute);
@@ -192,13 +155,7 @@ class RouterTest extends TestCase
                 fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
             );
 
-        $reflection = new ReflectionObject($router);
-        $property = $reflection->getProperty('routeRegistry');
-
-        /** @var RouteRegistry $routeRegistry */
-        $routeRegistry = $property->getValue($router);
-
-        $route = $routeRegistry->getRouteByName(new Name('dashboard'));
+        $route = $router->routeRegistry->getRouteByName(new Name('dashboard'));
 
         $this->assertInstanceOf(Route::class, $route);
 
@@ -223,5 +180,26 @@ class RouterTest extends TestCase
             new Path('/login'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('duplicated'));
+    }
+
+    public function test_it_should_register_a_route_inside_a_group_with_middleware(): void
+    {
+        $router = new Router;
+
+        $router->group(function (RouteGroup $group): void {
+            $group->get(
+                new Path('/'),
+                fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+            )->setName(new Name('home'));
+        })->addMiddleware(
+            fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
+        );
+
+        $route = $router->routeRegistry->getRouteByName(new Name('home'));
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals(HttpMethod::GET, $route->method);
+        $this->assertEquals('/', (string) $route->path);
+        $this->assertNotEmpty($route->middlewares);
     }
 }

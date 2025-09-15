@@ -2,20 +2,17 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Application;
+namespace YSOCode\Berry\Domain\Entities;
 
 use Closure;
-use YSOCode\Berry\Domain\Entities\Route;
-use YSOCode\Berry\Domain\Entities\RouteGroup;
-use YSOCode\Berry\Domain\Entities\RouteRegistry;
-use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
-final readonly class Router
+final readonly class RouteGroup
 {
     public RouteRegistry $routeRegistry;
 
@@ -64,37 +61,17 @@ final readonly class Router
         return $this->routeRegistry->addRoute(HttpMethod::PATCH, $path, $handler);
     }
 
-    public function getMatchedRoute(ServerRequest $request): Route|Error
-    {
-        $path = $request->uri->path ?? new Path('/');
-
-        $route = $this->routeRegistry->getRouteByMethodAndPath(
-            $request->method,
-            $path,
-        );
-
-        if ($route instanceof Route) {
-            return $route;
-        }
-
-        if ($this->routeRegistry->hasRouteByPath($path)) {
-            return new Error('Method not allowed.');
-        }
-
-        return new Error('Route not found.');
-    }
-
     /**
-     * @param  Closure(RouteGroup $group): void  $callback
+     * @param  class-string<MiddlewareInterface>|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
      */
-    public function group(Closure $callback): RouteGroup
+    public function addMiddleware(string|Closure $middleware): self
     {
-        $group = new RouteGroup;
+        foreach ($this->routeRegistry->routeCollections as $routeCollection) {
+            foreach ($routeCollection->routes as $route) {
+                $route->addMiddleware($middleware);
+            }
+        }
 
-        $callback($group);
-
-        $this->routeRegistry->addGroup($group);
-
-        return $group;
+        return $this;
     }
 }

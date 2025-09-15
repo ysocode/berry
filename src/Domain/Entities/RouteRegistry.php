@@ -17,12 +17,11 @@ use YSOCode\Berry\Infra\Http\ServerRequest;
 final class RouteRegistry
 {
     /**
-     * @var array<string, RouteCollection>
+     * @param  array<string, RouteCollection>  $routeCollections
      */
-    private array $routeCollections = [];
-
-    public function __construct()
-    {
+    public function __construct(
+        private(set) array $routeCollections = []
+    ) {
         foreach (HttpMethod::getValues() as $method) {
             $routeCollection = new RouteCollection;
             $routeCollection->on(RouteCollectionEvent::ROUTE_NAME_CHANGED, $this->assertUniqueName(...));
@@ -91,5 +90,26 @@ final class RouteRegistry
     public function hasRouteByPath(Path $path): bool
     {
         return array_any($this->routeCollections, fn ($routeCollection): bool => $routeCollection->hasRouteByPath($path));
+    }
+
+    public function addGroup(RouteGroup $group): void
+    {
+        foreach ($group->routeRegistry->routeCollections as $method => $routeCollection) {
+            $localRouteCollection = $this->routeCollections[$method];
+
+            foreach ($routeCollection->routes as $route) {
+                if ($localRouteCollection->hasRouteByPath($route->path)) {
+                    throw new RuntimeException(
+                        sprintf('Route %s %s already exists.', $method, $route->path)
+                    );
+                }
+
+                if ($route->name instanceof Name && $this->hasRouteByName($route->name)) {
+                    throw new RuntimeException(sprintf('Route name "%s" already exists.', $route->name));
+                }
+
+                $localRouteCollection->addRoute($route);
+            }
+        }
     }
 }
