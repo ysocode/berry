@@ -15,7 +15,6 @@ use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\Name;
 use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
@@ -24,37 +23,18 @@ use YSOCode\Berry\Infra\Http\UriFactory;
 
 final class DispatcherTest extends TestCase
 {
-    private function createServerRequest(): ServerRequest
+    public function test_it_should_dispatch_request(): void
     {
-        return new ServerRequest(
+        $request = new ServerRequest(
             HttpMethod::GET,
             new UriFactory()->createFromString('https://example.com')
         );
-    }
 
-    private function createDispatcher(): Dispatcher
-    {
         $router = new Router;
 
-        $router->get(
-            new Path('/'),
-            DummyHandler::class
-        )
-            ->setName(new Name('home'))
-            ->addMiddleware(
-                fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle(
-                    $request->withHeader(new Header(new HeaderName('X-Request-ID'), ['req-123456']))
-                        ->withHeader(new Header(new HeaderName('X-Client-Version'), ['1.0.0']))
-                )
-            );
+        $router->get(new Path('/'), DummyHandler::class);
 
-        return new Dispatcher(new Container, $router);
-    }
-
-    public function test_it_should_dispatch_request(): void
-    {
-        $request = $this->createServerRequest();
-        $dispatcher = $this->createDispatcher();
+        $dispatcher = new Dispatcher(new Container, $router);
 
         $middlewareStack = $dispatcher->dispatch($request);
         if ($middlewareStack instanceof Error) {
@@ -63,7 +43,40 @@ final class DispatcherTest extends TestCase
 
         $response = $middlewareStack->handle($request);
 
-        $expectedBody = json_encode(['requestId' => 'req-123456'], JSON_PRETTY_PRINT);
+        $this->assertEquals(HttpStatus::OK, $response->status);
+        $this->assertEquals('Hello, World!', (string) $response->body);
+    }
+
+    public function test_it_should_dispatch_request_with_middleware(): void
+    {
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            new UriFactory()->createFromString('https://example.com')
+        );
+
+        $router = new Router;
+
+        $router->get(
+            new Path('/'),
+            DummyHandler::class
+        )
+            ->addMiddleware(
+                fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle(
+                    $request->withHeader(new Header(new HeaderName('X-Request-ID'), ['req-123456']))
+                        ->withHeader(new Header(new HeaderName('X-Client-Version'), ['1.0.0']))
+                )
+            );
+
+        $dispatcher = new Dispatcher(new Container, $router);
+
+        $middlewareStack = $dispatcher->dispatch($request);
+        if ($middlewareStack instanceof Error) {
+            throw new RuntimeException((string) $middlewareStack);
+        }
+
+        $response = $middlewareStack->handle($request);
+
+        $expectedBody = json_encode(['requestId' => 'req-123456']);
         if (! is_string($expectedBody)) {
             throw new RuntimeException('Expected body to be string.');
         }

@@ -21,7 +21,7 @@ final class DummyHandler implements RequestHandlerInterface
 
         if ($requestIdHeader instanceof Header) {
             [$requestId] = $requestIdHeader->values;
-            $bodyContent = json_encode(['requestId' => $requestId], JSON_PRETTY_PRINT);
+            $bodyContent = json_encode(['requestId' => $requestId]);
             if (! is_string($bodyContent)) {
                 return new Response(HttpStatus::BAD_REQUEST);
             }
