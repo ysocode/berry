@@ -273,7 +273,7 @@ final class ServerRequestTest extends TestCase
             new Attribute(new AttributeName('users'), $users),
         );
 
-        $usersAttribute = $newServerRequest->attributes['users'];
+        $usersAttribute = $newServerRequest->getAttribute(new AttributeName('users'));
 
         $this->assertNotSame($request, $newServerRequest);
         $this->assertInstanceOf(Attribute::class, $usersAttribute);

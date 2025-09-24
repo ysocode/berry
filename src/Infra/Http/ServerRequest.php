@@ -118,6 +118,11 @@ final class ServerRequest
         return isset($this->attributes[(string) $name]);
     }
 
+    public function getAttribute(AttributeName $name): ?Attribute
+    {
+        return $this->attributes[(string) $name] ?? null;
+    }
+
     public function withAttribute(Attribute $attribute): self
     {
         $new = clone $this;

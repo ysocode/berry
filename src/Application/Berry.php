@@ -7,6 +7,7 @@ namespace YSOCode\Berry\Application;
 use Closure;
 use Psr\Container\ContainerInterface;
 use YSOCode\Berry\Domain\Entities\Route;
+use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
 use YSOCode\Berry\Domain\ValueObjects\Path;
@@ -17,7 +18,6 @@ use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\ServerRequestFactory;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class Berry
 {
@@ -27,18 +27,26 @@ final class Berry
 
     private readonly Dispatcher $dispatcher;
 
+    private readonly ResponseEmitter $responseEmitter;
+
     /**
      * @param  array<class-string<MiddlewareInterface>|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response>  $middlewares
      */
     public function __construct(
         ContainerInterface $container,
+        ?Router $router = null,
+        ?MiddlewareStackBuilder $middlewareStackBuilder = null,
+        ?Dispatcher $dispatcher = null,
+        ?ResponseEmitter $responseEmitter = null,
         private(set) array $middlewares = []
     ) {
-        $this->router = new Router;
+        $this->router = $router ?? new Router;
 
-        $this->middlewareStackBuilder = new MiddlewareStackBuilder($container);
+        $this->middlewareStackBuilder = $middlewareStackBuilder ?? new MiddlewareStackBuilder($container);
 
-        $this->dispatcher = new Dispatcher($container, $this->router);
+        $this->dispatcher = $dispatcher ?? new Dispatcher($container, $this->router);
+
+        $this->responseEmitter = $responseEmitter ?? new ResponseEmitter;
     }
 
     /**
@@ -82,6 +90,14 @@ final class Berry
     }
 
     /**
+     * @param  Closure(RouteGroup $group): void  $callback
+     */
+    public function group(Closure $callback): RouteGroup
+    {
+        return $this->router->group($callback);
+    }
+
+    /**
      * @param  class-string<MiddlewareInterface>|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response  $middleware
      */
     public function addMiddleware(string|Closure $middleware): self
@@ -91,9 +107,9 @@ final class Berry
         return $this;
     }
 
-    public function run(): void
+    public function run(?ServerRequest $request = null): void
     {
-        $request = new ServerRequestFactory()->fromGlobals();
+        $request ??= new ServerRequestFactory()->fromGlobals();
 
         $middlewareStack = $this->dispatcher->dispatch($request);
         if ($middlewareStack instanceof Error) {
@@ -103,17 +119,15 @@ final class Berry
             $response = $finalMiddlewareStack->handle($request);
         }
 
-        new ResponseEmitter()->emit($response);
+        $this->responseEmitter->emit($response);
     }
 
     private function handleError(Error $error): Response
     {
-        $body = new StreamFactory()->createFromString((string) $error);
-
         return match (true) {
-            $error->equals(new Error('Method not allowed.')) => new Response(HttpStatus::METHOD_NOT_ALLOWED, body: $body),
-            $error->equals(new Error('Route not found.')) => new Response(HttpStatus::NOT_FOUND, body: $body),
-            default => new Response(HttpStatus::INTERNAL_SERVER_ERROR, body: $body),
+            $error->equals(new Error('Method not allowed.')) => new Response(HttpStatus::METHOD_NOT_ALLOWED),
+            $error->equals(new Error('Route not found.')) => new Response(HttpStatus::NOT_FOUND),
+            default => new Response(HttpStatus::INTERNAL_SERVER_ERROR),
         };
     }
 }
