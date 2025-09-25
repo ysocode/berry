@@ -21,8 +21,9 @@ final readonly class Dispatcher
     public function __construct(
         private ContainerInterface $container,
         private Router $router,
+        ?MiddlewareStackBuilder $middlewareStackBuilder = null
     ) {
-        $this->middlewareStackBuilder = new MiddlewareStackBuilder($this->container);
+        $this->middlewareStackBuilder = $middlewareStackBuilder ?? new MiddlewareStackBuilder($this->container);
     }
 
     public function dispatch(ServerRequest $request): RequestHandlerInterface|Error
