@@ -20,7 +20,7 @@ final class RouteGroup
     public private(set) array $routes = [];
 
     public function __construct(
-        private(set) ?Path $prefix
+        private(set) ?Path $prefix = null
     ) {}
 
     /**

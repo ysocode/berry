@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use RuntimeException;
 use YSOCode\Berry\Domain\Entities\Route;
+use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
@@ -94,6 +95,26 @@ final class RouteRegistryTest extends TestCase
         $this->assertEquals('/users/8847', (string) $usersUpdatePatchRoute->path);
     }
 
+    public function test_it_should_not_register_a_duplicated_route_path_for_the_same_http_method(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Route GET / already exists.');
+
+        $routeRegistry = new RouteRegistry;
+
+        $routeRegistry->addRoute(
+            HttpMethod::GET,
+            new Path('/'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        );
+
+        $routeRegistry->addRoute(
+            HttpMethod::GET,
+            new Path('/'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        );
+    }
+
     public function test_it_should_not_register_a_duplicated_route_name(): void
     {
         $this->expectException(RuntimeException::class);
@@ -172,5 +193,65 @@ final class RouteRegistryTest extends TestCase
         )->setName(new Name('home'));
 
         $this->assertTrue($routeRegistry->hasRouteByPath(new Path('/')));
+    }
+
+    public function test_it_should_add_a_route_group(): void
+    {
+        $routeGroup = new RouteGroup;
+        $routeGroup->get(
+            new Path('/'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        )->setName(new Name('home'));
+
+        $routeRegistry = new RouteRegistry;
+        $routeRegistry->addGroup($routeGroup);
+
+        $route = $routeRegistry->getRouteByName(new Name('home'));
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals(HttpMethod::GET, $route->method);
+        $this->assertEquals('/', (string) $route->path);
+    }
+
+    public function test_it_should_not_register_a_duplicated_route_path_for_the_same_http_method_from_route_group(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Route GET / already exists.');
+
+        $routeGroup = new RouteGroup;
+
+        $routeGroup->get(
+            new Path('/'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        );
+
+        $routeGroup->get(
+            new Path('/'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        );
+
+        $routeRegistry = new RouteRegistry;
+        $routeRegistry->addGroup($routeGroup);
+    }
+
+    public function test_it_should_not_register_a_duplicated_route_name_from_route_group(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Route name "duplicated" already exists.');
+
+        $routeGroup = new RouteGroup;
+
+        $routeGroup->get(
+            new Path('/'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        )->setName(new Name('duplicated'));
+
+        $routeGroup->get(
+            new Path('/login'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        )->setName(new Name('duplicated'));
+
+        $routeRegistry = new RouteRegistry;
+        $routeRegistry->addGroup($routeGroup);
     }
 }
