@@ -9,6 +9,7 @@ use RuntimeException;
 use YSOCode\Berry\Application\Router;
 use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteGroup;
+use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
 use YSOCode\Berry\Domain\ValueObjects\Name;
@@ -117,6 +118,35 @@ class RouterTest extends TestCase
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals(HttpMethod::GET, $route->method);
         $this->assertEquals('/', (string) $route->path);
+    }
+
+    public function test_it_should_return_error_when_method_not_allowed(): void
+    {
+        $router = new Router;
+
+        $router->get(
+            new Path('/'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        );
+
+        $result = $router->getMatchedRoute(
+            new ServerRequest(HttpMethod::POST, new UriFactory()->createFromString('https://example.com'))
+        );
+
+        $this->assertInstanceOf(Error::class, $result);
+        $this->assertEquals('Method not allowed.', (string) $result);
+    }
+
+    public function test_it_should_return_error_when_route_not_found(): void
+    {
+        $router = new Router;
+
+        $result = $router->getMatchedRoute(
+            new ServerRequest(HttpMethod::GET, new UriFactory()->createFromString('https://example.com/missing'))
+        );
+
+        $this->assertInstanceOf(Error::class, $result);
+        $this->assertEquals('Route not found.', (string) $result);
     }
 
     public function test_it_should_not_register_a_duplicated_route_name(): void
