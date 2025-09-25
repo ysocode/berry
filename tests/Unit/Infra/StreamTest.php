@@ -6,7 +6,7 @@ namespace Tests\Unit\Infra;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
+use ReflectionObject;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\StreamResource;
 use YSOCode\Berry\Infra\Stream\Stream;
@@ -27,13 +27,13 @@ final class StreamTest extends TestCase
     {
         $stream = $this->createStream();
 
-        $refStream = new ReflectionClass($stream);
+        $reflection = new ReflectionObject($stream);
 
-        $refIsWritable = $refStream->getProperty('isWritable');
-        $refIsWritable->setValue($stream, false);
+        $isWritable = $reflection->getProperty('isWritable');
+        $isWritable->setValue($stream, false);
 
-        $refIsSeekable = $refStream->getProperty('isSeekable');
-        $refIsSeekable->setValue($stream, false);
+        $isSeekable = $reflection->getProperty('isSeekable');
+        $isSeekable->setValue($stream, false);
 
         return $stream;
     }
@@ -42,13 +42,13 @@ final class StreamTest extends TestCase
     {
         $stream = $this->createStream();
 
-        $refStream = new ReflectionClass($stream);
+        $reflection = new ReflectionObject($stream);
 
-        $refIsReadable = $refStream->getProperty('isReadable');
-        $refIsReadable->setValue($stream, false);
+        $isReadable = $reflection->getProperty('isReadable');
+        $isReadable->setValue($stream, false);
 
-        $refIsSeekable = $refStream->getProperty('isSeekable');
-        $refIsSeekable->setValue($stream, false);
+        $isSeekable = $reflection->getProperty('isSeekable');
+        $isSeekable->setValue($stream, false);
 
         return $stream;
     }
