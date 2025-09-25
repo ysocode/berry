@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Integration;
 
-use Closure;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use YSOCode\Berry\Application\Router;
@@ -18,6 +17,7 @@ use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\UriFactory;
+use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 class RouterTest extends TestCase
 {
@@ -101,30 +101,7 @@ class RouterTest extends TestCase
         $this->assertEquals('/users/8847', (string) $route->path);
     }
 
-    public function test_it_should_register_a_named_route(): void
-    {
-        $router = new Router;
-
-        $router->get(
-            new Path('/'),
-            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-        )->setName(new Name('home'));
-
-        $router->put(
-            new Path('/users/8847'),
-            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-        )->setName(new Name('users.update.put'));
-
-        $homeRoute = $router->routeRegistry->getRouteByName(new Name('home'));
-        $usersUpdateRoute = $router->routeRegistry->getRouteByName(new Name('users.update.put'));
-
-        $this->assertInstanceOf(Route::class, $homeRoute);
-        $this->assertInstanceOf(Route::class, $usersUpdateRoute);
-        $this->assertEquals('home', (string) $homeRoute->name);
-        $this->assertEquals('users.update.put', (string) $usersUpdateRoute->name);
-    }
-
-    public function test_it_should_return_a_route_when_exists(): void
+    public function test_it_should_return_a_route_when_request_matches(): void
     {
         $router = new Router;
 
@@ -140,28 +117,6 @@ class RouterTest extends TestCase
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals(HttpMethod::GET, $route->method);
         $this->assertEquals('/', (string) $route->path);
-    }
-
-    public function test_it_should_add_middleware_to_a_route(): void
-    {
-        $router = new Router;
-
-        $router->get(
-            new Path('/dashboard'),
-            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
-        )
-            ->setName(new Name('dashboard'))
-            ->addMiddleware(
-                fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
-            );
-
-        $route = $router->routeRegistry->getRouteByName(new Name('dashboard'));
-
-        $this->assertInstanceOf(Route::class, $route);
-
-        $middleware = $route->middlewares[0];
-
-        $this->assertInstanceOf(Closure::class, $middleware);
     }
 
     public function test_it_should_not_register_a_duplicated_route_name(): void
@@ -182,6 +137,24 @@ class RouterTest extends TestCase
         )->setName(new Name('duplicated'));
     }
 
+    public function test_it_should_register_a_route_inside_a_group(): void
+    {
+        $router = new Router;
+
+        $router->group(function (RouteGroup $group): void {
+            $group->get(
+                new Path('/'),
+                fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+            )->setName(new Name('home'));
+        });
+
+        $route = $router->routeRegistry->getRouteByName(new Name('home'));
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals(HttpMethod::GET, $route->method);
+        $this->assertEquals('/', (string) $route->path);
+    }
+
     public function test_it_should_register_a_route_inside_a_group_with_middleware(): void
     {
         $router = new Router;
@@ -192,7 +165,13 @@ class RouterTest extends TestCase
                 fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
             )->setName(new Name('home'));
         })->addMiddleware(
-            fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
+            function (ServerRequest $request, RequestHandlerInterface $handler): Response {
+                $response = $handler->handle($request);
+
+                return $response->withBody(
+                    new StreamFactory()->createFromString('Hello, World!')
+                );
+            }
         );
 
         $route = $router->routeRegistry->getRouteByName(new Name('home'));
@@ -201,5 +180,23 @@ class RouterTest extends TestCase
         $this->assertEquals(HttpMethod::GET, $route->method);
         $this->assertEquals('/', (string) $route->path);
         $this->assertNotEmpty($route->middlewares);
+    }
+
+    public function test_it_should_register_a_route_inside_a_group_with_prefix(): void
+    {
+        $router = new Router;
+
+        $router->group(function (RouteGroup $group): void {
+            $group->get(
+                new Path('/list'),
+                fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+            )->setName(new Name('users.list'));
+        }, new Path('/users'));
+
+        $route = $router->routeRegistry->getRouteByName(new Name('users.list'));
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals(HttpMethod::GET, $route->method);
+        $this->assertEquals('/users/list', (string) $route->path);
     }
 }

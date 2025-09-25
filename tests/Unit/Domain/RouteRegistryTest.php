@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use RuntimeException;
 use YSOCode\Berry\Domain\Entities\Route;
-use YSOCode\Berry\Domain\Entities\RouteCollection;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
@@ -23,10 +22,11 @@ final class RouteRegistryTest extends TestCase
     {
         $routeRegistry = new RouteRegistry;
         $reflection = new ReflectionObject($routeRegistry);
-        $property = $reflection->getProperty('routeCollections');
 
-        /** @var array<string, RouteCollection> $routeCollections */
-        $routeCollections = $property->getValue($routeRegistry);
+        $routeCollections = $reflection->getProperty('routeCollections')->getValue($routeRegistry);
+        if (! is_array($routeCollections)) {
+            throw new RuntimeException('Route collections should be an array.');
+        }
 
         foreach (HttpMethod::getValues() as $method) {
             $this->assertArrayHasKey($method, $routeCollections);

@@ -19,7 +19,7 @@ final class RouteCollection
     /**
      * @var array<Route>
      */
-    public array $routes = [];
+    public private(set) array $routes = [];
 
     /**
      * @var array<string, int>

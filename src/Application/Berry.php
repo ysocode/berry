@@ -92,9 +92,9 @@ final class Berry
     /**
      * @param  Closure(RouteGroup $group): void  $callback
      */
-    public function group(Closure $callback): RouteGroup
+    public function group(Closure $callback, ?Path $prefix = null): RouteGroup
     {
-        return $this->router->group($callback);
+        return $this->router->group($callback, $prefix);
     }
 
     /**

@@ -94,22 +94,20 @@ final class RouteRegistry
 
     public function addGroup(RouteGroup $group): void
     {
-        foreach ($group->routeRegistry->routeCollections as $method => $routeCollection) {
-            $localRouteCollection = $this->routeCollections[$method];
+        foreach ($group->routes as $route) {
+            $routeCollection = $this->routeCollections[$route->method->value];
 
-            foreach ($routeCollection->routes as $route) {
-                if ($localRouteCollection->hasRouteByPath($route->path)) {
-                    throw new RuntimeException(
-                        sprintf('Route %s %s already exists.', $method, $route->path)
-                    );
-                }
-
-                if ($route->name instanceof Name && $this->hasRouteByName($route->name)) {
-                    throw new RuntimeException(sprintf('Route name "%s" already exists.', $route->name));
-                }
-
-                $localRouteCollection->addRoute($route);
+            if ($routeCollection->hasRouteByPath($route->path)) {
+                throw new RuntimeException(
+                    sprintf('Route %s %s already exists.', $route->method->value, $route->path)
+                );
             }
+
+            if ($route->name instanceof Name && $this->hasRouteByName($route->name)) {
+                throw new RuntimeException(sprintf('Route name "%s" already exists.', $route->name));
+            }
+
+            $routeCollection->addRoute($route);
         }
     }
 }

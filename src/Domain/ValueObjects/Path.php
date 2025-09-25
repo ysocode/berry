@@ -45,6 +45,14 @@ final readonly class Path implements Stringable
         return $this->value === $other->value;
     }
 
+    public function prepend(self $other): self
+    {
+        $otherValue = rtrim($other->value, '/');
+        $current = '/'.ltrim($this->value, '/');
+
+        return new self($otherValue.$current);
+    }
+
     public function __toString(): string
     {
         return $this->value;
