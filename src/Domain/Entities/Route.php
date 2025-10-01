@@ -26,7 +26,7 @@ final class Route
      */
     public function __construct(
         public readonly HttpMethod $method,
-        public readonly Path $path,
+        private(set) Path $path,
         public readonly string|Closure $handler,
         private(set) ?Name $name = null,
         private(set) array $middlewares = []
@@ -50,6 +50,13 @@ final class Route
         foreach ($this->listeners[$event->name] ?? [] as $listener) {
             $listener($this, $data);
         }
+    }
+
+    public function addPrefix(Path $prefix): self
+    {
+        $this->path = $this->path->prepend($prefix);
+
+        return $this;
     }
 
     public function setName(Name $name): self

@@ -88,9 +88,9 @@ final readonly class Router
     /**
      * @param  Closure(RouteGroup $group): void  $callback
      */
-    public function group(Closure $callback, ?Path $prefix = null): RouteGroup
+    public function group(Closure $callback): RouteGroup
     {
-        $group = new RouteGroup($prefix);
+        $group = new RouteGroup;
 
         $callback($group);
 

@@ -34,7 +34,7 @@ final class RouteRegistryTest extends TestCase
         }
     }
 
-    public function test_it_should_register_a_route(): void
+    public function test_it_should_register_a_get_route(): void
     {
         $routeRegistry = new RouteRegistry;
 
@@ -44,11 +44,33 @@ final class RouteRegistryTest extends TestCase
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 
+        $route = $routeRegistry->getRouteByName(new Name('home'));
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals(HttpMethod::GET, $route->method);
+        $this->assertEquals('/', (string) $route->path);
+    }
+
+    public function test_it_should_register_a_put_route(): void
+    {
+        $routeRegistry = new RouteRegistry;
+
         $routeRegistry->addRoute(
             HttpMethod::PUT,
             new Path('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.update.put'));
+
+        $route = $routeRegistry->getRouteByName(new Name('users.update.put'));
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals(HttpMethod::PUT, $route->method);
+        $this->assertEquals('/users/8847', (string) $route->path);
+    }
+
+    public function test_it_should_register_a_post_route(): void
+    {
+        $routeRegistry = new RouteRegistry;
 
         $routeRegistry->addRoute(
             HttpMethod::POST,
@@ -56,11 +78,33 @@ final class RouteRegistryTest extends TestCase
             fn (ServerRequest $request): Response => new Response(HttpStatus::CREATED)
         )->setName(new Name('signUp'));
 
+        $route = $routeRegistry->getRouteByName(new Name('signUp'));
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals(HttpMethod::POST, $route->method);
+        $this->assertEquals('/sign-up', (string) $route->path);
+    }
+
+    public function test_it_should_register_a_delete_route(): void
+    {
+        $routeRegistry = new RouteRegistry;
+
         $routeRegistry->addRoute(
             HttpMethod::DELETE,
             new Path('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.destroy'));
+
+        $route = $routeRegistry->getRouteByName(new Name('users.destroy'));
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals(HttpMethod::DELETE, $route->method);
+        $this->assertEquals('/users/8847', (string) $route->path);
+    }
+
+    public function test_it_should_register_a_patch_route(): void
+    {
+        $routeRegistry = new RouteRegistry;
 
         $routeRegistry->addRoute(
             HttpMethod::PATCH,
@@ -68,31 +112,11 @@ final class RouteRegistryTest extends TestCase
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.update.patch'));
 
-        $homeRoute = $routeRegistry->getRouteByName(new Name('home'));
-        $usersUpdatePutRoute = $routeRegistry->getRouteByName(new Name('users.update.put'));
-        $signUpRoute = $routeRegistry->getRouteByName(new Name('signUp'));
-        $destroyRoute = $routeRegistry->getRouteByName(new Name('users.destroy'));
-        $usersUpdatePatchRoute = $routeRegistry->getRouteByName(new Name('users.update.patch'));
+        $route = $routeRegistry->getRouteByName(new Name('users.update.patch'));
 
-        $this->assertInstanceOf(Route::class, $homeRoute);
-        $this->assertEquals(HttpMethod::GET, $homeRoute->method);
-        $this->assertEquals('/', (string) $homeRoute->path);
-
-        $this->assertInstanceOf(Route::class, $usersUpdatePutRoute);
-        $this->assertEquals(HttpMethod::PUT, $usersUpdatePutRoute->method);
-        $this->assertEquals('/users/8847', (string) $usersUpdatePutRoute->path);
-
-        $this->assertInstanceOf(Route::class, $signUpRoute);
-        $this->assertEquals(HttpMethod::POST, $signUpRoute->method);
-        $this->assertEquals('/sign-up', (string) $signUpRoute->path);
-
-        $this->assertInstanceOf(Route::class, $destroyRoute);
-        $this->assertEquals(HttpMethod::DELETE, $destroyRoute->method);
-        $this->assertEquals('/users/8847', (string) $destroyRoute->path);
-
-        $this->assertInstanceOf(Route::class, $usersUpdatePatchRoute);
-        $this->assertEquals(HttpMethod::PATCH, $usersUpdatePatchRoute->method);
-        $this->assertEquals('/users/8847', (string) $usersUpdatePatchRoute->path);
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals(HttpMethod::PATCH, $route->method);
+        $this->assertEquals('/users/8847', (string) $route->path);
     }
 
     public function test_it_should_not_register_a_duplicated_route_path_for_the_same_http_method(): void

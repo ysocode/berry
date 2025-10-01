@@ -19,10 +19,6 @@ final class RouteGroup
      */
     public private(set) array $routes = [];
 
-    public function __construct(
-        private(set) ?Path $prefix = null
-    ) {}
-
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
@@ -68,15 +64,20 @@ final class RouteGroup
      */
     private function addRoute(HttpMethod $method, Path $path, string|Closure $handler): Route
     {
-        if ($this->prefix instanceof Path) {
-            $path = $path->prepend($this->prefix);
-        }
-
         $route = new Route($method, $path, $handler);
 
         $this->routes[] = $route;
 
         return $route;
+    }
+
+    public function addPrefix(Path $prefix): self
+    {
+        foreach ($this->routes as $route) {
+            $route->addPrefix($prefix);
+        }
+
+        return $this;
     }
 
     /**

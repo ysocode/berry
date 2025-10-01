@@ -221,7 +221,7 @@ class RouterTest extends TestCase
                 new Path('/list'),
                 fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
             )->setName(new Name('users.list'));
-        }, new Path('/users'));
+        })->addPrefix(new Path('/users'));
 
         $route = $router->routeRegistry->getRouteByName(new Name('users.list'));
 
