@@ -63,8 +63,7 @@ final class DispatcherTest extends TestCase
             ->addMiddleware(
                 fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle(
                     $request->withHeader(new Header(new HeaderName('X-Request-ID'), ['req-123456']))
-                        ->withHeader(new Header(new HeaderName('X-Client-Version'), ['1.0.0']))
-                )
+                ),
             );
 
         $dispatcher = new Dispatcher(new Container, $router);
