@@ -26,9 +26,8 @@ final class Stream implements Stringable
 
     public private(set) ?int $size;
 
-    public function __construct(
-        StreamResource $resource
-    ) {
+    public function __construct(StreamResource $resource)
+    {
         $this->resource = $resource;
 
         $this->extractParts();

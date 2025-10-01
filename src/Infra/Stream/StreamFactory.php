@@ -11,7 +11,7 @@ use YSOCode\Berry\Domain\ValueObjects\StreamResource;
 
 final readonly class StreamFactory
 {
-    public function createFromString(string $data = ''): Stream
+    public function createFromString(?string $data = null): Stream
     {
         $resource = fopen('php://temp', 'w+b');
         if (! is_resource($resource)) {
@@ -19,7 +19,11 @@ final readonly class StreamFactory
         }
 
         $stream = new Stream(new StreamResource($resource));
-        $stream->write($data);
+
+        if (is_string($data)) {
+            $stream->write($data);
+        }
+
         $stream->rewind();
 
         return $stream;
