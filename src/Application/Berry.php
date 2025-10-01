@@ -111,11 +111,11 @@ final class Berry
     {
         $request ??= new ServerRequestFactory()->fromGlobals();
 
-        $middlewareStack = $this->dispatcher->dispatch($request);
-        if ($middlewareStack instanceof Error) {
-            $response = $this->handleError($middlewareStack);
+        $routeMiddlewareStack = $this->dispatcher->dispatch($request);
+        if ($routeMiddlewareStack instanceof Error) {
+            $response = $this->handleError($routeMiddlewareStack);
         } else {
-            $finalMiddlewareStack = $this->middlewareStackBuilder->build($middlewareStack, $this->middlewares);
+            $finalMiddlewareStack = $this->middlewareStackBuilder->build($routeMiddlewareStack, $this->middlewares);
             $response = $finalMiddlewareStack->handle($request);
         }
 
