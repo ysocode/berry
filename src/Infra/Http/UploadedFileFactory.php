@@ -7,7 +7,7 @@ namespace YSOCode\Berry\Infra\Http;
 use YSOCode\Berry\Domain\ValueObjects\FileName;
 use YSOCode\Berry\Domain\ValueObjects\FilePath;
 use YSOCode\Berry\Domain\ValueObjects\MimeType;
-use YSOCode\Berry\Domain\ValueObjects\UploadStatus;
+use YSOCode\Berry\Domain\ValueObjects\UploadFileStatus;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class UploadedFileFactory
@@ -34,7 +34,7 @@ final class UploadedFileFactory
 
         return new UploadedFile(
             $stream,
-            UploadStatus::from($spec['error']),
+            UploadFileStatus::from($spec['error']),
             $name,
             $type,
             true,

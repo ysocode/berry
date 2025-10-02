@@ -11,7 +11,7 @@ use YSOCode\Berry\Domain\ValueObjects\FileName;
 use YSOCode\Berry\Domain\ValueObjects\MimeType;
 use YSOCode\Berry\Domain\ValueObjects\StreamResource;
 use YSOCode\Berry\Domain\ValueObjects\TargetFilePath;
-use YSOCode\Berry\Domain\ValueObjects\UploadStatus;
+use YSOCode\Berry\Domain\ValueObjects\UploadFileStatus;
 use YSOCode\Berry\Infra\Http\UploadedFile;
 use YSOCode\Berry\Infra\Stream\Stream;
 
@@ -57,13 +57,13 @@ final class UploadedFileTest extends TestCase
 
             $uploadedFile = new UploadedFile(
                 $stream,
-                UploadStatus::OK,
+                UploadFileStatus::OK,
                 new FileName('test.txt'),
                 new MimeType('text/plain'),
             );
 
             $this->assertEquals('Hello, world!', (string) $uploadedFile->stream);
-            $this->assertEquals(UploadStatus::OK, $uploadedFile->status);
+            $this->assertEquals(UploadFileStatus::OK, $uploadedFile->status);
             $this->assertEquals('test.txt', (string) $uploadedFile->name);
             $this->assertEquals('text/plain', (string) $uploadedFile->type);
         } finally {
@@ -81,7 +81,7 @@ final class UploadedFileTest extends TestCase
 
             $uploadedFile = new UploadedFile(
                 $stream,
-                UploadStatus::OK,
+                UploadFileStatus::OK,
                 new FileName('test.txt'),
                 new MimeType('text/plain'),
             );
@@ -117,7 +117,7 @@ final class UploadedFileTest extends TestCase
 
             $uploadedFile = new UploadedFile(
                 $stream,
-                UploadStatus::OK,
+                UploadFileStatus::OK,
                 new FileName('test.txt'),
                 new MimeType('text/plain'),
             );
@@ -148,17 +148,17 @@ final class UploadedFileTest extends TestCase
     {
         [$tempDir, $targetFile] = $this->getTargetFilePathParts();
 
-        $uploadStatus = UploadStatus::NO_FILE;
+        $status = UploadFileStatus::NO_FILE;
 
         $uploadedFile = new UploadedFile(
             null,
-            $uploadStatus,
+            $status,
             null,
             null,
         );
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage($uploadStatus->getMessage());
+        $this->expectExceptionMessage($status->getMessage());
 
         $uploadedFile->moveTo(
             new TargetFilePath(
@@ -178,7 +178,7 @@ final class UploadedFileTest extends TestCase
 
             $uploadedFile = new UploadedFile(
                 $stream,
-                UploadStatus::OK,
+                UploadFileStatus::OK,
                 new FileName('test.txt'),
                 new MimeType('text/plain'),
             );
@@ -207,7 +207,7 @@ final class UploadedFileTest extends TestCase
 
             $uploadedFile = new UploadedFile(
                 $stream,
-                UploadStatus::OK,
+                UploadFileStatus::OK,
                 new FileName('test.txt'),
                 new MimeType('text/plain'),
                 true

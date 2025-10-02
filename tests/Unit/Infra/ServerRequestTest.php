@@ -13,7 +13,7 @@ use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpVersion;
 use YSOCode\Berry\Domain\ValueObjects\RequestTarget;
-use YSOCode\Berry\Domain\ValueObjects\UploadStatus;
+use YSOCode\Berry\Domain\ValueObjects\UploadFileStatus;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\UploadedFile;
 use YSOCode\Berry\Infra\Http\UploadedFileFactory;
@@ -237,7 +237,7 @@ final class ServerRequestTest extends TestCase
 
             $this->assertNotSame($request, $newServerRequest);
             $this->assertInstanceOf(UploadedFile::class, $docUploadedFile);
-            $this->assertEquals(UploadStatus::OK, $docUploadedFile->status);
+            $this->assertEquals(UploadFileStatus::OK, $docUploadedFile->status);
             $this->assertEquals('doc.pdf', (string) $docUploadedFile->name);
             $this->assertEquals('application/pdf', (string) $docUploadedFile->type);
             $this->assertTrue($docUploadedFile->fromWebServer);

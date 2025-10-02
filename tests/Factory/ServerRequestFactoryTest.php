@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
-use YSOCode\Berry\Domain\ValueObjects\UploadStatus;
+use YSOCode\Berry\Domain\ValueObjects\UploadFileStatus;
 use YSOCode\Berry\Infra\Http\ServerRequestFactory;
 use YSOCode\Berry\Infra\Http\UploadedFile;
 
@@ -167,7 +167,7 @@ final class ServerRequestFactoryTest extends TestCase
             $docUploadedFile = $request->uploadedFiles['doc'];
 
             $this->assertInstanceOf(UploadedFile::class, $docUploadedFile);
-            $this->assertEquals(UploadStatus::OK, $docUploadedFile->status);
+            $this->assertEquals(UploadFileStatus::OK, $docUploadedFile->status);
             $this->assertEquals('doc.pdf', (string) $docUploadedFile->name);
             $this->assertEquals('application/pdf', (string) $docUploadedFile->type);
             $this->assertTrue($docUploadedFile->fromWebServer);

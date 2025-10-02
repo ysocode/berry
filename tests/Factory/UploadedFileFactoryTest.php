@@ -6,7 +6,7 @@ namespace Tests\Factory;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use YSOCode\Berry\Domain\ValueObjects\UploadStatus;
+use YSOCode\Berry\Domain\ValueObjects\UploadFileStatus;
 use YSOCode\Berry\Infra\Http\UploadedFile;
 use YSOCode\Berry\Infra\Http\UploadedFileFactory;
 
@@ -35,7 +35,7 @@ final class UploadedFileFactoryTest extends TestCase
 
             $uploadedFile = new UploadedFileFactory()->createFromSpec($spec);
 
-            $this->assertEquals(UploadStatus::OK, $uploadedFile->status);
+            $this->assertEquals(UploadFileStatus::OK, $uploadedFile->status);
             $this->assertEquals('doc.pdf', (string) $uploadedFile->name);
             $this->assertEquals('application/pdf', (string) $uploadedFile->type);
             $this->assertTrue($uploadedFile->fromWebServer);
@@ -64,7 +64,7 @@ final class UploadedFileFactoryTest extends TestCase
             $docUploadedFile = $uploadedFiles['doc'];
 
             $this->assertInstanceOf(UploadedFile::class, $docUploadedFile);
-            $this->assertEquals(UploadStatus::OK, $docUploadedFile->status);
+            $this->assertEquals(UploadFileStatus::OK, $docUploadedFile->status);
             $this->assertEquals('doc.pdf', (string) $docUploadedFile->name);
             $this->assertEquals('application/pdf', (string) $docUploadedFile->type);
             $this->assertTrue($docUploadedFile->fromWebServer);
@@ -156,8 +156,8 @@ final class UploadedFileFactoryTest extends TestCase
 
             $this->assertInstanceOf(UploadedFile::class, $firstUploadedImage);
             $this->assertInstanceOf(UploadedFile::class, $firstUploadedDoc);
-            $this->assertEquals(UploadStatus::OK, $firstUploadedImage->status);
-            $this->assertEquals(UploadStatus::OK, $firstUploadedDoc->status);
+            $this->assertEquals(UploadFileStatus::OK, $firstUploadedImage->status);
+            $this->assertEquals(UploadFileStatus::OK, $firstUploadedDoc->status);
             $this->assertEquals('image.png', (string) $firstUploadedImage->name);
             $this->assertEquals('doc.pdf', (string) $firstUploadedDoc->name);
             $this->assertEquals('image/png', (string) $firstUploadedImage->type);
@@ -236,8 +236,8 @@ final class UploadedFileFactoryTest extends TestCase
 
             $this->assertInstanceOf(UploadedFile::class, $firstUploadedDoc);
             $this->assertInstanceOf(UploadedFile::class, $uploadedImage);
-            $this->assertEquals(UploadStatus::OK, $firstUploadedDoc->status);
-            $this->assertEquals(UploadStatus::OK, $uploadedImage->status);
+            $this->assertEquals(UploadFileStatus::OK, $firstUploadedDoc->status);
+            $this->assertEquals(UploadFileStatus::OK, $uploadedImage->status);
             $this->assertEquals('doc.pdf', (string) $firstUploadedDoc->name);
             $this->assertEquals('image.png', (string) $uploadedImage->name);
             $this->assertEquals('application/pdf', (string) $firstUploadedDoc->type);
@@ -265,7 +265,7 @@ final class UploadedFileFactoryTest extends TestCase
 
         $uploadedFile = new UploadedFileFactory()->createFromSpec($spec);
 
-        $this->assertEquals(UploadStatus::INI_SIZE, $uploadedFile->status);
+        $this->assertEquals(UploadFileStatus::INI_SIZE, $uploadedFile->status);
     }
 
     public function test_it_should_handle_form_size_error(): void
@@ -281,7 +281,7 @@ final class UploadedFileFactoryTest extends TestCase
 
         $uploadedFile = new UploadedFileFactory()->createFromSpec($spec);
 
-        $this->assertEquals(UploadStatus::FORM_SIZE, $uploadedFile->status);
+        $this->assertEquals(UploadFileStatus::FORM_SIZE, $uploadedFile->status);
     }
 
     public function test_it_should_handle_partial_upload_error(): void
@@ -297,7 +297,7 @@ final class UploadedFileFactoryTest extends TestCase
 
         $uploadedFile = new UploadedFileFactory()->createFromSpec($spec);
 
-        $this->assertEquals(UploadStatus::PARTIAL, $uploadedFile->status);
+        $this->assertEquals(UploadFileStatus::PARTIAL, $uploadedFile->status);
     }
 
     public function test_it_should_handle_no_file_error(): void
@@ -313,7 +313,7 @@ final class UploadedFileFactoryTest extends TestCase
 
         $uploadedFile = new UploadedFileFactory()->createFromSpec($spec);
 
-        $this->assertEquals(UploadStatus::NO_FILE, $uploadedFile->status);
+        $this->assertEquals(UploadFileStatus::NO_FILE, $uploadedFile->status);
     }
 
     public function test_it_should_handle_no_tmp_dir_error(): void
@@ -329,7 +329,7 @@ final class UploadedFileFactoryTest extends TestCase
 
         $uploadedFile = new UploadedFileFactory()->createFromSpec($spec);
 
-        $this->assertEquals(UploadStatus::NO_TMP_DIR, $uploadedFile->status);
+        $this->assertEquals(UploadFileStatus::NO_TMP_DIR, $uploadedFile->status);
     }
 
     public function test_it_should_handle_cant_write_error(): void
@@ -345,7 +345,7 @@ final class UploadedFileFactoryTest extends TestCase
 
         $uploadedFile = new UploadedFileFactory()->createFromSpec($spec);
 
-        $this->assertEquals(UploadStatus::CANT_WRITE, $uploadedFile->status);
+        $this->assertEquals(UploadFileStatus::CANT_WRITE, $uploadedFile->status);
     }
 
     public function test_it_should_handle_extension_error(): void
@@ -361,6 +361,6 @@ final class UploadedFileFactoryTest extends TestCase
 
         $uploadedFile = new UploadedFileFactory()->createFromSpec($spec);
 
-        $this->assertEquals(UploadStatus::EXTENSION, $uploadedFile->status);
+        $this->assertEquals(UploadFileStatus::EXTENSION, $uploadedFile->status);
     }
 }

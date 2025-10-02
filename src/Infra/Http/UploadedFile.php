@@ -8,7 +8,7 @@ use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\FileName;
 use YSOCode\Berry\Domain\ValueObjects\MimeType;
 use YSOCode\Berry\Domain\ValueObjects\TargetFilePath;
-use YSOCode\Berry\Domain\ValueObjects\UploadStatus;
+use YSOCode\Berry\Domain\ValueObjects\UploadFileStatus;
 use YSOCode\Berry\Infra\Stream\Stream;
 
 final class UploadedFile
@@ -17,7 +17,7 @@ final class UploadedFile
 
     public function __construct(
         public readonly ?Stream $stream,
-        public readonly UploadStatus $status,
+        public readonly UploadFileStatus $status,
         public readonly ?FileName $name = null,
         public readonly ?MimeType $type = null,
         public readonly bool $fromWebServer = false,

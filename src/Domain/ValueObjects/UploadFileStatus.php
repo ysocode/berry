@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\ValueObjects;
 
-enum UploadStatus: int
+enum UploadFileStatus: int
 {
     case OK = 0;
     case INI_SIZE = 1;
