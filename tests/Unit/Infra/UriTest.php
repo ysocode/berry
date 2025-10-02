@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\Infra;
 
 use PHPUnit\Framework\TestCase;
+use YSOCode\Berry\Domain\Enums\UriScheme;
 use YSOCode\Berry\Domain\ValueObjects\Host;
 use YSOCode\Berry\Domain\ValueObjects\Port;
 use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Domain\ValueObjects\UriQuery;
-use YSOCode\Berry\Domain\ValueObjects\UriScheme;
 use YSOCode\Berry\Domain\ValueObjects\UriUserInfo;
 use YSOCode\Berry\Infra\Http\Uri;
 

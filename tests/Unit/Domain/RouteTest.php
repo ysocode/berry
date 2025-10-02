@@ -6,10 +6,10 @@ namespace Tests\Unit\Domain;
 
 use PHPUnit\Framework\TestCase;
 use YSOCode\Berry\Domain\Entities\Route;
-use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
-use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
+use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Enums\HttpStatus;
+use YSOCode\Berry\Domain\Enums\RouteEvent;
 use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\RouteEvent;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;

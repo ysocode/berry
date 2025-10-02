@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Factory;
 
 use PHPUnit\Framework\TestCase;
-use YSOCode\Berry\Domain\ValueObjects\UriScheme;
+use YSOCode\Berry\Domain\Enums\UriScheme;
 use YSOCode\Berry\Infra\Http\UriFactory;
 
 final class UriFactoryTest extends TestCase

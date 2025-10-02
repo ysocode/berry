@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Tests\Factory;
 
 use PHPUnit\Framework\TestCase;
+use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Enums\UploadFileStatus;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
-use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
-use YSOCode\Berry\Domain\ValueObjects\UploadFileStatus;
 use YSOCode\Berry\Infra\Http\ServerRequestFactory;
 use YSOCode\Berry\Infra\Http\UploadedFile;
 

@@ -6,14 +6,14 @@ namespace Tests\Unit\Infra;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Enums\UploadFileStatus;
 use YSOCode\Berry\Domain\ValueObjects\Attribute;
 use YSOCode\Berry\Domain\ValueObjects\AttributeName;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
-use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpVersion;
 use YSOCode\Berry\Domain\ValueObjects\RequestTarget;
-use YSOCode\Berry\Domain\ValueObjects\UploadFileStatus;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\UploadedFile;
 use YSOCode\Berry\Infra\Http\UploadedFileFactory;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Infra\Http;
 
-use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
+use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\RequestTarget;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Domain\ValueObjects\UriQuery;

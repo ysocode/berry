@@ -6,9 +6,9 @@ namespace YSOCode\Berry\Domain\Entities;
 
 use Closure;
 use RuntimeException;
-use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
+use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Enums\RouteCollectionEvent;
 use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\RouteCollectionEvent;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;

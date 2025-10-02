@@ -6,7 +6,7 @@ namespace Tests\Factory;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use YSOCode\Berry\Domain\ValueObjects\UploadFileStatus;
+use YSOCode\Berry\Domain\Enums\UploadFileStatus;
 use YSOCode\Berry\Infra\Http\UploadedFile;
 use YSOCode\Berry\Infra\Http\UploadedFileFactory;
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Domain\Entities;
 
 use Closure;
-use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
+use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;

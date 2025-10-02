@@ -6,12 +6,12 @@ namespace Tests\Unit\Infra;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use YSOCode\Berry\Domain\Enums\UploadFileStatus;
 use YSOCode\Berry\Domain\ValueObjects\DirPath;
 use YSOCode\Berry\Domain\ValueObjects\FileName;
 use YSOCode\Berry\Domain\ValueObjects\MimeType;
 use YSOCode\Berry\Domain\ValueObjects\StreamResource;
 use YSOCode\Berry\Domain\ValueObjects\TargetFilePath;
-use YSOCode\Berry\Domain\ValueObjects\UploadFileStatus;
 use YSOCode\Berry\Infra\Http\UploadedFile;
 use YSOCode\Berry\Infra\Stream\Stream;
 

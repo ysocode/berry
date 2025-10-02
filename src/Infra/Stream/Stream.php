@@ -7,9 +7,9 @@ namespace YSOCode\Berry\Infra\Stream;
 use InvalidArgumentException;
 use RuntimeException;
 use Stringable;
-use YSOCode\Berry\Domain\ValueObjects\StreamMode;
+use YSOCode\Berry\Domain\Enums\StreamMode;
+use YSOCode\Berry\Domain\Enums\StreamSeekWhence;
 use YSOCode\Berry\Domain\ValueObjects\StreamResource;
-use YSOCode\Berry\Domain\ValueObjects\StreamSeekWhence;
 
 final class Stream implements Stringable
 {

@@ -6,9 +6,9 @@ namespace Tests\Unit\Infra;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
-use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpVersion;
 use YSOCode\Berry\Domain\ValueObjects\RequestTarget;
 use YSOCode\Berry\Infra\Http\Request;

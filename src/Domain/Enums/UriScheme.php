@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\ValueObjects;
+namespace YSOCode\Berry\Domain\Enums;
+
+use YSOCode\Berry\Domain\ValueObjects\Port;
 
 enum UriScheme: string
 {

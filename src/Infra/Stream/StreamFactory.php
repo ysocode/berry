@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Infra\Stream;
 
 use RuntimeException;
+use YSOCode\Berry\Domain\Enums\StreamMode;
 use YSOCode\Berry\Domain\ValueObjects\FilePath;
-use YSOCode\Berry\Domain\ValueObjects\StreamMode;
 use YSOCode\Berry\Domain\ValueObjects\StreamResource;
 
 final readonly class StreamFactory
