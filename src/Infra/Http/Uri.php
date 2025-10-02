@@ -7,10 +7,10 @@ namespace YSOCode\Berry\Infra\Http;
 use Stringable;
 use YSOCode\Berry\Domain\ValueObjects\Host;
 use YSOCode\Berry\Domain\ValueObjects\Port;
-use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\ValueObjects\UriQuery;
 use YSOCode\Berry\Domain\ValueObjects\UserInfo;
 
 final class Uri implements Stringable
@@ -25,7 +25,7 @@ final class Uri implements Stringable
         ?Port $port = null,
         private(set) ?UriPath $path = null,
         private(set) ?UserInfo $userInfo = null,
-        private(set) ?Query $query = null,
+        private(set) ?UriQuery $query = null,
         private(set) ?UriFragment $fragment = null,
     ) {
         $this->port = $port ?? $scheme->getDefaultPort();
@@ -90,7 +90,7 @@ final class Uri implements Stringable
         return $new;
     }
 
-    public function withQuery(Query $query): self
+    public function withQuery(UriQuery $query): self
     {
         $new = clone $this;
         $new->query = $query;
@@ -114,7 +114,7 @@ final class Uri implements Stringable
             $uri .= $this->path;
         }
 
-        if ($this->query instanceof Query) {
+        if ($this->query instanceof UriQuery) {
             $uri .= '?'.$this->query;
         }
 

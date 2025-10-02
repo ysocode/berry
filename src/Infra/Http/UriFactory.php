@@ -8,10 +8,10 @@ use InvalidArgumentException;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\Host;
 use YSOCode\Berry\Domain\ValueObjects\Port;
-use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\ValueObjects\UriQuery;
 use YSOCode\Berry\Domain\ValueObjects\UserInfo;
 
 final readonly class UriFactory
@@ -67,7 +67,7 @@ final readonly class UriFactory
 
         $partQuery = $parts['query'] ?? null;
         if (is_string($partQuery)) {
-            $query = new Query($partQuery);
+            $query = new UriQuery($partQuery);
         }
 
         $fragment = null;
@@ -154,13 +154,13 @@ final readonly class UriFactory
         return new UriPath($partPath);
     }
 
-    private function getQueryFromGlobals(): ?Query
+    private function getQueryFromGlobals(): ?UriQuery
     {
         $queryString = $_SERVER['QUERY_STRING'] ?? null;
         if (! is_string($queryString)) {
             return null;
         }
 
-        return new Query($queryString);
+        return new UriQuery($queryString);
     }
 }

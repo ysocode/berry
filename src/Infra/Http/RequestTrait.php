@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Infra\Http;
 
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
-use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Domain\ValueObjects\RequestTarget;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\ValueObjects\UriQuery;
 
 trait RequestTrait
 {
@@ -25,7 +25,7 @@ trait RequestTrait
             $target = (string) $uri->path;
         }
 
-        if ($uri->query instanceof Query) {
+        if ($uri->query instanceof UriQuery) {
             $target .= '?'.$uri->query;
         }
 
