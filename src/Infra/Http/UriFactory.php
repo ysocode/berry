@@ -8,10 +8,10 @@ use InvalidArgumentException;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\Host;
 use YSOCode\Berry\Domain\ValueObjects\Port;
-use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Domain\ValueObjects\UriQuery;
+use YSOCode\Berry\Domain\ValueObjects\UriScheme;
 use YSOCode\Berry\Domain\ValueObjects\UriUserInfo;
 
 final readonly class UriFactory
@@ -32,7 +32,7 @@ final readonly class UriFactory
             throw new InvalidArgumentException('URL scheme is missing.');
         }
 
-        $scheme = Scheme::from($scheme);
+        $scheme = UriScheme::from($scheme);
 
         $host = $parts['host'] ?? null;
         if (! is_string($host)) {
@@ -127,14 +127,14 @@ final readonly class UriFactory
         return [new Host($httpHost), new Port($serverPort)];
     }
 
-    private function getSchemeFromGlobals(): Scheme
+    private function getSchemeFromGlobals(): UriScheme
     {
         $requestScheme = $_SERVER['REQUEST_SCHEME'] ?? null;
         if (! is_string($requestScheme)) {
             throw new RuntimeException('Unable to retrieve request scheme.');
         }
 
-        return Scheme::from($requestScheme);
+        return UriScheme::from($requestScheme);
     }
 
     private function getPathFromGlobals(): ?UriPath

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Factory;
 
 use PHPUnit\Framework\TestCase;
-use YSOCode\Berry\Domain\ValueObjects\Scheme;
+use YSOCode\Berry\Domain\ValueObjects\UriScheme;
 use YSOCode\Berry\Infra\Http\UriFactory;
 
 final class UriFactoryTest extends TestCase
@@ -14,7 +14,7 @@ final class UriFactoryTest extends TestCase
     {
         $uri = new UriFactory()->createFromString('https://user:pass@example.com:8080/path/to/resource?query=param#fragment');
 
-        $this->assertEquals(Scheme::HTTPS, $uri->scheme);
+        $this->assertEquals(UriScheme::HTTPS, $uri->scheme);
         $this->assertEquals('example.com', (string) $uri->host);
         $this->assertEquals(8080, $uri->port->value);
         $this->assertEquals('/path/to/resource', (string) $uri->path);
@@ -40,7 +40,7 @@ final class UriFactoryTest extends TestCase
 
         $uri = new UriFactory()->createFromGlobals();
 
-        $this->assertEquals(Scheme::HTTPS, $uri->scheme);
+        $this->assertEquals(UriScheme::HTTPS, $uri->scheme);
         $this->assertEquals('ysocode.com', (string) $uri->host);
         $this->assertEquals(8080, $uri->port->value);
         $this->assertEquals('/path/to/resource', (string) $uri->path);

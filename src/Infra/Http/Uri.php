@@ -7,10 +7,10 @@ namespace YSOCode\Berry\Infra\Http;
 use Stringable;
 use YSOCode\Berry\Domain\ValueObjects\Host;
 use YSOCode\Berry\Domain\ValueObjects\Port;
-use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Domain\ValueObjects\UriQuery;
+use YSOCode\Berry\Domain\ValueObjects\UriScheme;
 use YSOCode\Berry\Domain\ValueObjects\UriUserInfo;
 
 final class Uri implements Stringable
@@ -20,7 +20,7 @@ final class Uri implements Stringable
     public bool $withDefaultPort = false;
 
     public function __construct(
-        private(set) Scheme $scheme,
+        private(set) UriScheme $scheme,
         private(set) Host $host,
         ?Port $port = null,
         private(set) ?UriPath $path = null,
@@ -50,7 +50,7 @@ final class Uri implements Stringable
         return $authority;
     }
 
-    public function withScheme(Scheme $scheme): self
+    public function withScheme(UriScheme $scheme): self
     {
         $new = clone $this;
         $new->scheme = $scheme;

@@ -7,10 +7,10 @@ namespace Tests\Unit\Infra;
 use PHPUnit\Framework\TestCase;
 use YSOCode\Berry\Domain\ValueObjects\Host;
 use YSOCode\Berry\Domain\ValueObjects\Port;
-use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Domain\ValueObjects\UriQuery;
+use YSOCode\Berry\Domain\ValueObjects\UriScheme;
 use YSOCode\Berry\Domain\ValueObjects\UriUserInfo;
 use YSOCode\Berry\Infra\Http\Uri;
 
@@ -19,7 +19,7 @@ final class UriTest extends TestCase
     private function createUri(): Uri
     {
         return new Uri(
-            Scheme::HTTPS,
+            UriScheme::HTTPS,
             new Host('example.com'),
             new Port(8080),
             null,
@@ -32,7 +32,7 @@ final class UriTest extends TestCase
         $uri = $this->createUri();
 
         $this->assertEquals('https://ysocode:berry@example.com:8080', (string) $uri);
-        $this->assertEquals(Scheme::HTTPS, $uri->scheme);
+        $this->assertEquals(UriScheme::HTTPS, $uri->scheme);
         $this->assertEquals('example.com', (string) $uri->host);
         $this->assertEquals(8080, $uri->port->value);
         $this->assertNull($uri->path);
@@ -45,7 +45,7 @@ final class UriTest extends TestCase
     {
         $uri = $this->createUri();
         $uriWithoutUserInfo = new Uri(
-            Scheme::HTTPS,
+            UriScheme::HTTPS,
             new Host('example.com'),
             new Port(8080),
         );
@@ -58,7 +58,7 @@ final class UriTest extends TestCase
     {
         $uri = $this->createUri();
 
-        $newUri = $uri->withScheme(Scheme::HTTP);
+        $newUri = $uri->withScheme(UriScheme::HTTP);
         $this->assertEquals('http://ysocode:berry@example.com:8080', (string) $newUri);
 
         $newUri = $newUri->withHost(new Host('example.org'));
@@ -83,13 +83,13 @@ final class UriTest extends TestCase
     public function test_it_should_use_default_port_from_scheme_when_port_is_not_provided(): void
     {
         $httpsUri = new Uri(
-            Scheme::HTTPS,
+            UriScheme::HTTPS,
             new Host('example.com'),
         );
         $this->assertEquals(443, $httpsUri->port->value);
 
         $httpUri = new Uri(
-            Scheme::HTTP,
+            UriScheme::HTTP,
             new Host('example.com'),
         );
         $this->assertEquals(80, $httpUri->port->value);

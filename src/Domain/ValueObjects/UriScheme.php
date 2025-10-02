@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\ValueObjects;
 
-enum Scheme: string
+enum UriScheme: string
 {
     case HTTP = 'http';
     case HTTPS = 'https';
