@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Infra\Http;
 
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
-use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Domain\ValueObjects\RequestTarget;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 
 trait RequestTrait
 {
@@ -21,7 +21,7 @@ trait RequestTrait
     {
         $target = '/';
 
-        if ($uri->path instanceof Path) {
+        if ($uri->path instanceof UriPath) {
             $target = (string) $uri->path;
         }
 

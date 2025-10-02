@@ -8,8 +8,8 @@ use Closure;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\RouteCollectionEvent;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -46,7 +46,7 @@ final class RouteRegistry
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function addRoute(HttpMethod $method, Path $path, string|Closure $handler): Route
+    public function addRoute(HttpMethod $method, UriPath $path, string|Closure $handler): Route
     {
         $routeCollection = $this->routeCollections[$method->value];
 
@@ -80,14 +80,14 @@ final class RouteRegistry
         return null;
     }
 
-    public function getRouteByMethodAndPath(HttpMethod $method, Path $path): ?Route
+    public function getRouteByMethodAndPath(HttpMethod $method, UriPath $path): ?Route
     {
         $routeCollection = $this->routeCollections[$method->value];
 
         return $routeCollection->getRouteByPath($path);
     }
 
-    public function hasRouteByPath(Path $path): bool
+    public function hasRouteByPath(UriPath $path): bool
     {
         return array_any($this->routeCollections, fn ($routeCollection): bool => $routeCollection->hasRouteByPath($path));
     }

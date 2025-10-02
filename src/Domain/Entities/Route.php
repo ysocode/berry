@@ -8,8 +8,8 @@ use Closure;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\RouteEvent;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
@@ -26,7 +26,7 @@ final class Route
      */
     public function __construct(
         public readonly HttpMethod $method,
-        private(set) Path $path,
+        private(set) UriPath $path,
         public readonly string|Closure $handler,
         private(set) ?Name $name = null,
         private(set) array $middlewares = []
@@ -52,7 +52,7 @@ final class Route
         }
     }
 
-    public function addPrefix(Path $prefix): self
+    public function addPrefix(UriPath $prefix): self
     {
         $this->path = $this->path->prepend($prefix);
 

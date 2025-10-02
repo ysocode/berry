@@ -7,9 +7,9 @@ namespace YSOCode\Berry\Domain\Entities;
 use Closure;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\RouteCollectionEvent;
 use YSOCode\Berry\Domain\ValueObjects\RouteEvent;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 
 final class RouteCollection
 {
@@ -93,12 +93,12 @@ final class RouteCollection
         return $this;
     }
 
-    public function hasRouteByPath(Path $path): bool
+    public function hasRouteByPath(UriPath $path): bool
     {
         return isset($this->routeIndexesByPath[(string) $path]);
     }
 
-    public function getRouteByPath(Path $path): ?Route
+    public function getRouteByPath(UriPath $path): ?Route
     {
         $routeIndex = $this->routeIndexesByPath[(string) $path] ?? null;
         if (! is_int($routeIndex)) {

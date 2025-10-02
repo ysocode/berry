@@ -15,7 +15,7 @@ use YSOCode\Berry\Domain\ValueObjects\Header;
 use YSOCode\Berry\Domain\ValueObjects\HeaderName;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -32,7 +32,7 @@ final class DispatcherTest extends TestCase
 
         $router = new Router;
 
-        $router->get(new Path('/'), DummyHandler::class);
+        $router->get(new UriPath('/'), DummyHandler::class);
 
         $dispatcher = new Dispatcher(new Container, $router);
 
@@ -57,7 +57,7 @@ final class DispatcherTest extends TestCase
         $router = new Router;
 
         $router->get(
-            new Path('/'),
+            new UriPath('/'),
             DummyHandler::class
         )
             ->addMiddleware(

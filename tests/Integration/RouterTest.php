@@ -13,7 +13,7 @@ use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
 use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -27,7 +27,7 @@ class RouterTest extends TestCase
         $router = new Router;
 
         $router->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 
@@ -43,7 +43,7 @@ class RouterTest extends TestCase
         $router = new Router;
 
         $router->put(
-            new Path('/users/8847'),
+            new UriPath('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.update.put'));
 
@@ -59,7 +59,7 @@ class RouterTest extends TestCase
         $router = new Router;
 
         $router->post(
-            new Path('/sign-up'),
+            new UriPath('/sign-up'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::CREATED)
         )->setName(new Name('signUp'));
 
@@ -75,7 +75,7 @@ class RouterTest extends TestCase
         $router = new Router;
 
         $router->delete(
-            new Path('/users/8847'),
+            new UriPath('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.destroy'));
 
@@ -91,7 +91,7 @@ class RouterTest extends TestCase
         $router = new Router;
 
         $router->patch(
-            new Path('/users/8847'),
+            new UriPath('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.update.patch'));
 
@@ -107,7 +107,7 @@ class RouterTest extends TestCase
         $router = new Router;
 
         $router->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         );
 
@@ -125,7 +125,7 @@ class RouterTest extends TestCase
         $router = new Router;
 
         $router->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         );
 
@@ -157,12 +157,12 @@ class RouterTest extends TestCase
         $router = new Router;
 
         $router->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('duplicated'));
 
         $router->post(
-            new Path('/login'),
+            new UriPath('/login'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('duplicated'));
     }
@@ -173,7 +173,7 @@ class RouterTest extends TestCase
 
         $router->group(function (RouteGroup $group): void {
             $group->get(
-                new Path('/'),
+                new UriPath('/'),
                 fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
             )->setName(new Name('home'));
         });
@@ -191,7 +191,7 @@ class RouterTest extends TestCase
 
         $router->group(function (RouteGroup $group): void {
             $group->get(
-                new Path('/'),
+                new UriPath('/'),
                 fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
             )->setName(new Name('home'));
         })->addMiddleware(
@@ -218,10 +218,10 @@ class RouterTest extends TestCase
 
         $router->group(function (RouteGroup $group): void {
             $group->get(
-                new Path('/list'),
+                new UriPath('/list'),
                 fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
             )->setName(new Name('users.list'));
-        })->addPrefix(new Path('/users'));
+        })->addPrefix(new UriPath('/users'));
 
         $route = $router->routeRegistry->getRouteByName(new Name('users.list'));
 

@@ -10,7 +10,7 @@ use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
@@ -52,7 +52,7 @@ final class Berry
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function get(Path $path, string|Closure $handler): Route
+    public function get(UriPath $path, string|Closure $handler): Route
     {
         return $this->router->get($path, $handler);
     }
@@ -60,7 +60,7 @@ final class Berry
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function put(Path $path, string|Closure $handler): Route
+    public function put(UriPath $path, string|Closure $handler): Route
     {
         return $this->router->put($path, $handler);
     }
@@ -68,7 +68,7 @@ final class Berry
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function post(Path $path, string|Closure $handler): Route
+    public function post(UriPath $path, string|Closure $handler): Route
     {
         return $this->router->post($path, $handler);
     }
@@ -76,7 +76,7 @@ final class Berry
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function delete(Path $path, string|Closure $handler): Route
+    public function delete(UriPath $path, string|Closure $handler): Route
     {
         return $this->router->delete($path, $handler);
     }
@@ -84,7 +84,7 @@ final class Berry
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function patch(Path $path, string|Closure $handler): Route
+    public function patch(UriPath $path, string|Closure $handler): Route
     {
         return $this->router->patch($path, $handler);
     }

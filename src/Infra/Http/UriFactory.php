@@ -7,11 +7,11 @@ namespace YSOCode\Berry\Infra\Http;
 use InvalidArgumentException;
 use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\Host;
-use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Port;
 use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UriFragment;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Domain\ValueObjects\UserInfo;
 
 final readonly class UriFactory
@@ -52,7 +52,7 @@ final readonly class UriFactory
 
         $partPath = $parts['path'] ?? null;
         if (is_string($partPath)) {
-            $path = new Path($partPath);
+            $path = new UriPath($partPath);
         }
 
         $userInfo = null;
@@ -137,7 +137,7 @@ final readonly class UriFactory
         return Scheme::from($requestScheme);
     }
 
-    private function getPathFromGlobals(): ?Path
+    private function getPathFromGlobals(): ?UriPath
     {
         $requestUri = $_SERVER['REQUEST_URI'] ?? null;
         if (! is_string($requestUri)) {
@@ -151,7 +151,7 @@ final readonly class UriFactory
             return null;
         }
 
-        return new Path($partPath);
+        return new UriPath($partPath);
     }
 
     private function getQueryFromGlobals(): ?Query

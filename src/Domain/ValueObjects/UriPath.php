@@ -7,7 +7,7 @@ namespace YSOCode\Berry\Domain\ValueObjects;
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class Path implements Stringable
+final readonly class UriPath implements Stringable
 {
     public string $value;
 
@@ -29,12 +29,12 @@ final readonly class Path implements Stringable
     private static function validate(string $value): true|Error
     {
         if (! str_starts_with($value, '/')) {
-            return new Error('Path must start with "/".');
+            return new Error('Uri path must start with "/".');
         }
 
         $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/]|%[0-9A-Fa-f]{2})*$/';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
-            return new Error('Path contains invalid characters.');
+            return new Error('Uri path contains invalid characters.');
         }
 
         return true;

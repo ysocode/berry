@@ -9,8 +9,8 @@ use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
 use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\RouteEvent;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -21,7 +21,7 @@ final class RouteTest extends TestCase
     {
         $route = new Route(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK),
             new Name('home')
         );
@@ -35,7 +35,7 @@ final class RouteTest extends TestCase
     {
         $route = new Route(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->addMiddleware(
             fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
@@ -50,7 +50,7 @@ final class RouteTest extends TestCase
 
         $route = new Route(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         );
 

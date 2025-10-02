@@ -10,8 +10,8 @@ use YSOCode\Berry\Domain\Entities\RouteCollection;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
 use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\RouteCollectionEvent;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
@@ -23,7 +23,7 @@ final class RouteCollectionTest extends TestCase
     {
         $this->route = new Route(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK),
             new Name('home')
         );
@@ -47,7 +47,7 @@ final class RouteCollectionTest extends TestCase
         $routeCollection = new RouteCollection;
         $routeCollection->addRoute($this->route);
 
-        $route = $routeCollection->getRouteByPath(new Path('/'));
+        $route = $routeCollection->getRouteByPath(new UriPath('/'));
 
         $this->assertInstanceOf(Route::class, $route);
     }
@@ -67,7 +67,7 @@ final class RouteCollectionTest extends TestCase
         $routeCollection = new RouteCollection;
         $routeCollection->addRoute($this->route);
 
-        $this->assertTrue($routeCollection->hasRouteByPath(new Path('/')));
+        $this->assertTrue($routeCollection->hasRouteByPath(new UriPath('/')));
     }
 
     public function test_it_should_return_true_when_route_name_exists(): void
@@ -97,7 +97,7 @@ final class RouteCollectionTest extends TestCase
 
         $route = new Route(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         );
 

@@ -10,7 +10,7 @@ use YSOCode\Berry\Application\Berry;
 use YSOCode\Berry\Domain\ValueObjects\Attribute;
 use YSOCode\Berry\Domain\ValueObjects\AttributeName;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
@@ -59,7 +59,7 @@ final class BerryTest extends TestCase
         );
 
         $this->berry->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(
                 HttpStatus::OK,
                 body: new StreamFactory()->createFromString('Hello, world!')

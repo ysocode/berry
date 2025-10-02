@@ -10,7 +10,7 @@ use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
 use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -22,7 +22,7 @@ final class RouteGroupTest extends TestCase
         $routeGroup = new RouteGroup;
 
         $routeGroup->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 
@@ -38,7 +38,7 @@ final class RouteGroupTest extends TestCase
         $routeGroup = new RouteGroup;
 
         $routeGroup->put(
-            new Path('/users/8847'),
+            new UriPath('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.update.put'));
 
@@ -54,7 +54,7 @@ final class RouteGroupTest extends TestCase
         $routeGroup = new RouteGroup;
 
         $routeGroup->post(
-            new Path('/sign-up'),
+            new UriPath('/sign-up'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::CREATED)
         )->setName(new Name('signUp'));
 
@@ -70,7 +70,7 @@ final class RouteGroupTest extends TestCase
         $routeGroup = new RouteGroup;
 
         $routeGroup->delete(
-            new Path('/users/8847'),
+            new UriPath('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.destroy'));
 
@@ -86,7 +86,7 @@ final class RouteGroupTest extends TestCase
         $routeGroup = new RouteGroup;
 
         $routeGroup->patch(
-            new Path('/users/8847'),
+            new UriPath('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.update.patch'));
 
@@ -102,13 +102,13 @@ final class RouteGroupTest extends TestCase
         $routeGroup = new RouteGroup;
 
         $routeGroup->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 
         $route = $routeGroup->routes[0];
 
-        $routeGroup->addPrefix(new Path('/api/v1'));
+        $routeGroup->addPrefix(new UriPath('/api/v1'));
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals(HttpMethod::GET, $route->method);
@@ -120,7 +120,7 @@ final class RouteGroupTest extends TestCase
         $routeGroup = new RouteGroup;
 
         $routeGroup->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 

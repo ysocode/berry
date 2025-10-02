@@ -13,7 +13,7 @@ use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\HttpStatus;
 use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
@@ -40,7 +40,7 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->addRoute(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 
@@ -57,7 +57,7 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->addRoute(
             HttpMethod::PUT,
-            new Path('/users/8847'),
+            new UriPath('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.update.put'));
 
@@ -74,7 +74,7 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->addRoute(
             HttpMethod::POST,
-            new Path('/sign-up'),
+            new UriPath('/sign-up'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::CREATED)
         )->setName(new Name('signUp'));
 
@@ -91,7 +91,7 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->addRoute(
             HttpMethod::DELETE,
-            new Path('/users/8847'),
+            new UriPath('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.destroy'));
 
@@ -108,7 +108,7 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->addRoute(
             HttpMethod::PATCH,
-            new Path('/users/8847'),
+            new UriPath('/users/8847'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('users.update.patch'));
 
@@ -128,13 +128,13 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->addRoute(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         );
 
         $routeRegistry->addRoute(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         );
     }
@@ -148,13 +148,13 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->addRoute(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('duplicated'));
 
         $routeRegistry->addRoute(
             HttpMethod::POST,
-            new Path('/login'),
+            new UriPath('/login'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('duplicated'));
     }
@@ -165,7 +165,7 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->addRoute(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 
@@ -182,7 +182,7 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->addRoute(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 
@@ -195,11 +195,11 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->addRoute(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 
-        $homeRoute = $routeRegistry->getRouteByMethodAndPath(HttpMethod::GET, new Path('/'));
+        $homeRoute = $routeRegistry->getRouteByMethodAndPath(HttpMethod::GET, new UriPath('/'));
 
         $this->assertInstanceOf(Route::class, $homeRoute);
         $this->assertEquals(HttpMethod::GET, $homeRoute->method);
@@ -212,18 +212,18 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->addRoute(
             HttpMethod::GET,
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 
-        $this->assertTrue($routeRegistry->hasRouteByPath(new Path('/')));
+        $this->assertTrue($routeRegistry->hasRouteByPath(new UriPath('/')));
     }
 
     public function test_it_should_add_a_route_group(): void
     {
         $routeGroup = new RouteGroup;
         $routeGroup->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('home'));
 
@@ -245,12 +245,12 @@ final class RouteRegistryTest extends TestCase
         $routeGroup = new RouteGroup;
 
         $routeGroup->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         );
 
         $routeGroup->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         );
 
@@ -266,12 +266,12 @@ final class RouteRegistryTest extends TestCase
         $routeGroup = new RouteGroup;
 
         $routeGroup->get(
-            new Path('/'),
+            new UriPath('/'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('duplicated'));
 
         $routeGroup->get(
-            new Path('/login'),
+            new UriPath('/login'),
             fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
         )->setName(new Name('duplicated'));
 

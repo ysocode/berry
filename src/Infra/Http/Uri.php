@@ -6,11 +6,11 @@ namespace YSOCode\Berry\Infra\Http;
 
 use Stringable;
 use YSOCode\Berry\Domain\ValueObjects\Host;
-use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Port;
 use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UriFragment;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Domain\ValueObjects\UserInfo;
 
 final class Uri implements Stringable
@@ -23,7 +23,7 @@ final class Uri implements Stringable
         private(set) Scheme $scheme,
         private(set) Host $host,
         ?Port $port = null,
-        private(set) ?Path $path = null,
+        private(set) ?UriPath $path = null,
         private(set) ?UserInfo $userInfo = null,
         private(set) ?Query $query = null,
         private(set) ?UriFragment $fragment = null,
@@ -74,7 +74,7 @@ final class Uri implements Stringable
         return $new;
     }
 
-    public function withPath(Path $path): self
+    public function withPath(UriPath $path): self
     {
         $new = clone $this;
         $new->path = $path;
@@ -110,7 +110,7 @@ final class Uri implements Stringable
     {
         $uri = $this->scheme->value.'://'.$this->getAuthority();
 
-        if ($this->path instanceof Path) {
+        if ($this->path instanceof UriPath) {
             $uri .= $this->path;
         }
 

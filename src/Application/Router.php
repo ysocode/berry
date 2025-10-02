@@ -10,7 +10,7 @@ use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\HttpMethod;
-use YSOCode\Berry\Domain\ValueObjects\Path;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -28,7 +28,7 @@ final readonly class Router
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function get(Path $path, string|Closure $handler): Route
+    public function get(UriPath $path, string|Closure $handler): Route
     {
         return $this->routeRegistry->addRoute(HttpMethod::GET, $path, $handler);
     }
@@ -36,7 +36,7 @@ final readonly class Router
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function put(Path $path, string|Closure $handler): Route
+    public function put(UriPath $path, string|Closure $handler): Route
     {
         return $this->routeRegistry->addRoute(HttpMethod::PUT, $path, $handler);
     }
@@ -44,7 +44,7 @@ final readonly class Router
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function post(Path $path, string|Closure $handler): Route
+    public function post(UriPath $path, string|Closure $handler): Route
     {
         return $this->routeRegistry->addRoute(HttpMethod::POST, $path, $handler);
     }
@@ -52,7 +52,7 @@ final readonly class Router
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function delete(Path $path, string|Closure $handler): Route
+    public function delete(UriPath $path, string|Closure $handler): Route
     {
         return $this->routeRegistry->addRoute(HttpMethod::DELETE, $path, $handler);
     }
@@ -60,14 +60,14 @@ final readonly class Router
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
      */
-    public function patch(Path $path, string|Closure $handler): Route
+    public function patch(UriPath $path, string|Closure $handler): Route
     {
         return $this->routeRegistry->addRoute(HttpMethod::PATCH, $path, $handler);
     }
 
     public function getMatchedRoute(ServerRequest $request): Route|Error
     {
-        $path = $request->uri->path ?? new Path('/');
+        $path = $request->uri->path ?? new UriPath('/');
 
         $route = $this->routeRegistry->getRouteByMethodAndPath(
             $request->method,
