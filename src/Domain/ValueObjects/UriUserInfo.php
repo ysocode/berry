@@ -7,7 +7,7 @@ namespace YSOCode\Berry\Domain\ValueObjects;
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class UserInfo implements Stringable
+final readonly class UriUserInfo implements Stringable
 {
     public string $user;
 

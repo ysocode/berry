@@ -11,7 +11,7 @@ use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Domain\ValueObjects\UriQuery;
-use YSOCode\Berry\Domain\ValueObjects\UserInfo;
+use YSOCode\Berry\Domain\ValueObjects\UriUserInfo;
 use YSOCode\Berry\Infra\Http\Uri;
 
 final class UriTest extends TestCase
@@ -23,7 +23,7 @@ final class UriTest extends TestCase
             new Host('example.com'),
             new Port(8080),
             null,
-            new UserInfo('ysocode', 'berry')
+            new UriUserInfo('ysocode', 'berry')
         );
     }
 
@@ -70,7 +70,7 @@ final class UriTest extends TestCase
         $newUri = $newUri->withPath(new UriPath('/newpath'));
         $this->assertEquals('http://ysocode:berry@example.org:1234/newpath', (string) $newUri);
 
-        $newUri = $newUri->withUserInfo(new UserInfo('newuser', 'newpass'));
+        $newUri = $newUri->withUserInfo(new UriUserInfo('newuser', 'newpass'));
         $this->assertEquals('http://newuser:newpass@example.org:1234/newpath', (string) $newUri);
 
         $newUri = $newUri->withQuery(new UriQuery('newquery=2'));

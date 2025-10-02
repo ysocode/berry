@@ -11,7 +11,7 @@ use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Domain\ValueObjects\UriQuery;
-use YSOCode\Berry\Domain\ValueObjects\UserInfo;
+use YSOCode\Berry\Domain\ValueObjects\UriUserInfo;
 
 final class Uri implements Stringable
 {
@@ -24,7 +24,7 @@ final class Uri implements Stringable
         private(set) Host $host,
         ?Port $port = null,
         private(set) ?UriPath $path = null,
-        private(set) ?UserInfo $userInfo = null,
+        private(set) ?UriUserInfo $userInfo = null,
         private(set) ?UriQuery $query = null,
         private(set) ?UriFragment $fragment = null,
     ) {
@@ -35,7 +35,7 @@ final class Uri implements Stringable
     {
         $authority = '';
 
-        if ($this->userInfo instanceof UserInfo) {
+        if ($this->userInfo instanceof UriUserInfo) {
             $authority .= $this->userInfo.'@';
         }
 
@@ -82,7 +82,7 @@ final class Uri implements Stringable
         return $new;
     }
 
-    public function withUserInfo(UserInfo $userInfo): self
+    public function withUserInfo(UriUserInfo $userInfo): self
     {
         $new = clone $this;
         $new->userInfo = $userInfo;

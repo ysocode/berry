@@ -12,7 +12,7 @@ use YSOCode\Berry\Domain\ValueObjects\Scheme;
 use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Domain\ValueObjects\UriQuery;
-use YSOCode\Berry\Domain\ValueObjects\UserInfo;
+use YSOCode\Berry\Domain\ValueObjects\UriUserInfo;
 
 final readonly class UriFactory
 {
@@ -60,7 +60,7 @@ final readonly class UriFactory
         $user = $parts['user'] ?? null;
         $pass = $parts['pass'] ?? null;
         if (is_string($user)) {
-            $userInfo = new UserInfo($user, $pass);
+            $userInfo = new UriUserInfo($user, $pass);
         }
 
         $query = null;
