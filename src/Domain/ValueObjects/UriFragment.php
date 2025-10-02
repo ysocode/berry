@@ -7,7 +7,7 @@ namespace YSOCode\Berry\Domain\ValueObjects;
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class Fragment implements Stringable
+final readonly class UriFragment implements Stringable
 {
     public string $value;
 
@@ -29,12 +29,12 @@ final readonly class Fragment implements Stringable
     private static function validate(string $value): true|Error
     {
         if ($value === '') {
-            return new Error('Fragment cannot be empty.');
+            return new Error('Uri fragment cannot be empty.');
         }
 
         $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/?]|%[0-9A-Fa-f]{2})*$/u';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
-            return new Error('Fragment contains invalid characters.');
+            return new Error('Uri fragment contains invalid characters.');
         }
 
         return true;

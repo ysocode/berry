@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Infra\Http;
 
 use Stringable;
-use YSOCode\Berry\Domain\ValueObjects\Fragment;
 use YSOCode\Berry\Domain\ValueObjects\Host;
 use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Port;
 use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Domain\ValueObjects\Scheme;
+use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UserInfo;
 
 final class Uri implements Stringable
@@ -26,7 +26,7 @@ final class Uri implements Stringable
         private(set) ?Path $path = null,
         private(set) ?UserInfo $userInfo = null,
         private(set) ?Query $query = null,
-        private(set) ?Fragment $fragment = null,
+        private(set) ?UriFragment $fragment = null,
     ) {
         $this->port = $port ?? $scheme->getDefaultPort();
     }
@@ -98,7 +98,7 @@ final class Uri implements Stringable
         return $new;
     }
 
-    public function withFragment(Fragment $fragment): self
+    public function withFragment(UriFragment $fragment): self
     {
         $new = clone $this;
         $new->fragment = $fragment;
@@ -118,7 +118,7 @@ final class Uri implements Stringable
             $uri .= '?'.$this->query;
         }
 
-        if ($this->fragment instanceof Fragment) {
+        if ($this->fragment instanceof UriFragment) {
             $uri .= '#'.$this->fragment;
         }
 

@@ -6,12 +6,12 @@ namespace YSOCode\Berry\Infra\Http;
 
 use InvalidArgumentException;
 use RuntimeException;
-use YSOCode\Berry\Domain\ValueObjects\Fragment;
 use YSOCode\Berry\Domain\ValueObjects\Host;
 use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Port;
 use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Domain\ValueObjects\Scheme;
+use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UserInfo;
 
 final readonly class UriFactory
@@ -74,7 +74,7 @@ final readonly class UriFactory
 
         $partFragment = $parts['fragment'] ?? null;
         if (is_string($partFragment)) {
-            $fragment = new Fragment($partFragment);
+            $fragment = new UriFragment($partFragment);
         }
 
         return new Uri(

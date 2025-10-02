@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\Infra;
 
 use PHPUnit\Framework\TestCase;
-use YSOCode\Berry\Domain\ValueObjects\Fragment;
 use YSOCode\Berry\Domain\ValueObjects\Host;
 use YSOCode\Berry\Domain\ValueObjects\Path;
 use YSOCode\Berry\Domain\ValueObjects\Port;
 use YSOCode\Berry\Domain\ValueObjects\Query;
 use YSOCode\Berry\Domain\ValueObjects\Scheme;
+use YSOCode\Berry\Domain\ValueObjects\UriFragment;
 use YSOCode\Berry\Domain\ValueObjects\UserInfo;
 use YSOCode\Berry\Infra\Http\Uri;
 
@@ -76,7 +76,7 @@ final class UriTest extends TestCase
         $newUri = $newUri->withQuery(new Query('newquery=2'));
         $this->assertEquals('http://newuser:newpass@example.org:1234/newpath?newquery=2', (string) $newUri);
 
-        $newUri = $newUri->withFragment(new Fragment('newfrag'));
+        $newUri = $newUri->withFragment(new UriFragment('newfrag'));
         $this->assertEquals('http://newuser:newpass@example.org:1234/newpath?newquery=2#newfrag', (string) $newUri);
     }
 
