@@ -6,16 +6,14 @@ namespace Tests\Integration;
 
 use DI\Container;
 use PHPUnit\Framework\TestCase;
+use Tests\Fixtures\HelloWorldHandler;
+use Tests\Fixtures\InspectRequestHandler;
+use Tests\Fixtures\LoggingMiddleware;
+use Tests\Fixtures\PoweredByMiddleware;
 use YSOCode\Berry\Application\Berry;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\Attribute;
-use YSOCode\Berry\Domain\ValueObjects\AttributeName;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
-use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
-use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
-use YSOCode\Berry\Infra\Http\ServerRequest;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class BerryTest extends TestCase
 {
@@ -57,14 +55,6 @@ final class BerryTest extends TestCase
             new Container,
             responseEmitter: new ResponseEmitter($this->headerEmitter(...)),
         );
-
-        $this->berry->get(
-            new UriPath('/'),
-            fn (ServerRequest $request): Response => new Response(
-                HttpStatus::OK,
-                body: new StreamFactory()->createFromString('Hello, world!')
-            ),
-        );
     }
 
     private function headerEmitter(string $header, bool $replace = true, int $statusCode = 0): void
@@ -78,6 +68,11 @@ final class BerryTest extends TestCase
 
     public function test_it_should_run_a_route(): void
     {
+        $this->berry->get(
+            new UriPath('/'),
+            HelloWorldHandler::class
+        );
+
         ob_start();
         $this->berry->run();
         $output = ob_get_clean();
@@ -88,39 +83,14 @@ final class BerryTest extends TestCase
         $this->assertEquals('Hello, world!', $output);
     }
 
-    public function test_it_should_handle_global_middlewares(): void
+    public function test_it_should_handle_single_global_middleware(): void
     {
-        $this->berry->addMiddleware(function (ServerRequest $request, RequestHandlerInterface $handler): Response {
-            $request = $request->withAttribute(
-                new Attribute(new AttributeName('important-warning'), 'Berry is the best.')
-            );
+        $this->berry->addMiddleware(LoggingMiddleware::class);
 
-            return $handler->handle($request);
-        });
-
-        $this->berry->addMiddleware(function (ServerRequest $request, RequestHandlerInterface $handler): Response {
-            $response = $handler->handle($request);
-
-            $importantWarningAttribute = $request->getAttribute(new AttributeName('important-warning'));
-            if (! $importantWarningAttribute instanceof Attribute) {
-                return $response->withStatus(HttpStatus::BAD_REQUEST)
-                    ->withBody(
-                        new StreamFactory()->createFromString('Important warning attribute is not defined.')
-                    );
-            }
-
-            if (! is_string($importantWarningAttribute->value)) {
-                return $response->withStatus(HttpStatus::BAD_REQUEST)
-                    ->withBody(
-                        new StreamFactory()->createFromString('Important warning attribute value must be a string.')
-                    );
-            }
-
-            return $response->withStatus(HttpStatus::UNAUTHORIZED)
-                ->withBody(
-                    new StreamFactory()->createFromString('Replaced by middleware. '.$importantWarningAttribute->value)
-                );
-        });
+        $this->berry->get(
+            new UriPath('/'),
+            InspectRequestHandler::class
+        );
 
         ob_start();
         $this->berry->run();
@@ -128,13 +98,37 @@ final class BerryTest extends TestCase
 
         $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
 
-        $this->assertEquals(HttpStatus::UNAUTHORIZED, $status);
-        $this->assertEquals('Replaced by middleware. Berry is the best.', $output);
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals('Log: 1997-08-22 00:00:00. Powered by: Not powered.', $output);
+    }
+
+    public function test_it_should_handle_multiple_global_middlewares(): void
+    {
+        $this->berry->addMiddlewares([LoggingMiddleware::class, PoweredByMiddleware::class]);
+
+        $this->berry->get(
+            new UriPath('/'),
+            InspectRequestHandler::class
+        );
+
+        ob_start();
+        $this->berry->run();
+        $output = ob_get_clean();
+
+        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals('Log: 1997-08-22 00:00:00. Powered by: Berry.', $output);
     }
 
     public function test_it_should_handle_method_not_allowed_error(): void
     {
         $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->berry->get(
+            new UriPath('/'),
+            HelloWorldHandler::class
+        );
 
         $this->berry->run();
 

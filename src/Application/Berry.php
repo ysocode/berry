@@ -107,6 +107,16 @@ final class Berry
         return $this;
     }
 
+    /**
+     * @param  array<class-string<MiddlewareInterface>|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response>  $middlewares
+     */
+    public function addMiddlewares(array $middlewares): self
+    {
+        $this->middlewares = array_merge($this->middlewares, $middlewares);
+
+        return $this;
+    }
+
     public function run(?ServerRequest $request = null): void
     {
         $request ??= new ServerRequestFactory()->fromGlobals();

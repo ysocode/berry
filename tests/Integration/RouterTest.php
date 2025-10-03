@@ -18,7 +18,6 @@ use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\UriFactory;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 class RouterTest extends TestCase
 {
@@ -185,7 +184,7 @@ class RouterTest extends TestCase
         $this->assertEquals('/', (string) $route->path);
     }
 
-    public function test_it_should_register_a_route_inside_a_group_with_middleware(): void
+    public function test_it_should_register_a_route_inside_a_group_with_single_middleware(): void
     {
         $router = new Router;
 
@@ -195,13 +194,7 @@ class RouterTest extends TestCase
                 fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
             )->setName(new Name('home'));
         })->addMiddleware(
-            function (ServerRequest $request, RequestHandlerInterface $handler): Response {
-                $response = $handler->handle($request);
-
-                return $response->withBody(
-                    new StreamFactory()->createFromString('Hello, World!')
-                );
-            }
+            fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
         );
 
         $route = $router->routeRegistry->getRouteByName(new Name('home'));
@@ -210,6 +203,28 @@ class RouterTest extends TestCase
         $this->assertEquals(HttpMethod::GET, $route->method);
         $this->assertEquals('/', (string) $route->path);
         $this->assertNotEmpty($route->middlewares);
+    }
+
+    public function test_it_should_register_a_route_inside_a_group_with_multiple_middlewares(): void
+    {
+        $router = new Router;
+
+        $router->group(function (RouteGroup $group): void {
+            $group->get(
+                new UriPath('/'),
+                fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+            )->setName(new Name('home'));
+        })->addMiddlewares([
+            fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
+            fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
+        ]);
+
+        $route = $router->routeRegistry->getRouteByName(new Name('home'));
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals(HttpMethod::GET, $route->method);
+        $this->assertEquals('/', (string) $route->path);
+        $this->assertCount(2, $route->middlewares);
     }
 
     public function test_it_should_register_a_route_inside_a_group_with_prefix(): void

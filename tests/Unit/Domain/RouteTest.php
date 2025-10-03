@@ -31,7 +31,7 @@ final class RouteTest extends TestCase
         $this->assertEquals('home', (string) $route->name);
     }
 
-    public function test_it_should_add_middleware_to_a_route(): void
+    public function test_it_should_add_single_middleware_to_a_route(): void
     {
         $route = new Route(
             HttpMethod::GET,
@@ -42,6 +42,20 @@ final class RouteTest extends TestCase
         );
 
         $this->assertNotEmpty($route->middlewares);
+    }
+
+    public function test_it_should_add_multiple_middleware_to_a_route(): void
+    {
+        $route = new Route(
+            HttpMethod::GET,
+            new UriPath('/'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        )->addMiddlewares([
+            fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
+            fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
+        ]);
+
+        $this->assertCount(2, $route->middlewares);
     }
 
     public function test_it_should_emit_an_event_when_name_changes(): void

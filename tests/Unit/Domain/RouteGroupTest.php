@@ -97,7 +97,7 @@ final class RouteGroupTest extends TestCase
         $this->assertEquals('/users/8847', (string) $route->path);
     }
 
-    public function test_it_should_apply_prefix_to_routes(): void
+    public function test_it_should_add_prefix_to_route(): void
     {
         $routeGroup = new RouteGroup;
 
@@ -115,7 +115,7 @@ final class RouteGroupTest extends TestCase
         $this->assertEquals('/api/v1/', (string) $route->path);
     }
 
-    public function test_it_should_apply_middleware_to_routes(): void
+    public function test_it_should_add_single_middleware_to_route(): void
     {
         $routeGroup = new RouteGroup;
 
@@ -134,5 +134,27 @@ final class RouteGroupTest extends TestCase
         $this->assertEquals(HttpMethod::GET, $route->method);
         $this->assertEquals('/', (string) $route->path);
         $this->assertNotEmpty($route->middlewares);
+    }
+
+    public function test_it_should_add_multiple_middlewares_to_route(): void
+    {
+        $routeGroup = new RouteGroup;
+
+        $routeGroup->get(
+            new UriPath('/'),
+            fn (ServerRequest $request): Response => new Response(HttpStatus::OK)
+        )->setName(new Name('home'));
+
+        $routeGroup->addMiddlewares([
+            fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
+            fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
+        ]);
+
+        $route = $routeGroup->routes[0];
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals(HttpMethod::GET, $route->method);
+        $this->assertEquals('/', (string) $route->path);
+        $this->assertCount(2, $route->middlewares);
     }
 }

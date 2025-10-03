@@ -91,4 +91,16 @@ final class RouteGroup
 
         return $this;
     }
+
+    /**
+     * @param  array<class-string<MiddlewareInterface>|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response>  $middlewares
+     */
+    public function addMiddlewares(array $middlewares): self
+    {
+        foreach ($this->routes as $route) {
+            $route->addMiddlewares($middlewares);
+        }
+
+        return $this;
+    }
 }
