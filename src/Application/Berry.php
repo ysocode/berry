@@ -21,32 +21,24 @@ use YSOCode\Berry\Infra\Http\ServerRequestFactory;
 
 final class Berry
 {
-    private readonly Router $router;
-
     private readonly MiddlewareStackBuilder $middlewareStackBuilder;
 
     private readonly Dispatcher $dispatcher;
-
-    private readonly ResponseEmitter $responseEmitter;
 
     /**
      * @param  array<class-string<MiddlewareInterface>|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response>  $middlewares
      */
     public function __construct(
         ContainerInterface $container,
-        ?Router $router = null,
+        private readonly Router $router = new Router,
         ?MiddlewareStackBuilder $middlewareStackBuilder = null,
         ?Dispatcher $dispatcher = null,
-        ?ResponseEmitter $responseEmitter = null,
+        private readonly ResponseEmitter $responseEmitter = new ResponseEmitter,
         private(set) array $middlewares = []
     ) {
-        $this->router = $router ?? new Router;
-
         $this->middlewareStackBuilder = $middlewareStackBuilder ?? new MiddlewareStackBuilder($container);
 
         $this->dispatcher = $dispatcher ?? new Dispatcher($container, $this->router);
-
-        $this->responseEmitter = $responseEmitter ?? new ResponseEmitter;
     }
 
     /**
