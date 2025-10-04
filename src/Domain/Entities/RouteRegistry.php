@@ -17,11 +17,12 @@ use YSOCode\Berry\Infra\Http\ServerRequest;
 final class RouteRegistry
 {
     /**
-     * @param  array<string, RouteCollection>  $routeCollections
+     * @var array<string, RouteCollection>
      */
-    public function __construct(
-        private(set) array $routeCollections = []
-    ) {
+    public private(set) array $routeCollections = [];
+
+    public function __construct()
+    {
         foreach (HttpMethod::getValues() as $method) {
             $routeCollection = new RouteCollection;
             $routeCollection->on(RouteCollectionEvent::ROUTE_NAME_CHANGED, $this->assertUniqueName(...));
