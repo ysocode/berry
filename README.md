@@ -359,6 +359,69 @@ $berry->get(new UriPath('/profile'), ProfileHandler::class)
     ->addMiddleware(AuthMiddleware::class);
 ```
 
+### ServerRequest and Response
+
+Berry provides its own implementations of `ServerRequest` and `Response`, inspired by PSR-7 but improved for clarity and stronger typing.
+These classes follow the principle of immutability and use Value Objects to ensure consistency across headers, body, and HTTP version.
+
+#### ServerRequest
+
+Represents the HTTP request received by the server, containing data such as method, URI, headers, body, and parameters (query, cookies, etc).
+
+```php
+<?php
+
+use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\ValueObjects\Uri;
+use YSOCode\Berry\Infra\Http\ServerRequest;
+
+$request = new ServerRequest(HttpMethod::GET, new Uri('https://example.com/users'));
+```
+
+You can add or modify headers immutably:
+
+```php
+<?php
+
+use YSOCode\Berry\Domain\ValueObjects\Header;
+use YSOCode\Berry\Domain\ValueObjects\HeaderName;
+
+$newRequest = $request->withHeader(
+    new Header(new HeaderName('X-Request-ID'), ['abc123'])
+);
+```
+
+#### Response
+
+The `Response` class represents the HTTP response sent to the client.
+It defines the status, headers, and body, maintaining immutability and simplicity.
+
+```php
+<?php
+
+use YSOCode\Berry\Domain\Enums\HttpStatus;
+use YSOCode\Berry\Infra\Http\Response;
+use YSOCode\Berry\Infra\Stream\StreamFactory;
+
+$response = new Response(
+    HttpStatus::OK,
+    body: new StreamFactory()->createFromString('Hello, world!')
+);
+```
+
+You can also change the status or body while preserving immutability:
+
+```php
+<?php
+
+use YSOCode\Berry\Domain\Enums\HttpStatus;
+use YSOCode\Berry\Infra\Stream\StreamFactory;
+
+$newResponse = $response
+    ->withStatus(HttpStatus::CREATED)
+    ->withBody((new StreamFactory())->createFromString('Created!'));
+```
+
 ## License
 
 Berry is open-sourced software licensed under the [MIT license](LICENSE).
