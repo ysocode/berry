@@ -7,7 +7,7 @@ namespace YSOCode\Berry\Domain\ValueObjects;
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class Name implements Stringable
+final readonly class RouteName implements Stringable
 {
     public string $value;
 

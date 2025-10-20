@@ -11,6 +11,8 @@ enum HttpMethod: string
     case POST = 'POST';
     case DELETE = 'DELETE';
     case PATCH = 'PATCH';
+    case HEAD = 'HEAD';
+    case OPTIONS = 'OPTIONS';
 
     /**
      * @return array<string>
