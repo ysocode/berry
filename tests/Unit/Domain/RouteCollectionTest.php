@@ -18,10 +18,10 @@ final class RouteCollectionTest extends TestCase
     {
         $routeCollection = new RouteCollection;
 
-        $putProfile = new Route([HttpMethod::PUT], new RoutePathPattern('/user/{user}/profile'), HelloWorldHandler::class);
-        $getUser = new Route([HttpMethod::GET], new RoutePathPattern('/user/{user}'), HelloWorldHandler::class);
-        $deleteUser = new Route([HttpMethod::DELETE], new RoutePathPattern('/user/{user}'), HelloWorldHandler::class);
-        $getArticle = new Route([HttpMethod::GET], new RoutePathPattern('/article/{slug:[a-z\-]+}'), HelloWorldHandler::class);
+        $putProfile = new Route([HttpMethod::PUT], new RoutePathPattern('/user/{user:int}/profile'), HelloWorldHandler::class);
+        $getUser = new Route([HttpMethod::GET], new RoutePathPattern('/user/{user:int}'), HelloWorldHandler::class);
+        $deleteUser = new Route([HttpMethod::DELETE], new RoutePathPattern('/user/{user:int}'), HelloWorldHandler::class);
+        $getArticle = new Route([HttpMethod::GET], new RoutePathPattern('/article/{slug:regex([a-z\-]+)}'), HelloWorldHandler::class);
 
         $routeCollection->addRoute($putProfile);
         $routeCollection->addRoute($getUser);
@@ -35,7 +35,7 @@ final class RouteCollectionTest extends TestCase
         $expected = [
             'user' => [
                 'children' => [
-                    '{user}' => [
+                    '{user:int}' => [
                         'children' => [
                             'profile' => [
                                 'children' => [],
@@ -49,7 +49,7 @@ final class RouteCollectionTest extends TestCase
             ],
             'article' => [
                 'children' => [
-                    '{slug:[a-z\-]+}' => [
+                    '{slug:regex([a-z\-]+)}' => [
                         'children' => [],
                         'routes' => [$getArticle],
                     ],

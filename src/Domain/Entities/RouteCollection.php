@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Entities;
 
-/** @phpstan-type Node array{children: array<string, mixed>, routes: array<Route>}  */
+/**
+ * @phpstan-type Node array{children: array<string, mixed>, routes: array<Route>}
+ */
 final class RouteCollection
 {
     /** @var array<string, Node> */
@@ -12,9 +14,11 @@ final class RouteCollection
 
     public function addRoute(Route $route): void
     {
-        $segments = array_values(array_filter(explode('/', (string) $route->pathPattern)));
-
-        $this->routeBySegments = $this->addRouteBySegments($this->routeBySegments, $segments, $route);
+        $this->routeBySegments = $this->addRouteBySegments(
+            $this->routeBySegments,
+            $route->pathPattern->getSegments(),
+            $route
+        );
     }
 
     /**
