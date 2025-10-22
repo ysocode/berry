@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Entities;
 
+use RuntimeException;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 
 /**
@@ -27,7 +28,11 @@ final class RouteCollection
             $tree[$segment] ??= ['children' => [], 'route' => null];
 
             if ($index === $lastIndex) {
-                $tree[$segment]['route'] ??= $route;
+                if (isset($tree[$segment]['route'])) {
+                    throw new RuntimeException("Route conflict: {$route->pathPattern}");
+                }
+
+                $tree[$segment]['route'] = $route;
             }
 
             /** @var array<string, Node> $tree */

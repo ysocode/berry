@@ -6,6 +6,7 @@ namespace Tests\Unit\Domain;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
+use RuntimeException;
 use Tests\Fixtures\HelloWorldHandler;
 use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteCollection;
@@ -65,7 +66,7 @@ final class RouteCollectionTest extends TestCase
         $this->assertSame($expected, $routeBySegmentsValue);
     }
 
-    public function test_it_should_get_a_route_by_path(): void
+    public function test_it_should_return_a_route_when_exist(): void
     {
         $routeCollection = new RouteCollection;
 
@@ -84,5 +85,26 @@ final class RouteCollectionTest extends TestCase
         $this->assertSame($putProfileRoute, $actualPutProfileRoute);
         $this->assertSame($getUserRoute, $actualGetUserRoute);
         $this->assertSame($getArticleRoute, $actualGetArticleRoute);
+    }
+
+    public function test_it_should_return_null_when_route_not_exist(): void
+    {
+        $routeCollection = new RouteCollection;
+
+        $this->assertNull($routeCollection->getRouteByPath(new UriPath('/')));
+    }
+
+    public function test_it_should_reject_duplicated_path_pattern(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Route conflict: /user/{user}');
+
+        $routeCollection = new RouteCollection;
+
+        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/user/{user}'), HelloWorldHandler::class);
+        $deleteUserRoute = new Route(HttpMethod::DELETE, new RoutePathPattern('/user/{user}'), HelloWorldHandler::class);
+
+        $routeCollection->addRoute($getUserRoute);
+        $routeCollection->addRoute($deleteUserRoute);
     }
 }
