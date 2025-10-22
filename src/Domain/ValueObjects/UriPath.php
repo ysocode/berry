@@ -40,6 +40,17 @@ final readonly class UriPath implements Stringable
         return true;
     }
 
+    /**
+     * @return array<string>
+     */
+    public function getSegments(): array
+    {
+        $segments = array_values(array_filter(explode('/', $this->value)));
+        array_unshift($segments, '/');
+
+        return $segments;
+    }
+
     public function __toString(): string
     {
         return $this->value;

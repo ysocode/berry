@@ -16,10 +16,9 @@ final readonly class Route
 {
     /**
      * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
-     * @param  array<HttpMethod>  $methods
      */
     public function __construct(
-        public array $methods,
+        public HttpMethod $method,
         public RoutePathPattern $pathPattern,
         public string|Closure $handler,
         public ?RouteName $name = null

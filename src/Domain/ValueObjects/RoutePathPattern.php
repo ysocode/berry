@@ -32,7 +32,7 @@ final readonly class RoutePathPattern implements Stringable
             return new Error('Route path pattern must start with "/".');
         }
 
-        $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/]|%[0-9A-Fa-f]{2}|\{\w+(?::[a-zA-Z_]\w*(?:\([^()]*\))?)?\})*$/';
+        $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/]|%[0-9A-Fa-f]{2}|\{\w+\})*$/';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
             return new Error('Route path pattern contains invalid characters.');
         }
@@ -45,7 +45,10 @@ final readonly class RoutePathPattern implements Stringable
      */
     public function getSegments(): array
     {
-        return array_values(array_filter(explode('/', $this->value)));
+        $segments = array_values(array_filter(explode('/', $this->value)));
+        array_unshift($segments, '/');
+
+        return $segments;
     }
 
     public function __toString(): string

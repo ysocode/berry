@@ -4,52 +4,73 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Entities;
 
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
+
 /**
- * @phpstan-type Node array{children: array<string, mixed>, routes: array<Route>}
+ * @phpstan-type Node array{children: array<string, mixed>, route: ?Route}
  */
 final class RouteCollection
 {
-    /** @var array<string, Node> */
+    /**
+     * @var array<string, Node>
+     */
     private array $routeBySegments = [];
 
     public function addRoute(Route $route): void
     {
-        $this->routeBySegments = $this->addRouteBySegments(
-            $this->routeBySegments,
-            $route->pathPattern->getSegments(),
-            $route
-        );
+        $segments = $route->pathPattern->getSegments();
+        $lastIndex = array_key_last($segments);
+
+        $tree = &$this->routeBySegments;
+
+        foreach ($segments as $index => $segment) {
+            $tree[$segment] ??= ['children' => [], 'route' => null];
+
+            if ($index === $lastIndex) {
+                $tree[$segment]['route'] ??= $route;
+            }
+
+            /** @var array<string, Node> $tree */
+            $tree = &$tree[$segment]['children'];
+        }
     }
 
-    /**
-     * @param  array<string, Node>  $tree
-     * @param  array<string>  $segments
-     * @return array<string, Node>
-     */
-    private function addRouteBySegments(array $tree, array $segments, Route $route): array
+    public function getRouteByPath(UriPath $path): ?Route
     {
-        if ($segments === []) {
-            return $tree;
+        $segments = $path->getSegments();
+        $lastIndex = array_key_last($segments);
+
+        $tree = &$this->routeBySegments;
+
+        foreach ($segments as $index => $segment) {
+            if (! isset($tree[$segment])) {
+                foreach (array_keys($tree) as $treeSegment) {
+                    if (
+                        str_starts_with($treeSegment, '{') &&
+                        str_ends_with($treeSegment, '}')
+                    ) {
+                        if ($index === $lastIndex) {
+                            return $tree[$treeSegment]['route'] ?? null;
+                        }
+
+                        /** @var array<string, Node> $tree */
+                        $tree = &$tree[$treeSegment]['children'];
+
+                        continue 2;
+                    }
+                }
+
+                return null;
+            }
+
+            if ($index === $lastIndex) {
+                return $tree[$segment]['route'] ?? null;
+            }
+
+            /** @var array<string, Node> $tree */
+            $tree = &$tree[$segment]['children'];
         }
 
-        $segment = array_shift($segments);
-
-        $tree[$segment] ??= [
-            'children' => [],
-            'routes' => [],
-        ];
-
-        if (count($segments) > 0) {
-            /** @var array<string, Node> $children */
-            $children = $tree[$segment]['children'];
-
-            $tree[$segment]['children'] = $this->addRouteBySegments($children, $segments, $route);
-
-            return $tree;
-        }
-
-        $tree[$segment]['routes'][] = $route;
-
-        return $tree;
+        return null;
     }
 }
