@@ -40,6 +40,11 @@ final class RouteCollection
         }
     }
 
+    public function hasRouteByPath(UriPath $path): bool
+    {
+        return $this->getRouteByPath($path) instanceof Route;
+    }
+
     public function getRouteByPath(UriPath $path): ?Route
     {
         $segments = $path->getSegments();

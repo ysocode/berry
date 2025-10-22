@@ -66,7 +66,19 @@ final class RouteCollectionTest extends TestCase
         $this->assertSame($expected, $routeBySegmentsValue);
     }
 
-    public function test_it_should_return_a_route_when_exist(): void
+    public function test_it_should_check_route_existence(): void
+    {
+        $routeCollection = new RouteCollection;
+
+        $routeCollection->addRoute(
+            new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), HelloWorldHandler::class)
+        );
+
+        $this->assertTrue($routeCollection->hasRouteByPath(new UriPath('/users/8847/profile')));
+        $this->assertFalse($routeCollection->hasRouteByPath(new UriPath('/users/42')));
+    }
+
+    public function test_it_should_return_a_route_when_exists(): void
     {
         $routeCollection = new RouteCollection;
 
@@ -87,7 +99,7 @@ final class RouteCollectionTest extends TestCase
         $this->assertSame($getArticleRoute, $actualGetArticleRoute);
     }
 
-    public function test_it_should_return_null_when_route_not_exist(): void
+    public function test_it_should_return_null_when_route_not_exists(): void
     {
         $routeCollection = new RouteCollection;
 
