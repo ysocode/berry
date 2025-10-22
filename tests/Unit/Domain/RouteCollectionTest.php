@@ -20,8 +20,8 @@ final class RouteCollectionTest extends TestCase
     {
         $routeCollection = new RouteCollection;
 
-        $putProfileRoute = new Route(HttpMethod::PUT, new RoutePathPattern('/user/{user}/profile'), HelloWorldHandler::class);
-        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/user/{user}'), HelloWorldHandler::class);
+        $putProfileRoute = new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), HelloWorldHandler::class);
+        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), HelloWorldHandler::class);
         $getArticleRoute = new Route(HttpMethod::GET, new RoutePathPattern('/article/{slug}'), HelloWorldHandler::class);
 
         $routeCollection->addRoute($putProfileRoute);
@@ -35,7 +35,7 @@ final class RouteCollectionTest extends TestCase
         $expected = [
             '/' => [
                 'children' => [
-                    'user' => [
+                    'users' => [
                         'children' => [
                             '{user}' => [
                                 'children' => [
@@ -70,16 +70,16 @@ final class RouteCollectionTest extends TestCase
     {
         $routeCollection = new RouteCollection;
 
-        $putProfileRoute = new Route(HttpMethod::PUT, new RoutePathPattern('/user/{user}/profile'), HelloWorldHandler::class);
-        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/user/{user}'), HelloWorldHandler::class);
+        $putProfileRoute = new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), HelloWorldHandler::class);
+        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), HelloWorldHandler::class);
         $getArticleRoute = new Route(HttpMethod::GET, new RoutePathPattern('/article/{slug}'), HelloWorldHandler::class);
 
         $routeCollection->addRoute($putProfileRoute);
         $routeCollection->addRoute($getUserRoute);
         $routeCollection->addRoute($getArticleRoute);
 
-        $actualPutProfileRoute = $routeCollection->getRouteByPath(new UriPath('/user/8847/profile'));
-        $actualGetUserRoute = $routeCollection->getRouteByPath(new UriPath('/user/42'));
+        $actualPutProfileRoute = $routeCollection->getRouteByPath(new UriPath('/users/8847/profile'));
+        $actualGetUserRoute = $routeCollection->getRouteByPath(new UriPath('/users/42'));
         $actualGetArticleRoute = $routeCollection->getRouteByPath(new UriPath('/article/example-slug'));
 
         $this->assertSame($putProfileRoute, $actualPutProfileRoute);
@@ -97,12 +97,12 @@ final class RouteCollectionTest extends TestCase
     public function test_it_should_reject_duplicated_path_pattern(): void
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Route conflict: /user/{user}');
+        $this->expectExceptionMessage('Route conflict: /users/{user}');
 
         $routeCollection = new RouteCollection;
 
-        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/user/{user}'), HelloWorldHandler::class);
-        $deleteUserRoute = new Route(HttpMethod::DELETE, new RoutePathPattern('/user/{user}'), HelloWorldHandler::class);
+        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), HelloWorldHandler::class);
+        $deleteUserRoute = new Route(HttpMethod::DELETE, new RoutePathPattern('/users/{user}'), HelloWorldHandler::class);
 
         $routeCollection->addRoute($getUserRoute);
         $routeCollection->addRoute($deleteUserRoute);
