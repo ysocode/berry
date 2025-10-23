@@ -10,6 +10,7 @@ use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\Error;
+use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
 use YSOCode\Berry\Domain\ValueObjects\RoutePathPattern;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 
@@ -23,7 +24,7 @@ final class RouteRegistryTest extends TestCase
             $routeRegistry->map(
                 $method,
                 new RoutePathPattern('/users/{user}'),
-                HelloWorldHandler::class
+                new RequestHandler(HelloWorldHandler::class)
             );
 
             $route = $routeRegistry->getRouteByMethodAndPath($method, new UriPath('/users/42'));
@@ -31,7 +32,7 @@ final class RouteRegistryTest extends TestCase
             $this->assertInstanceOf(Route::class, $route);
             $this->assertEquals($method, $route->method);
             $this->assertEquals('/users/{user}', (string) $route->pathPattern);
-            $this->assertEquals(HelloWorldHandler::class, $route->handler);
+            $this->assertEquals(new RequestHandler(HelloWorldHandler::class), $route->handler);
         }
     }
 
@@ -42,7 +43,7 @@ final class RouteRegistryTest extends TestCase
         $routeRegistry->map(
             HttpMethod::GET,
             new RoutePathPattern('/users/{user}'),
-            HelloWorldHandler::class
+            new RequestHandler(HelloWorldHandler::class)
         );
 
         $error = $routeRegistry->getRouteByMethodAndPath(HttpMethod::DELETE, new UriPath('/users/42'));
@@ -58,12 +59,12 @@ final class RouteRegistryTest extends TestCase
         $routeRegistry->map(
             HttpMethod::GET,
             new RoutePathPattern('/users/{user}'),
-            HelloWorldHandler::class
+            new RequestHandler(HelloWorldHandler::class)
         );
 
         $error = $routeRegistry->getRouteByMethodAndPath(HttpMethod::DELETE, new UriPath('/home'));
 
         $this->assertInstanceOf(Error::class, $error);
-        $this->assertEquals('Not found.', (string) $error);
+        $this->assertEquals('Route not found.', (string) $error);
     }
 }

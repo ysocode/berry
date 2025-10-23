@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Entities;
 
-use Closure;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\Error;
+use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
 use YSOCode\Berry\Domain\ValueObjects\RoutePathPattern;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
-use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
-use YSOCode\Berry\Infra\Http\Response;
-use YSOCode\Berry\Infra\Http\ServerRequest;
 
 final class RouteRegistry
 {
@@ -25,10 +22,7 @@ final class RouteRegistry
         }
     }
 
-    /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
-     */
-    public function map(HttpMethod $method, RoutePathPattern $pathPattern, string|Closure $handler): Route
+    public function map(HttpMethod $method, RoutePathPattern $pathPattern, RequestHandler $handler): Route
     {
         $route = new Route($method, $pathPattern, $handler);
 
@@ -53,7 +47,7 @@ final class RouteRegistry
                 }
             }
 
-            return new Error('Not found.');
+            return new Error('Route not found.');
         }
 
         return $route;

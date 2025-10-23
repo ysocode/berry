@@ -11,6 +11,7 @@ use Tests\Fixtures\HelloWorldHandler;
 use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteCollection;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
 use YSOCode\Berry\Domain\ValueObjects\RoutePathPattern;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 
@@ -20,9 +21,9 @@ final class RouteCollectionTest extends TestCase
     {
         $routeCollection = new RouteCollection;
 
-        $putProfileRoute = new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), HelloWorldHandler::class);
-        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), HelloWorldHandler::class);
-        $getArticleRoute = new Route(HttpMethod::GET, new RoutePathPattern('/article/{slug}'), HelloWorldHandler::class);
+        $putProfileRoute = new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), new RequestHandler(HelloWorldHandler::class));
+        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
+        $getArticleRoute = new Route(HttpMethod::GET, new RoutePathPattern('/article/{slug}'), new RequestHandler(HelloWorldHandler::class));
 
         $routeCollection->addRoute($putProfileRoute);
         $routeCollection->addRoute($getUserRoute);
@@ -71,7 +72,7 @@ final class RouteCollectionTest extends TestCase
         $routeCollection = new RouteCollection;
 
         $routeCollection->addRoute(
-            new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), HelloWorldHandler::class)
+            new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), new RequestHandler(HelloWorldHandler::class))
         );
 
         $this->assertTrue($routeCollection->hasRouteByPath(new UriPath('/users/8847/profile')));
@@ -82,9 +83,9 @@ final class RouteCollectionTest extends TestCase
     {
         $routeCollection = new RouteCollection;
 
-        $putProfileRoute = new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), HelloWorldHandler::class);
-        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), HelloWorldHandler::class);
-        $getArticleRoute = new Route(HttpMethod::GET, new RoutePathPattern('/article/{slug}'), HelloWorldHandler::class);
+        $putProfileRoute = new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), new RequestHandler(HelloWorldHandler::class));
+        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
+        $getArticleRoute = new Route(HttpMethod::GET, new RoutePathPattern('/article/{slug}'), new RequestHandler(HelloWorldHandler::class));
 
         $routeCollection->addRoute($putProfileRoute);
         $routeCollection->addRoute($getUserRoute);
@@ -113,8 +114,8 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection = new RouteCollection;
 
-        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), HelloWorldHandler::class);
-        $deleteUserRoute = new Route(HttpMethod::DELETE, new RoutePathPattern('/users/{user}'), HelloWorldHandler::class);
+        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
+        $deleteUserRoute = new Route(HttpMethod::DELETE, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
 
         $routeCollection->addRoute($getUserRoute);
         $routeCollection->addRoute($deleteUserRoute);
