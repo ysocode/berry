@@ -12,6 +12,7 @@ use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteCollection;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
+use YSOCode\Berry\Domain\ValueObjects\RouteName;
 use YSOCode\Berry\Domain\ValueObjects\RoutePathPattern;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 
@@ -30,8 +31,8 @@ final class RouteCollectionTest extends TestCase
         $routeCollection->addRoute($getArticleRoute);
 
         $reflection = new ReflectionObject($routeCollection);
-        $routeBySegments = $reflection->getProperty('routeBySegments');
-        $routeBySegmentsValue = $routeBySegments->getValue($routeCollection);
+        $routesBySegment = $reflection->getProperty('routesBySegment');
+        $routesBySegmentValue = $routesBySegment->getValue($routeCollection);
 
         $expected = [
             '/' => [
@@ -64,19 +65,7 @@ final class RouteCollectionTest extends TestCase
             ],
         ];
 
-        $this->assertSame($expected, $routeBySegmentsValue);
-    }
-
-    public function test_it_should_check_route_existence(): void
-    {
-        $routeCollection = new RouteCollection;
-
-        $routeCollection->addRoute(
-            new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), new RequestHandler(HelloWorldHandler::class))
-        );
-
-        $this->assertTrue($routeCollection->hasRouteByPath(new UriPath('/users/8847/profile')));
-        $this->assertFalse($routeCollection->hasRouteByPath(new UriPath('/users/42')));
+        $this->assertSame($expected, $routesBySegmentValue);
     }
 
     public function test_it_should_return_a_route_when_exists(): void
@@ -119,5 +108,57 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection->addRoute($getUserRoute);
         $routeCollection->addRoute($deleteUserRoute);
+    }
+
+    public function test_it_should_return_a_route_when_path_exists(): void
+    {
+        $routeCollection = new RouteCollection;
+        $routeCollection->addRoute(
+            new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class))
+        );
+
+        $route = $routeCollection->getRouteByPath(new UriPath('/users/8847'));
+
+        $this->assertInstanceOf(Route::class, $route);
+    }
+
+    public function test_it_should_check_path_existence(): void
+    {
+        $routeCollection = new RouteCollection;
+        $routeCollection->addRoute(
+            new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class))
+        );
+
+        $this->assertTrue($routeCollection->hasRouteByPath(new UriPath('/users/42')));
+        $this->assertFalse($routeCollection->hasRouteByPath(new UriPath('/home')));
+    }
+
+    public function test_it_should_return_a_route_when_name_exists(): void
+    {
+        $routeCollection = new RouteCollection;
+
+        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
+
+        $routeCollection->addRoute($getUserRoute);
+
+        $getUserRoute->setName(new RouteName('users.show'));
+
+        $route = $routeCollection->getRouteByName(new RouteName('users.show'));
+
+        $this->assertInstanceOf(Route::class, $route);
+    }
+
+    public function test_it_should_check_name_existence(): void
+    {
+        $routeCollection = new RouteCollection;
+
+        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
+
+        $routeCollection->addRoute($getUserRoute);
+
+        $getUserRoute->setName(new RouteName('users.show'));
+
+        $this->assertTrue($routeCollection->hasRouteByName(new RouteName('users.show')));
+        $this->assertFalse($routeCollection->hasRouteByName(new RouteName('home')));
     }
 }

@@ -6,6 +6,7 @@ namespace YSOCode\Berry\Domain\Entities;
 
 use Closure;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Enums\RouteEvent;
 use YSOCode\Berry\Domain\ValueObjects\Middleware;
 use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
 use YSOCode\Berry\Domain\ValueObjects\RouteName;
@@ -17,6 +18,9 @@ use YSOCode\Berry\Infra\Http\ServerRequest;
 
 final class Route
 {
+    /** @use EventTrait<self, RouteEvent> */
+    use EventTrait;
+
     public function __construct(
         public readonly HttpMethod $method,
         public readonly RoutePathPattern $pathPattern,
@@ -27,6 +31,8 @@ final class Route
 
     public function setName(RouteName $name): self
     {
+        $this->emit(RouteEvent::NAME_CHANGED, ['name' => $name]);
+
         $this->name = $name;
 
         return $this;
