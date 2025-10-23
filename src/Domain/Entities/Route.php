@@ -4,17 +4,53 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Entities;
 
+use Closure;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\ValueObjects\Middleware;
 use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
 use YSOCode\Berry\Domain\ValueObjects\RouteName;
 use YSOCode\Berry\Domain\ValueObjects\RoutePathPattern;
+use YSOCode\Berry\Infra\Http\MiddlewareInterface;
+use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
+use YSOCode\Berry\Infra\Http\Response;
+use YSOCode\Berry\Infra\Http\ServerRequest;
 
-final readonly class Route
+final class Route
 {
     public function __construct(
-        public HttpMethod $method,
-        public RoutePathPattern $pathPattern,
-        public RequestHandler $handler,
-        public ?RouteName $name = null
+        public readonly HttpMethod $method,
+        public readonly RoutePathPattern $pathPattern,
+        public readonly RequestHandler $handler,
+        public ?RouteName $name = null,
+        public readonly MiddlewareCollection $middlewareCollection = new MiddlewareCollection
     ) {}
+
+    public function setName(RouteName $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @param  class-string<MiddlewareInterface>|Closure(ServerRequest, RequestHandlerInterface): Response  $middleware
+     */
+    public function addMiddleware(string|Closure $middleware): self
+    {
+        $this->middlewareCollection->addMiddleware(new Middleware($middleware));
+
+        return $this;
+    }
+
+    /**
+     * @param  array<class-string<MiddlewareInterface>|Closure(ServerRequest, RequestHandlerInterface): Response>  $middlewares
+     */
+    public function addMiddlewares(array $middlewares): self
+    {
+        foreach ($middlewares as $middleware) {
+            $this->middlewareCollection->addMiddleware(new Middleware($middleware));
+        }
+
+        return $this;
+    }
 }
