@@ -133,6 +133,23 @@ final class RouteCollectionTest extends TestCase
         $this->assertFalse($routeCollection->hasRouteByPath(new UriPath('/home')));
     }
 
+    public function test_it_should_reject_duplicated_name(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Route name "users.show" already exists.');
+
+        $routeCollection = new RouteCollection;
+
+        $putProfileRoute = new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), new RequestHandler(HelloWorldHandler::class));
+        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
+
+        $routeCollection->addRoute($putProfileRoute);
+        $routeCollection->addRoute($getUserRoute);
+
+        $putProfileRoute->setName('users.show');
+        $getUserRoute->setName('users.show');
+    }
+
     public function test_it_should_return_a_route_when_name_exists(): void
     {
         $routeCollection = new RouteCollection;
@@ -141,7 +158,7 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection->addRoute($getUserRoute);
 
-        $getUserRoute->setName(new RouteName('users.show'));
+        $getUserRoute->setName('users.show');
 
         $route = $routeCollection->getRouteByName(new RouteName('users.show'));
 
@@ -156,7 +173,7 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection->addRoute($getUserRoute);
 
-        $getUserRoute->setName(new RouteName('users.show'));
+        $getUserRoute->setName('users.show');
 
         $this->assertTrue($routeCollection->hasRouteByName(new RouteName('users.show')));
         $this->assertFalse($routeCollection->hasRouteByName(new RouteName('home')));

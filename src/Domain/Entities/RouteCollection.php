@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Domain\Entities;
 
 use RuntimeException;
+use YSOCode\Berry\Domain\Enums\RouteCollectionEvent;
 use YSOCode\Berry\Domain\Enums\RouteEvent;
 use YSOCode\Berry\Domain\ValueObjects\RouteName;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
@@ -14,6 +15,9 @@ use YSOCode\Berry\Domain\ValueObjects\UriPath;
  */
 final class RouteCollection
 {
+    /** @use EventTrait<self, RouteCollectionEvent> */
+    use EventTrait;
+
     /**
      * @var array<string, Node>
      */
@@ -61,6 +65,8 @@ final class RouteCollection
         if (! $name instanceof RouteName) {
             throw new RuntimeException('Route name should be an instance of RouteName.');
         }
+
+        $this->emit(RouteCollectionEvent::ROUTE_NAME_CHANGED, ['name' => $name]);
 
         if ($this->hasRouteByName($name)) {
             throw new RuntimeException(sprintf('Route name "%s" already exists.', $name));

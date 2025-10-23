@@ -29,11 +29,11 @@ final class Route
         public readonly MiddlewareCollection $middlewareCollection = new MiddlewareCollection
     ) {}
 
-    public function setName(RouteName $name): self
+    public function setName(string $name): self
     {
-        $this->emit(RouteEvent::NAME_CHANGED, ['name' => $name]);
+        $this->emit(RouteEvent::NAME_CHANGED, ['name' => new RouteName($name)]);
 
-        $this->name = $name;
+        $this->name = new RouteName($name);
 
         return $this;
     }
