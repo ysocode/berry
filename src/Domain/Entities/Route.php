@@ -7,6 +7,7 @@ namespace YSOCode\Berry\Domain\Entities;
 use Closure;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Enums\RouteEvent;
+use YSOCode\Berry\Domain\Support\EventTrait;
 use YSOCode\Berry\Domain\ValueObjects\Middleware;
 use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
 use YSOCode\Berry\Domain\ValueObjects\RouteName;
@@ -23,9 +24,9 @@ final class Route
 
     public function __construct(
         public readonly HttpMethod $method,
-        public readonly RoutePathPattern $pathPattern,
+        private(set) RoutePathPattern $pathPattern,
         public readonly RequestHandler $handler,
-        public ?RouteName $name = null,
+        private(set) ?RouteName $name = null,
         public readonly MiddlewareCollection $middlewareCollection = new MiddlewareCollection
     ) {}
 
@@ -53,9 +54,16 @@ final class Route
      */
     public function addMiddlewares(array $middlewares): self
     {
-        foreach ($middlewares as $middleware) {
-            $this->middlewareCollection->addMiddleware(new Middleware($middleware));
-        }
+        $this->middlewareCollection->addMiddlewares(
+            array_map(fn (string|Closure $middleware): Middleware => new Middleware($middleware), $middlewares)
+        );
+
+        return $this;
+    }
+
+    public function addPrefix(RoutePathPattern $pathPattern): self
+    {
+        $this->pathPattern = $this->pathPattern->prepend($pathPattern);
 
         return $this;
     }

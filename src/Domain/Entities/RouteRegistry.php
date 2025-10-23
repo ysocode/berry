@@ -91,4 +91,25 @@ final class RouteRegistry
 
         return $route;
     }
+
+    public function append(self $other): void
+    {
+        foreach ($other->routeCollectionsByMethod as $method => $routeCollection) {
+            $this->routeCollectionsByMethod[$method]->append($routeCollection);
+        }
+    }
+
+    /**
+     * @return array<Route>
+     */
+    public function getRoutes(): array
+    {
+        $collectedRoutes = [];
+
+        foreach ($this->routeCollectionsByMethod as $routeCollection) {
+            $collectedRoutes = array_merge($collectedRoutes, $routeCollection->getRoutes());
+        }
+
+        return $collectedRoutes;
+    }
 }

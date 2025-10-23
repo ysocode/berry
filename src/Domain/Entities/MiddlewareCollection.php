@@ -17,4 +17,17 @@ final class MiddlewareCollection
     {
         $this->middlewares[] = $middleware;
     }
+
+    /**
+     * @param  array<Middleware>  $middlewares
+     */
+    public function addMiddlewares(array $middlewares): void
+    {
+        $this->middlewares = array_merge($this->middlewares, $middlewares);
+    }
+
+    public function append(self $other): void
+    {
+        $this->addMiddlewares($other->middlewares);
+    }
 }

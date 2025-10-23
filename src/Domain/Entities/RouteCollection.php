@@ -7,6 +7,7 @@ namespace YSOCode\Berry\Domain\Entities;
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\RouteCollectionEvent;
 use YSOCode\Berry\Domain\Enums\RouteEvent;
+use YSOCode\Berry\Domain\Support\EventTrait;
 use YSOCode\Berry\Domain\ValueObjects\RouteName;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 
@@ -47,6 +48,10 @@ final class RouteCollection
                     RouteEvent::NAME_CHANGED,
                     $this->setRouteByName(...)
                 );
+
+                if ($route->name instanceof RouteName) {
+                    $this->routesByName[(string) $route->name] = $route;
+                }
 
                 $tree[$segment]['route'] = $route;
             }
@@ -131,5 +136,31 @@ final class RouteCollection
         }
 
         return null;
+    }
+
+    public function append(self $other): void
+    {
+        foreach ($other->getRoutes() as $route) {
+            $this->addRoute($route);
+        }
+    }
+
+    /**
+     * @return array<Route>
+     */
+    public function getRoutes(): array
+    {
+        $collectedRoutes = [];
+
+        array_walk_recursive(
+            $this->routesBySegment,
+            function (mixed $value, string $key) use (&$collectedRoutes): void {
+                if ($key === 'route' && $value instanceof Route) {
+                    $collectedRoutes[] = $value;
+                }
+            }
+        );
+
+        return $collectedRoutes;
     }
 }

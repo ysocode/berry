@@ -8,115 +8,62 @@ use Closure;
 use Psr\Container\ContainerInterface;
 use YSOCode\Berry\Domain\Entities\MiddlewareCollection;
 use YSOCode\Berry\Domain\Entities\Route;
+use YSOCode\Berry\Domain\Entities\RouteGroup;
+use YSOCode\Berry\Domain\Entities\RouteRegistry;
+use YSOCode\Berry\Domain\Entities\RouteRegistryProxyTrait;
+use YSOCode\Berry\Domain\Enums\BerryEvent;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
+use YSOCode\Berry\Domain\Support\EventTrait;
 use YSOCode\Berry\Domain\ValueObjects\Error;
-use YSOCode\Berry\Domain\ValueObjects\Middleware;
-use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
-use YSOCode\Berry\Domain\ValueObjects\RoutePathPattern;
-use YSOCode\Berry\Infra\Http\MiddlewareInterface;
+use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
-use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\ServerRequestFactory;
 
-final readonly class Berry
+final class Berry
 {
-    private MiddlewareStackBuilder $middlewareStackBuilder;
+    /** @use EventTrait<self, BerryEvent> */
+    use EventTrait, RouteRegistryProxyTrait;
+
+    private readonly MiddlewareStackBuilder $middlewareStackBuilder;
 
     public function __construct(
-        private ContainerInterface $container,
-        private Router $router = new Router,
+        private readonly ContainerInterface $container,
+        ?RouteRegistry $routeRegistry = null,
         ?MiddlewareStackBuilder $middlewareStackBuilder = null,
-        private ResponseEmitter $responseEmitter = new ResponseEmitter,
-        public MiddlewareCollection $middlewareCollection = new MiddlewareCollection
+        private readonly ResponseEmitter $responseEmitter = new ResponseEmitter,
+        ?MiddlewareCollection $middlewareCollection = null
     ) {
+        $this->routeRegistry = $routeRegistry ?? new RouteRegistry;
+        $this->middlewareCollection = $middlewareCollection ?? new MiddlewareCollection;
         $this->middlewareStackBuilder = $middlewareStackBuilder ?? new MiddlewareStackBuilder($this->container);
     }
 
     /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
+     * @param  Closure(RouteGroup $group): void  $closure
      */
-    public function get(string $pathPattern, string|Closure $handler): Route
+    public function group(Closure $closure): RouteGroup
     {
-        return $this->router->get(new RoutePathPattern($pathPattern), new RequestHandler($handler));
-    }
+        $group = new RouteGroup;
 
-    /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
-     */
-    public function put(string $pathPattern, string|Closure $handler): Route
-    {
-        return $this->router->put(new RoutePathPattern($pathPattern), new RequestHandler($handler));
-    }
+        $closure($group);
 
-    /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
-     */
-    public function post(string $pathPattern, string|Closure $handler): Route
-    {
-        return $this->router->post(new RoutePathPattern($pathPattern), new RequestHandler($handler));
-    }
+        $this->on(BerryEvent::BEFORE_RUN, function (self $berry) use ($group): void {
+            $group->propagate();
+            $berry->routeRegistry->append($group->routeRegistry);
+        });
 
-    /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
-     */
-    public function delete(string $pathPattern, string|Closure $handler): Route
-    {
-        return $this->router->delete(new RoutePathPattern($pathPattern), new RequestHandler($handler));
-    }
-
-    /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
-     */
-    public function patch(string $pathPattern, string|Closure $handler): Route
-    {
-        return $this->router->patch(new RoutePathPattern($pathPattern), new RequestHandler($handler));
-    }
-
-    /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
-     */
-    public function head(string $pathPattern, string|Closure $handler): Route
-    {
-        return $this->router->head(new RoutePathPattern($pathPattern), new RequestHandler($handler));
-    }
-
-    /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
-     */
-    public function options(string $pathPattern, string|Closure $handler): Route
-    {
-        return $this->router->options(new RoutePathPattern($pathPattern), new RequestHandler($handler));
-    }
-
-    /**
-     * @param  class-string<MiddlewareInterface>|Closure(ServerRequest, RequestHandlerInterface): Response  $middleware
-     */
-    public function addMiddleware(string|Closure $middleware): self
-    {
-        $this->middlewareCollection->addMiddleware(new Middleware($middleware));
-
-        return $this;
-    }
-
-    /**
-     * @param  array<class-string<MiddlewareInterface>|Closure(ServerRequest, RequestHandlerInterface): Response>  $middlewares
-     */
-    public function addMiddlewares(array $middlewares): self
-    {
-        foreach ($middlewares as $middleware) {
-            $this->middlewareCollection->addMiddleware(new Middleware($middleware));
-        }
-
-        return $this;
+        return $group;
     }
 
     public function run(?ServerRequest $request = null): void
     {
+        $this->emit(BerryEvent::BEFORE_RUN);
+
         $request ??= new ServerRequestFactory()->fromGlobals();
-        $route = $this->router->getRouteByRequest($request);
+        $route = $this->getRouteByRequest($request);
         if ($route instanceof Route) {
             $handler = $route->handler->resolve($this->container);
             $middlewareStack = $this->middlewareStackBuilder->build(
@@ -136,5 +83,12 @@ final readonly class Berry
         }
 
         $this->responseEmitter->emit($response);
+    }
+
+    public function getRouteByRequest(ServerRequest $request): Route|Error
+    {
+        $path = $request->uri->path ?? new UriPath('/');
+
+        return $this->routeRegistry->getRouteByMethodAndPath($request->method, $path);
     }
 }

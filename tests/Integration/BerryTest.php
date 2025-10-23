@@ -13,6 +13,7 @@ use Tests\Fixtures\PoweredByMiddleware;
 use Tests\Support\HeaderEmitterTrait;
 use Tests\Support\ServerEnvironmentSetupTrait;
 use YSOCode\Berry\Application\Berry;
+use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
 
@@ -100,5 +101,71 @@ final class BerryTest extends TestCase
         $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
 
         $this->assertEquals(HttpStatus::NOT_FOUND, $status);
+    }
+
+    public function test_it_should_register_a_route_inside_a_group(): void
+    {
+        $this->berry->group(function (RouteGroup $group): void {
+            $group->get('/', HelloWorldHandler::class);
+        });
+
+        ob_start();
+        $this->berry->run();
+        $output = ob_get_clean();
+
+        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals('Hello, world!', $output);
+    }
+
+    public function test_it_should_register_a_route_inside_a_group_with_single_middleware(): void
+    {
+        $this->berry->group(function (RouteGroup $group): void {
+            $group->get('/', InspectRequestHandler::class);
+        })->addMiddleware(LoggingMiddleware::class);
+
+        ob_start();
+        $this->berry->run();
+        $output = ob_get_clean();
+
+        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals('Log: 1997-08-22 00:00:00. Powered by: Not powered.', $output);
+    }
+
+    public function test_it_should_register_a_route_inside_a_group_with_multiple_middlewares(): void
+    {
+        $this->berry->group(function (RouteGroup $group): void {
+            $group->get('/', InspectRequestHandler::class);
+        })->addMiddlewares([LoggingMiddleware::class, PoweredByMiddleware::class]);
+
+        ob_start();
+        $this->berry->run();
+        $output = ob_get_clean();
+
+        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals('Log: 1997-08-22 00:00:00. Powered by: Berry.', $output);
+    }
+
+    public function test_it_should_register_a_route_inside_a_group_with_prefix(): void
+    {
+        $this->berry->group(function (RouteGroup $group): void {
+            $group->get('/{user}/profile', HelloWorldHandler::class);
+        })->addPrefix('/users');
+
+        $_SERVER['REQUEST_URI'] = '/users/8847/profile?query=param';
+
+        ob_start();
+        $this->berry->run();
+        $output = ob_get_clean();
+
+        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals('Hello, world!', $output);
     }
 }
