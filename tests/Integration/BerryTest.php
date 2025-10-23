@@ -10,6 +10,7 @@ use Tests\Fixtures\HelloWorldHandler;
 use Tests\Fixtures\InspectRequestHandler;
 use Tests\Fixtures\LoggingMiddleware;
 use Tests\Fixtures\PoweredByMiddleware;
+use Tests\Support\HeaderEmitterTrait;
 use Tests\Support\ServerEnvironmentSetupTrait;
 use YSOCode\Berry\Application\Berry;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
@@ -17,14 +18,9 @@ use YSOCode\Berry\Infra\Http\ResponseEmitter;
 
 final class BerryTest extends TestCase
 {
-    use ServerEnvironmentSetupTrait;
+    use HeaderEmitterTrait, ServerEnvironmentSetupTrait;
 
     private Berry $berry;
-
-    /**
-     * @var array<array{header: string, replace: bool, statusCode: int}>
-     */
-    private array $emittedHeaders = [];
 
     protected function setUp(): void
     {
@@ -34,15 +30,6 @@ final class BerryTest extends TestCase
             new Container,
             responseEmitter: new ResponseEmitter($this->headerEmitter(...)),
         );
-    }
-
-    private function headerEmitter(string $header, bool $replace = true, int $statusCode = 0): void
-    {
-        $this->emittedHeaders[] = [
-            'header' => $header,
-            'replace' => $replace,
-            'statusCode' => $statusCode,
-        ];
     }
 
     public function test_it_should_run_a_route(): void
