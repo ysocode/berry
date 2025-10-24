@@ -12,13 +12,10 @@ use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Entities\RouteRegistryProxyTrait;
 use YSOCode\Berry\Domain\Enums\BerryEvent;
-use YSOCode\Berry\Domain\Enums\HttpStatus;
 use YSOCode\Berry\Domain\Support\EventTrait;
-use YSOCode\Berry\Domain\ValueObjects\Error;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
-use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
+use YSOCode\Berry\Infra\Http\ResponseFactory;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\ServerRequestFactory;
 
@@ -27,18 +24,32 @@ final class Berry
     /** @use EventTrait<self, BerryEvent> */
     use EventTrait, RouteRegistryProxyTrait;
 
-    private readonly MiddlewareStackBuilder $middlewareStackBuilder;
+    private readonly RequestHandlerRunner $requestHandlerRunner;
+
+    private readonly RouteResolver $routeResolver;
 
     public function __construct(
         private readonly ContainerInterface $container,
         ?RouteRegistry $routeRegistry = null,
         ?MiddlewareStackBuilder $middlewareStackBuilder = null,
-        private readonly ResponseEmitter $responseEmitter = new ResponseEmitter,
-        ?MiddlewareCollection $middlewareCollection = null
+        ?MiddlewareCollection $middlewareCollection = null,
+        ?RequestHandlerRunner $requestHandlerRunner = null,
+        ?RouteResolver $routeResolver = null,
+        private readonly ResponseFactory $responseFactory = new ResponseFactory,
+        private readonly ResponseEmitter $responseEmitter = new ResponseEmitter
     ) {
         $this->routeRegistry = $routeRegistry ?? new RouteRegistry;
+
+        $middlewareStackBuilder ??= new MiddlewareStackBuilder($this->container);
+
         $this->middlewareCollection = $middlewareCollection ?? new MiddlewareCollection;
-        $this->middlewareStackBuilder = $middlewareStackBuilder ?? new MiddlewareStackBuilder($this->container);
+        $this->requestHandlerRunner = $requestHandlerRunner ?? new RequestHandlerRunner(
+            $this->container,
+            $middlewareStackBuilder,
+            $this->middlewareCollection
+        );
+
+        $this->routeResolver = $routeResolver ?? new RouteResolver($this->routeRegistry);
     }
 
     /**
@@ -63,32 +74,12 @@ final class Berry
         $this->emit(BerryEvent::BEFORE_RUN);
 
         $request ??= new ServerRequestFactory()->fromGlobals();
-        $route = $this->getRouteByRequest($request);
-        if ($route instanceof Route) {
-            $handler = $route->handler->resolve($this->container);
-            $middlewareStack = $this->middlewareStackBuilder->build(
-                $handler,
-                array_merge(
-                    $route->middlewareCollection->middlewares,
-                    $this->middlewareCollection->middlewares
-                )
-            );
-            $response = $middlewareStack->handle($request);
-        } else {
-            $response = match (true) {
-                $route->equals(new Error('Method not allowed.')) => new Response(HttpStatus::METHOD_NOT_ALLOWED),
-                $route->equals(new Error('Route not found.')) => new Response(HttpStatus::NOT_FOUND),
-                default => new Response(HttpStatus::INTERNAL_SERVER_ERROR),
-            };
-        }
+        $route = $this->routeResolver->resolve($request);
+
+        $response = $route instanceof Route
+        ? $this->requestHandlerRunner->run($route, $request)
+        : $this->responseFactory->fromError($route);
 
         $this->responseEmitter->emit($response);
-    }
-
-    public function getRouteByRequest(ServerRequest $request): Route|Error
-    {
-        $path = $request->uri->path ?? new UriPath('/');
-
-        return $this->routeRegistry->getRouteByMethodAndPath($request->method, $path);
     }
 }
