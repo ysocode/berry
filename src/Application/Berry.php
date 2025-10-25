@@ -27,7 +27,7 @@ final class Berry
 
     private readonly RouteResolver $routeResolver;
 
-    private readonly ErrorHandlerFactory $errorHandlerFactory;
+    private readonly ErrorRequestHandlerFactory $errorRequestHandlerFactory;
 
     public function __construct(
         private readonly ContainerInterface $container,
@@ -37,7 +37,7 @@ final class Berry
         ?RequestHandlerRunner $requestHandlerRunner = null,
         ?RouteResolver $routeResolver = null,
         private readonly ResponseEmitter $responseEmitter = new ResponseEmitter,
-        ?ErrorHandlerFactory $errorHandlerFactory = null
+        ?ErrorRequestHandlerFactory $errorRequestHandlerFactory = null
     ) {
         $this->routeRegistry = $routeRegistry ?? new RouteRegistry;
 
@@ -51,7 +51,7 @@ final class Berry
         );
 
         $this->routeResolver = $routeResolver ?? new RouteResolver($this->routeRegistry);
-        $this->errorHandlerFactory = $errorHandlerFactory ?? new ErrorHandlerFactory($this->container);
+        $this->errorRequestHandlerFactory = $errorRequestHandlerFactory ?? new ErrorRequestHandlerFactory($this->container);
     }
 
     /**
@@ -77,7 +77,7 @@ final class Berry
 
         $response = $resolvedRoute instanceof ResolvedRoute
         ? $this->requestHandlerRunner->runFromResolvedRoute($resolvedRoute, $request)
-        : $this->requestHandlerRunner->runFromRequestHandler($this->errorHandlerFactory->createFromError($resolvedRoute), $request);
+        : $this->requestHandlerRunner->runFromRequestHandler($this->errorRequestHandlerFactory->createFromError($resolvedRoute), $request);
 
         $this->responseEmitter->emit($response);
     }
