@@ -7,9 +7,9 @@ namespace Tests\Unit\Domain;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Tests\Fixtures\HelloWorldHandler;
-use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
 use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
 use YSOCode\Berry\Domain\ValueObjects\RoutePathPattern;
@@ -24,12 +24,15 @@ final class RouteRegistryTest extends TestCase
         foreach (HttpMethod::cases() as $method) {
             $routeRegistry->map($method, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
 
-            $route = $routeRegistry->getRouteByMethodAndPath($method, new UriPath('/users/42'));
+            $resolvedRoute = $routeRegistry->getRouteByMethodAndPath($method, new UriPath('/users/42'));
 
-            $this->assertInstanceOf(Route::class, $route);
-            $this->assertEquals($method, $route->method);
-            $this->assertEquals('/users/{user}', (string) $route->pathPattern);
-            $this->assertEquals(new RequestHandler(HelloWorldHandler::class), $route->handler);
+            $expectedParameters = ['user' => '42'];
+
+            $this->assertInstanceOf(ResolvedRoute::class, $resolvedRoute);
+            $this->assertEquals($method, $resolvedRoute->route->method);
+            $this->assertEquals('/users/{user}', (string) $resolvedRoute->route->pathPattern);
+            $this->assertEquals(new RequestHandler(HelloWorldHandler::class), $resolvedRoute->route->handler);
+            $this->assertEquals($expectedParameters, $resolvedRoute->parameters);
         }
     }
 

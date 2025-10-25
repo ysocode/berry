@@ -11,6 +11,7 @@ use Tests\Fixtures\HelloWorldHandler;
 use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteCollection;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
 use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
 use YSOCode\Berry\Domain\ValueObjects\RouteName;
 use YSOCode\Berry\Domain\ValueObjects\RoutePathPattern;
@@ -68,7 +69,7 @@ final class RouteCollectionTest extends TestCase
         $this->assertSame($expected, $routesBySegmentValue);
     }
 
-    public function test_it_should_return_a_route_when_exists(): void
+    public function test_it_should_return_resolved_route_when_route_exists(): void
     {
         $routeCollection = new RouteCollection;
 
@@ -80,13 +81,16 @@ final class RouteCollectionTest extends TestCase
         $routeCollection->addRoute($getUserRoute);
         $routeCollection->addRoute($getArticleRoute);
 
-        $actualPutProfileRoute = $routeCollection->getRouteByPath(new UriPath('/users/8847/profile'));
-        $actualGetUserRoute = $routeCollection->getRouteByPath(new UriPath('/users/42'));
-        $actualGetArticleRoute = $routeCollection->getRouteByPath(new UriPath('/article/example-slug'));
+        $actualPutProfileResolvedRoute = $routeCollection->getRouteByPath(new UriPath('/users/8847/profile'));
+        $actualGetUserResolvedRoute = $routeCollection->getRouteByPath(new UriPath('/users/42'));
+        $actualGetArticleResolvedRoute = $routeCollection->getRouteByPath(new UriPath('/article/example-slug'));
 
-        $this->assertSame($putProfileRoute, $actualPutProfileRoute);
-        $this->assertSame($getUserRoute, $actualGetUserRoute);
-        $this->assertSame($getArticleRoute, $actualGetArticleRoute);
+        $this->assertInstanceOf(ResolvedRoute::class, $actualPutProfileResolvedRoute);
+        $this->assertInstanceOf(ResolvedRoute::class, $actualGetUserResolvedRoute);
+        $this->assertInstanceOf(ResolvedRoute::class, $actualGetArticleResolvedRoute);
+        $this->assertSame($putProfileRoute, $actualPutProfileResolvedRoute->route);
+        $this->assertSame($getUserRoute, $actualGetUserResolvedRoute->route);
+        $this->assertSame($getArticleRoute, $actualGetArticleResolvedRoute->route);
     }
 
     public function test_it_should_return_null_when_route_not_exists(): void
@@ -110,16 +114,16 @@ final class RouteCollectionTest extends TestCase
         $routeCollection->addRoute($deleteUserRoute);
     }
 
-    public function test_it_should_return_a_route_when_path_exists(): void
+    public function test_it_should_return_resolved_route_when_path_exists(): void
     {
         $routeCollection = new RouteCollection;
         $routeCollection->addRoute(
             new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class))
         );
 
-        $route = $routeCollection->getRouteByPath(new UriPath('/users/8847'));
+        $resolvedRoute = $routeCollection->getRouteByPath(new UriPath('/users/8847'));
 
-        $this->assertInstanceOf(Route::class, $route);
+        $this->assertInstanceOf(ResolvedRoute::class, $resolvedRoute);
     }
 
     public function test_it_should_check_path_existence(): void
@@ -150,7 +154,7 @@ final class RouteCollectionTest extends TestCase
         $getUserRoute->setName('users.show');
     }
 
-    public function test_it_should_return_a_route_when_name_exists(): void
+    public function test_it_should_return_route_when_name_exists(): void
     {
         $routeCollection = new RouteCollection;
 
@@ -177,5 +181,22 @@ final class RouteCollectionTest extends TestCase
 
         $this->assertTrue($routeCollection->hasRouteByName(new RouteName('users.show')));
         $this->assertFalse($routeCollection->hasRouteByName(new RouteName('home')));
+    }
+
+    public function test_it_should_contain_parameters_in_resolved_route(): void
+    {
+        $routeCollection = new RouteCollection;
+
+        $route = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}/posts/{post}'), new RequestHandler(HelloWorldHandler::class));
+
+        $routeCollection->addRoute($route);
+
+        $resolvedRoute = $routeCollection->getRouteByPath(new UriPath('/users/42/posts/99'));
+
+        $expectedParameters = ['user' => '42', 'post' => '99'];
+
+        $this->assertInstanceOf(ResolvedRoute::class, $resolvedRoute);
+        $this->assertSame($route, $resolvedRoute->route);
+        $this->assertSame($expectedParameters, $resolvedRoute->parameters);
     }
 }

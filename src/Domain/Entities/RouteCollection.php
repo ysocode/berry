@@ -7,6 +7,7 @@ namespace YSOCode\Berry\Domain\Entities;
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\RouteCollectionEvent;
 use YSOCode\Berry\Domain\Enums\RouteEvent;
+use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
 use YSOCode\Berry\Domain\Support\EventTrait;
 use YSOCode\Berry\Domain\ValueObjects\RouteName;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
@@ -96,15 +97,15 @@ final class RouteCollection
 
     public function hasRouteByPath(UriPath $path): bool
     {
-        return $this->getRouteByPath($path) instanceof Route;
+        return $this->getRouteByPath($path) instanceof ResolvedRoute;
     }
 
-    public function getRouteByPath(UriPath $path): ?Route
+    public function getRouteByPath(UriPath $path): ?ResolvedRoute
     {
         $segments = $path->getSegments();
         $lastIndex = array_key_last($segments);
-
         $tree = &$this->routesBySegment;
+        $parameters = [];
 
         foreach ($segments as $index => $segment) {
             if (! isset($tree[$segment])) {
@@ -113,8 +114,15 @@ final class RouteCollection
                         str_starts_with($treeSegment, '{') &&
                         str_ends_with($treeSegment, '}')
                     ) {
+                        $parameters[str_replace(['{', '}'], '', $treeSegment)] = $segment;
+
                         if ($index === $lastIndex) {
-                            return $tree[$treeSegment]['route'] ?? null;
+                            $route = $tree[$treeSegment]['route'] ?? null;
+                            if (! $route instanceof Route) {
+                                return null;
+                            }
+
+                            return new ResolvedRoute($route, $parameters);
                         }
 
                         /** @var array<string, Node> $tree */
@@ -128,7 +136,12 @@ final class RouteCollection
             }
 
             if ($index === $lastIndex) {
-                return $tree[$segment]['route'] ?? null;
+                $route = $tree[$segment]['route'] ?? null;
+                if (! $route instanceof Route) {
+                    return null;
+                }
+
+                return new ResolvedRoute($route, $parameters);
             }
 
             /** @var array<string, Node> $tree */

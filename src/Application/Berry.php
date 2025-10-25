@@ -7,11 +7,11 @@ namespace YSOCode\Berry\Application;
 use Closure;
 use Psr\Container\ContainerInterface;
 use YSOCode\Berry\Domain\Entities\MiddlewareCollection;
-use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Entities\RouteRegistryProxyTrait;
 use YSOCode\Berry\Domain\Enums\BerryEvent;
+use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
 use YSOCode\Berry\Domain\Support\EventTrait;
 use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
@@ -74,11 +74,11 @@ final class Berry
         $this->emit(BerryEvent::BEFORE_RUN);
 
         $request ??= new ServerRequestFactory()->fromGlobals();
-        $route = $this->routeResolver->resolve($request);
+        $resolvedRoute = $this->routeResolver->resolve($request);
 
-        $response = $route instanceof Route
-        ? $this->requestHandlerRunner->run($route, $request)
-        : $this->responseFactory->fromError($route);
+        $response = $resolvedRoute instanceof ResolvedRoute
+        ? $this->requestHandlerRunner->run($resolvedRoute, $request)
+        : $this->responseFactory->fromError($resolvedRoute);
 
         $this->responseEmitter->emit($response);
     }

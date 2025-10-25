@@ -6,6 +6,7 @@ namespace Tests\Integration;
 
 use DI\Container;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Tests\Fixtures\HelloWorldHandler;
 use Tests\Fixtures\InspectRequestHandler;
 use Tests\Fixtures\LoggingMiddleware;
@@ -15,7 +16,12 @@ use Tests\Support\ServerEnvironmentSetupTrait;
 use YSOCode\Berry\Application\Berry;
 use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
+use YSOCode\Berry\Domain\ValueObjects\Attribute;
+use YSOCode\Berry\Domain\ValueObjects\AttributeName;
+use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
+use YSOCode\Berry\Infra\Http\ResponseFactory;
+use YSOCode\Berry\Infra\Http\ServerRequest;
 
 final class BerryTest extends TestCase
 {
@@ -167,5 +173,37 @@ final class BerryTest extends TestCase
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Hello, world!', $output);
+    }
+
+    public function test_it_should_resolve_route_with_parameters(): void
+    {
+        $this->berry->get('/users/{user}/posts/{post}', function (ServerRequest $request): Response {
+            $user = $request->getAttribute(new AttributeName('user'));
+            $post = $request->getAttribute(new AttributeName('post'));
+
+            if (! $user instanceof Attribute || ! $post instanceof Attribute) {
+                throw new RuntimeException('Attributes not found');
+            }
+
+            $json = json_encode(['user' => $user->value, 'post' => $post->value]);
+            if (! is_string($json)) {
+                throw new RuntimeException('Failed to decode JSON.');
+            }
+
+            return new ResponseFactory()->fromBody($json);
+        });
+
+        $_SERVER['REQUEST_URI'] = '/users/42/posts/99?query=param';
+
+        ob_start();
+        $this->berry->run();
+        $output = ob_get_clean();
+
+        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+
+        $expectedJson = json_encode(['user' => '42', 'post' => '99']);
+
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals($expectedJson, $output);
     }
 }

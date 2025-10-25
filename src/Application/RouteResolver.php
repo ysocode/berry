@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Application;
 
-use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
+use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
 use YSOCode\Berry\Domain\ValueObjects\Error;
 use YSOCode\Berry\Domain\ValueObjects\UriPath;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -16,7 +16,7 @@ final readonly class RouteResolver
         private RouteRegistry $routeRegistry
     ) {}
 
-    public function resolve(ServerRequest $request): Route|Error
+    public function resolve(ServerRequest $request): ResolvedRoute|Error
     {
         $path = $request->uri->path ?? new UriPath('/');
 
