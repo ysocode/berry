@@ -9,7 +9,7 @@ use RuntimeException;
 use Stringable;
 use YSOCode\Berry\Domain\Enums\StreamMode;
 use YSOCode\Berry\Domain\Enums\StreamSeekWhence;
-use YSOCode\Berry\Domain\ValueObjects\StreamResource;
+use YSOCode\Berry\Domain\Types\StreamResource;
 
 final class Stream implements Stringable
 {

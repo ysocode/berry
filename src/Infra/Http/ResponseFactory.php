@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Infra\Http;
 
 use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\Error;
+use YSOCode\Berry\Domain\Types\Error;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class ResponseFactory

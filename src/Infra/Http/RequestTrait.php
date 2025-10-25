@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Infra\Http;
 
 use YSOCode\Berry\Domain\Enums\HttpMethod;
-use YSOCode\Berry\Domain\ValueObjects\RequestTarget;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
-use YSOCode\Berry\Domain\ValueObjects\UriQuery;
+use YSOCode\Berry\Domain\Types\RequestTarget;
+use YSOCode\Berry\Domain\Types\UriPath;
+use YSOCode\Berry\Domain\Types\UriQuery;
 
 trait RequestTrait
 {

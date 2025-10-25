@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\ValueObjects;
+namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class MimeType implements Stringable
+final readonly class UriQuery implements Stringable
 {
     public string $value;
 
@@ -28,9 +28,13 @@ final readonly class MimeType implements Stringable
 
     private static function validate(string $value): true|Error
     {
-        $pattern = '/^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/i';
+        if ($value === '') {
+            return new Error('Uri query cannot be empty.');
+        }
+
+        $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/?]|%[0-9A-Fa-f]{2})*$/u';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
-            return new Error(sprintf('MIME type "%s" is invalid.', $value));
+            return new Error('Uri query contains invalid characters.');
         }
 
         return true;

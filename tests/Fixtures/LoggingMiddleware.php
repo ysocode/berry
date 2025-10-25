@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Fixtures;
 
 use DateTimeImmutable;
-use YSOCode\Berry\Domain\ValueObjects\Attribute;
-use YSOCode\Berry\Domain\ValueObjects\AttributeName;
+use YSOCode\Berry\Domain\Types\Attribute;
+use YSOCode\Berry\Domain\Types\AttributeName;
 use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;

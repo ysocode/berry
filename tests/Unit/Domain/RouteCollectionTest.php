@@ -12,10 +12,10 @@ use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteCollection;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
-use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
-use YSOCode\Berry\Domain\ValueObjects\RouteName;
-use YSOCode\Berry\Domain\ValueObjects\RoutePathPattern;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\Types\RequestHandler;
+use YSOCode\Berry\Domain\Types\RouteName;
+use YSOCode\Berry\Domain\Types\RoutePathPattern;
+use YSOCode\Berry\Domain\Types\UriPath;
 
 final class RouteCollectionTest extends TestCase
 {

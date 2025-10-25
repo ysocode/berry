@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\ValueObjects;
+namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class UriQuery implements Stringable
+final readonly class DirPath implements Stringable
 {
     public string $value;
 
@@ -28,13 +28,8 @@ final readonly class UriQuery implements Stringable
 
     private static function validate(string $value): true|Error
     {
-        if ($value === '') {
-            return new Error('Uri query cannot be empty.');
-        }
-
-        $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/?]|%[0-9A-Fa-f]{2})*$/u';
-        if (in_array(preg_match($pattern, $value), [0, false], true)) {
-            return new Error('Uri query contains invalid characters.');
+        if (! is_dir($value)) {
+            return new Error('Dir path must point to an existing directory.');
         }
 
         return true;

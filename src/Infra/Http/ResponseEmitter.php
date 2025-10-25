@@ -9,9 +9,9 @@ use InvalidArgumentException;
 use ReflectionFunction;
 use ReflectionNamedType;
 use ReflectionParameter;
-use YSOCode\Berry\Domain\ValueObjects\Error;
-use YSOCode\Berry\Domain\ValueObjects\Header;
-use YSOCode\Berry\Domain\ValueObjects\HeaderName;
+use YSOCode\Berry\Domain\Types\Error;
+use YSOCode\Berry\Domain\Types\Header;
+use YSOCode\Berry\Domain\Types\HeaderName;
 
 final readonly class ResponseEmitter
 {

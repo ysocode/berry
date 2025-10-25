@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\ValueObjects;
+namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class UriFragment implements Stringable
+final readonly class RouteName implements Stringable
 {
     public string $value;
 
@@ -29,12 +29,12 @@ final readonly class UriFragment implements Stringable
     private static function validate(string $value): true|Error
     {
         if ($value === '') {
-            return new Error('Uri fragment cannot be empty.');
+            return new Error('Route name cannot be empty.');
         }
 
-        $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/?]|%[0-9A-Fa-f]{2})*$/u';
+        $pattern = '/^[a-zA-Z][a-zA-Z0-9._]*$/';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
-            return new Error('Uri fragment contains invalid characters.');
+            return new Error('Route name contains invalid characters.');
         }
 
         return true;

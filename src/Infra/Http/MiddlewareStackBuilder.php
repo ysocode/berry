@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Infra\Http;
 
 use Psr\Container\ContainerInterface;
-use YSOCode\Berry\Domain\ValueObjects\Middleware;
+use YSOCode\Berry\Domain\Types\Middleware;
 
 final readonly class MiddlewareStackBuilder
 {

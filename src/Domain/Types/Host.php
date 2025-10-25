@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\ValueObjects;
+namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class RouteName implements Stringable
+final readonly class Host implements Stringable
 {
     public string $value;
 
@@ -28,16 +28,20 @@ final readonly class RouteName implements Stringable
 
     private static function validate(string $value): true|Error
     {
-        if ($value === '') {
-            return new Error('Route name cannot be empty.');
+        $valueWithoutBrackets = str_replace(['[', ']'], '', $value);
+        if (filter_var($valueWithoutBrackets, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) {
+            return true;
         }
 
-        $pattern = '/^[a-zA-Z][a-zA-Z0-9._]*$/';
-        if (in_array(preg_match($pattern, $value), [0, false], true)) {
-            return new Error('Route name contains invalid characters.');
+        if (filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
+            return true;
         }
 
-        return true;
+        if (filter_var($value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false) {
+            return true;
+        }
+
+        return new Error('Host is not a valid domain or IP address.');
     }
 
     public function __toString(): string

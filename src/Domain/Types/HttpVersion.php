@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\ValueObjects;
+namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class Host implements Stringable
+final readonly class HttpVersion implements Stringable
 {
     public string $value;
 
@@ -28,20 +28,11 @@ final readonly class Host implements Stringable
 
     private static function validate(string $value): true|Error
     {
-        $valueWithoutBrackets = str_replace(['[', ']'], '', $value);
-        if (filter_var($valueWithoutBrackets, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) {
-            return true;
+        if (! in_array($value, ['1.0', '1.1', '2.0'], true)) {
+            return new Error(sprintf('HTTP version "%s" is not supported.', $value));
         }
 
-        if (filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
-            return true;
-        }
-
-        if (filter_var($value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false) {
-            return true;
-        }
-
-        return new Error('Host is not a valid domain or IP address.');
+        return true;
     }
 
     public function __toString(): string

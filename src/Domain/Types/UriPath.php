@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\ValueObjects;
+namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class RoutePathPattern implements Stringable
+final readonly class UriPath implements Stringable
 {
     public string $value;
 
@@ -29,12 +29,12 @@ final readonly class RoutePathPattern implements Stringable
     private static function validate(string $value): true|Error
     {
         if (! str_starts_with($value, '/')) {
-            return new Error('Route path pattern must start with "/".');
+            return new Error('Uri path must start with "/".');
         }
 
-        $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/]|%[0-9A-Fa-f]{2}|\{\w+\})*$/';
+        $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/]|%[0-9A-Fa-f]{2})*$/';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
-            return new Error('Route path pattern contains invalid characters.');
+            return new Error('Uri path contains invalid characters.');
         }
 
         return true;
@@ -49,14 +49,6 @@ final readonly class RoutePathPattern implements Stringable
         array_unshift($segments, '/');
 
         return $segments;
-    }
-
-    public function prepend(self $other): self
-    {
-        $otherValue = rtrim($other->value, '/');
-        $current = '/'.ltrim($this->value, '/');
-
-        return new self($otherValue.$current);
     }
 
     public function __toString(): string

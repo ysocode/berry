@@ -11,7 +11,7 @@ use Tests\Fixtures\LoggingMiddleware;
 use Tests\Fixtures\PoweredByMiddleware;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\Middleware;
+use YSOCode\Berry\Domain\Types\Middleware;
 use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\ValueObjects;
+namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class FilePath implements Stringable
+final readonly class UriFragment implements Stringable
 {
     public string $value;
 
@@ -28,8 +28,13 @@ final readonly class FilePath implements Stringable
 
     private static function validate(string $value): true|Error
     {
-        if (! is_file($value)) {
-            return new Error('File path must point to an existing file.');
+        if ($value === '') {
+            return new Error('Uri fragment cannot be empty.');
+        }
+
+        $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/?]|%[0-9A-Fa-f]{2})*$/u';
+        if (in_array(preg_match($pattern, $value), [0, false], true)) {
+            return new Error('Uri fragment contains invalid characters.');
         }
 
         return true;

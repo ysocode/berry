@@ -6,8 +6,8 @@ namespace YSOCode\Berry\Application;
 
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
-use YSOCode\Berry\Domain\ValueObjects\Error;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\Types\Error;
+use YSOCode\Berry\Domain\Types\UriPath;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
 final readonly class RouteResolver

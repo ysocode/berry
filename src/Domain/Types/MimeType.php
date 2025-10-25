@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\ValueObjects;
+namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class HeaderName implements Stringable
+final readonly class MimeType implements Stringable
 {
     public string $value;
 
@@ -28,13 +28,9 @@ final readonly class HeaderName implements Stringable
 
     private static function validate(string $value): true|Error
     {
-        if ($value === '') {
-            return new Error('Header name cannot be empty.');
-        }
-
-        $pattern = '/^[!#$%&\'*+\-.^_`|~0-9a-zA-Z]+$/';
+        $pattern = '/^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/i';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
-            return new Error('Header name contains invalid characters.');
+            return new Error(sprintf('MIME type "%s" is invalid.', $value));
         }
 
         return true;

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\ValueObjects;
+namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class HttpVersion implements Stringable
+final readonly class FilePath implements Stringable
 {
     public string $value;
 
@@ -28,8 +28,8 @@ final readonly class HttpVersion implements Stringable
 
     private static function validate(string $value): true|Error
     {
-        if (! in_array($value, ['1.0', '1.1', '2.0'], true)) {
-            return new Error(sprintf('HTTP version "%s" is not supported.', $value));
+        if (! is_file($value)) {
+            return new Error('File path must point to an existing file.');
         }
 
         return true;

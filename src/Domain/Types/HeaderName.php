@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\ValueObjects;
+namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
 use Stringable;
 
-final readonly class UriPath implements Stringable
+final readonly class HeaderName implements Stringable
 {
     public string $value;
 
@@ -28,27 +28,16 @@ final readonly class UriPath implements Stringable
 
     private static function validate(string $value): true|Error
     {
-        if (! str_starts_with($value, '/')) {
-            return new Error('Uri path must start with "/".');
+        if ($value === '') {
+            return new Error('Header name cannot be empty.');
         }
 
-        $pattern = '/^(?:[A-Za-z0-9\-._~!$&\'()*+,;=:@\/]|%[0-9A-Fa-f]{2})*$/';
+        $pattern = '/^[!#$%&\'*+\-.^_`|~0-9a-zA-Z]+$/';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
-            return new Error('Uri path contains invalid characters.');
+            return new Error('Header name contains invalid characters.');
         }
 
         return true;
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function getSegments(): array
-    {
-        $segments = array_values(array_filter(explode('/', $this->value)));
-        array_unshift($segments, '/');
-
-        return $segments;
     }
 
     public function __toString(): string

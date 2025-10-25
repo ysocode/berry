@@ -10,10 +10,10 @@ use Tests\Fixtures\HelloWorldHandler;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
-use YSOCode\Berry\Domain\ValueObjects\Error;
-use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
-use YSOCode\Berry\Domain\ValueObjects\RoutePathPattern;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\Types\Error;
+use YSOCode\Berry\Domain\Types\RequestHandler;
+use YSOCode\Berry\Domain\Types\RoutePathPattern;
+use YSOCode\Berry\Domain\Types\UriPath;
 
 final class RouteRegistryTest extends TestCase
 {

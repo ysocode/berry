@@ -6,9 +6,9 @@ namespace YSOCode\Berry\Domain\Entities;
 
 use Closure;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
-use YSOCode\Berry\Domain\ValueObjects\Middleware;
-use YSOCode\Berry\Domain\ValueObjects\RequestHandler;
-use YSOCode\Berry\Domain\ValueObjects\RoutePathPattern;
+use YSOCode\Berry\Domain\Types\Middleware;
+use YSOCode\Berry\Domain\Types\RequestHandler;
+use YSOCode\Berry\Domain\Types\RoutePathPattern;
 use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;

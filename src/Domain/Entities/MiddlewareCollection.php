@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Entities;
 
-use YSOCode\Berry\Domain\ValueObjects\Middleware;
+use YSOCode\Berry\Domain\Types\Middleware;
 
 final class MiddlewareCollection
 {
