@@ -15,7 +15,6 @@ use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
 use YSOCode\Berry\Domain\Traits\EventTrait;
 use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
-use YSOCode\Berry\Infra\Http\ResponseFactory;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\ServerRequestFactory;
 
@@ -28,6 +27,8 @@ final class Berry
 
     private readonly RouteResolver $routeResolver;
 
+    private readonly ErrorHandlerFactory $errorHandlerFactory;
+
     public function __construct(
         private readonly ContainerInterface $container,
         ?RouteRegistry $routeRegistry = null,
@@ -35,8 +36,8 @@ final class Berry
         ?MiddlewareCollection $middlewareCollection = null,
         ?RequestHandlerRunner $requestHandlerRunner = null,
         ?RouteResolver $routeResolver = null,
-        private readonly ResponseFactory $responseFactory = new ResponseFactory,
-        private readonly ResponseEmitter $responseEmitter = new ResponseEmitter
+        private readonly ResponseEmitter $responseEmitter = new ResponseEmitter,
+        ?ErrorHandlerFactory $errorHandlerFactory = null
     ) {
         $this->routeRegistry = $routeRegistry ?? new RouteRegistry;
 
@@ -50,6 +51,7 @@ final class Berry
         );
 
         $this->routeResolver = $routeResolver ?? new RouteResolver($this->routeRegistry);
+        $this->errorHandlerFactory = $errorHandlerFactory ?? new ErrorHandlerFactory($this->container);
     }
 
     /**
@@ -74,8 +76,8 @@ final class Berry
         $resolvedRoute = $this->routeResolver->resolve($request);
 
         $response = $resolvedRoute instanceof ResolvedRoute
-        ? $this->requestHandlerRunner->run($resolvedRoute, $request)
-        : $this->responseFactory->fromError($resolvedRoute);
+        ? $this->requestHandlerRunner->runFromResolvedRoute($resolvedRoute, $request)
+        : $this->requestHandlerRunner->runFromRequestHandler($this->errorHandlerFactory->createFromError($resolvedRoute), $request);
 
         $this->responseEmitter->emit($response);
     }
