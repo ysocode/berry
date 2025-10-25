@@ -61,10 +61,7 @@ final class Berry
 
         $closure($group);
 
-        $this->on(BerryEvent::BEFORE_RUN, function (self $berry) use ($group): void {
-            $group->propagate();
-            $berry->routeRegistry->append($group->routeRegistry);
-        });
+        $this->on(BerryEvent::BEFORE_RUN, $group->shareRoutesWith(...));
 
         return $group;
     }

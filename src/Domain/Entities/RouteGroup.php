@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Entities;
 
+use YSOCode\Berry\Application\Berry;
 use YSOCode\Berry\Domain\Types\RoutePathPattern;
 
 final class RouteGroup
@@ -43,9 +44,16 @@ final class RouteGroup
         }
     }
 
-    public function propagate(): void
+    private function propagate(): void
     {
         $this->propagatePrefix();
         $this->propagateMiddlewares();
+    }
+
+    public function shareRoutesWith(Berry $berry): void
+    {
+        $this->propagate();
+
+        $berry->routeRegistry->append($this->routeRegistry);
     }
 }
