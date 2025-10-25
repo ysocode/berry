@@ -11,11 +11,10 @@ final class RouteGroup
 {
     use RouteRegistryProxyTrait;
 
-    private ?RoutePathPattern $prefix = null;
-
     public function __construct(
         ?RouteRegistry $routeRegistry = null,
-        ?MiddlewareCollection $middlewareCollection = null
+        ?MiddlewareCollection $middlewareCollection = null,
+        private ?RoutePathPattern $prefix = null
     ) {
         $this->routeRegistry = $routeRegistry ?? new RouteRegistry;
         $this->middlewareCollection = $middlewareCollection ?? new MiddlewareCollection;
@@ -32,7 +31,7 @@ final class RouteGroup
     {
         foreach ($this->routeRegistry->getRoutes() as $route) {
             if ($this->prefix instanceof RoutePathPattern) {
-                $route->addPrefix($this->prefix);
+                $route->addPrefix((string) $this->prefix);
             }
         }
     }

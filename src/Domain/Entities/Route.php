@@ -61,9 +61,9 @@ final class Route
         return $this;
     }
 
-    public function addPrefix(RoutePathPattern $pathPattern): self
+    public function addPrefix(string $pathPattern): self
     {
-        $this->pathPattern = $this->pathPattern->prepend($pathPattern);
+        $this->pathPattern = $this->pathPattern->prepend(new RoutePathPattern($pathPattern));
 
         return $this;
     }
