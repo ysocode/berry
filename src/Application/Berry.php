@@ -12,7 +12,7 @@ use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Entities\RouteRegistryProxyTrait;
 use YSOCode\Berry\Domain\Enums\BerryEvent;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
-use YSOCode\Berry\Domain\Support\EventTrait;
+use YSOCode\Berry\Domain\Traits\EventTrait;
 use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
 use YSOCode\Berry\Infra\Http\ResponseFactory;

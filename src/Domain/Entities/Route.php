@@ -7,7 +7,7 @@ namespace YSOCode\Berry\Domain\Entities;
 use Closure;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Enums\RouteEvent;
-use YSOCode\Berry\Domain\Support\EventTrait;
+use YSOCode\Berry\Domain\Traits\EventTrait;
 use YSOCode\Berry\Domain\Types\Middleware;
 use YSOCode\Berry\Domain\Types\RequestHandler;
 use YSOCode\Berry\Domain\Types\RouteName;

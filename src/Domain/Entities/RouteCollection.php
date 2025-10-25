@@ -8,7 +8,7 @@ use RuntimeException;
 use YSOCode\Berry\Domain\Enums\RouteCollectionEvent;
 use YSOCode\Berry\Domain\Enums\RouteEvent;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
-use YSOCode\Berry\Domain\Support\EventTrait;
+use YSOCode\Berry\Domain\Traits\EventTrait;
 use YSOCode\Berry\Domain\Types\RouteName;
 use YSOCode\Berry\Domain\Types\UriPath;
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Factory;
 
 use PHPUnit\Framework\TestCase;
-use Tests\Support\ServerEnvironmentSetupTrait;
+use Tests\Traits\ServerEnvironmentSetupTrait;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Enums\UploadFileStatus;
 use YSOCode\Berry\Domain\Types\Header;

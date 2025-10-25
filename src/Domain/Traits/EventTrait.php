@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace YSOCode\Berry\Domain\Support;
+namespace YSOCode\Berry\Domain\Traits;
 
 use Closure;
 use UnitEnum;

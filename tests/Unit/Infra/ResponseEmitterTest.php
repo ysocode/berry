@@ -8,7 +8,7 @@ use Closure;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\HeaderEmitterTrait;
+use Tests\Traits\HeaderEmitterTrait;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
 use YSOCode\Berry\Domain\Types\Header;
 use YSOCode\Berry\Domain\Types\HeaderName;
