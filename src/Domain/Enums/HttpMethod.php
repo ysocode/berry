@@ -11,12 +11,6 @@ enum HttpMethod: string
     case POST = 'POST';
     case DELETE = 'DELETE';
     case PATCH = 'PATCH';
-
-    /**
-     * @return array<string>
-     */
-    public static function getValues(): array
-    {
-        return array_map(fn (self $method) => $method->value, self::cases());
-    }
+    case HEAD = 'HEAD';
+    case OPTIONS = 'OPTIONS';
 }

@@ -6,9 +6,9 @@ namespace YSOCode\Berry\Infra\Http;
 
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\UploadFileStatus;
-use YSOCode\Berry\Domain\ValueObjects\FileName;
-use YSOCode\Berry\Domain\ValueObjects\MimeType;
-use YSOCode\Berry\Domain\ValueObjects\TargetFilePath;
+use YSOCode\Berry\Domain\Types\FileName;
+use YSOCode\Berry\Domain\Types\MimeType;
+use YSOCode\Berry\Domain\Types\TargetFilePath;
 use YSOCode\Berry\Infra\Stream\Stream;
 
 final class UploadedFile

@@ -8,19 +8,17 @@ use Closure;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Tests\Traits\HeaderEmitterTrait;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\Header;
-use YSOCode\Berry\Domain\ValueObjects\HeaderName;
+use YSOCode\Berry\Domain\Types\Header;
+use YSOCode\Berry\Domain\Types\HeaderName;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class ResponseEmitterTest extends TestCase
 {
-    /**
-     * @var array<array{header: string, replace: bool, statusCode: int}>
-     */
-    private array $emittedHeaders = [];
+    use HeaderEmitterTrait;
 
     protected function setUp(): void
     {
@@ -39,15 +37,6 @@ final class ResponseEmitterTest extends TestCase
             ],
             $body,
         );
-    }
-
-    private function headerEmitter(string $header, bool $replace = true, int $statusCode = 0): void
-    {
-        $this->emittedHeaders[] = [
-            'header' => $header,
-            'replace' => $replace,
-            'statusCode' => $statusCode,
-        ];
     }
 
     /**

@@ -6,7 +6,7 @@ namespace Tests\Unit\Domain;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use YSOCode\Berry\Domain\ValueObjects\RequestTarget;
+use YSOCode\Berry\Domain\Types\RequestTarget;
 
 final class RequestTargetTest extends TestCase
 {

@@ -6,9 +6,9 @@ namespace YSOCode\Berry\Infra\Http;
 
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
-use YSOCode\Berry\Domain\ValueObjects\Header;
-use YSOCode\Berry\Domain\ValueObjects\HeaderName;
-use YSOCode\Berry\Domain\ValueObjects\StreamResource;
+use YSOCode\Berry\Domain\Types\Header;
+use YSOCode\Berry\Domain\Types\HeaderName;
+use YSOCode\Berry\Domain\Types\StreamResource;
 use YSOCode\Berry\Infra\Stream\Stream;
 
 final class ServerRequestFactory

@@ -4,111 +4,113 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Entities;
 
-use Closure;
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Enums\RouteCollectionEvent;
-use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
-use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
-use YSOCode\Berry\Infra\Http\Response;
-use YSOCode\Berry\Infra\Http\ServerRequest;
+use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
+use YSOCode\Berry\Domain\Types\Error;
+use YSOCode\Berry\Domain\Types\RequestHandler;
+use YSOCode\Berry\Domain\Types\RouteName;
+use YSOCode\Berry\Domain\Types\RoutePathPattern;
+use YSOCode\Berry\Domain\Types\UriPath;
 
 final class RouteRegistry
 {
-    /**
-     * @var array<string, RouteCollection>
-     */
-    public private(set) array $routeCollections = [];
+    /** @var array<string, RouteCollection> */
+    private array $routeCollectionsByMethod = [];
 
     public function __construct()
     {
-        foreach (HttpMethod::getValues() as $method) {
+        foreach (HttpMethod::cases() as $method) {
             $routeCollection = new RouteCollection;
             $routeCollection->on(RouteCollectionEvent::ROUTE_NAME_CHANGED, $this->assertUniqueName(...));
 
-            $this->routeCollections[$method] = $routeCollection;
+            $this->routeCollectionsByMethod[$method->value] = $routeCollection;
         }
     }
 
     /**
      * @param  array<string, mixed>  $data
      */
-    private function assertUniqueName(array $data): void
+    private function assertUniqueName(RouteCollection $routeCollection, array $data): void
     {
-        /** @var Name $name */
-        $name = $data['routeName'];
+        $name = $data['name'] ?? null;
+        if (! $name instanceof RouteName) {
+            throw new RuntimeException('Route name should be an instance of RouteName.');
+        }
 
-        if ($this->hasRouteByName($name)) {
-            throw new RuntimeException(sprintf('Route name "%s" already exists.', $name));
+        $otherRouteCollections = array_filter(
+            $this->routeCollectionsByMethod,
+            fn (RouteCollection $currentRouteCollection): bool => $currentRouteCollection !== $routeCollection
+        );
+
+        foreach ($otherRouteCollections as $routeCollection) {
+            if ($routeCollection->hasRouteByName($name)) {
+                throw new RuntimeException(sprintf('Route name "%s" already exists.', $name));
+            }
         }
     }
 
-    /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
-     */
-    public function addRoute(HttpMethod $method, UriPath $path, string|Closure $handler): Route
+    public function hasRouteByName(RouteName $name): bool
     {
-        $routeCollection = $this->routeCollections[$method->value];
-
-        if ($routeCollection->hasRouteByPath($path)) {
-            throw new RuntimeException(
-                sprintf('Route %s %s already exists.', $method->value, $path)
-            );
+        foreach ($this->routeCollectionsByMethod as $routeCollection) {
+            if ($routeCollection->hasRouteByName($name)) {
+                return true;
+            }
         }
 
-        $route = new Route($method, $path, $handler);
+        return false;
+    }
 
-        $routeCollection->addRoute($route);
+    public function map(HttpMethod $method, RoutePathPattern $pathPattern, RequestHandler $handler): Route
+    {
+        $route = new Route($method, $pathPattern, $handler);
+
+        $this->routeCollectionsByMethod[$method->value]->addRoute($route);
 
         return $route;
     }
 
-    public function hasRouteByName(Name $name): bool
+    public function getRouteByMethodAndPath(HttpMethod $method, UriPath $path): ResolvedRoute|Error
     {
-        return array_any($this->routeCollections, fn ($routeCollection): bool => $routeCollection->hasRouteByName($name));
-    }
+        $resolvedRoute = $this->routeCollectionsByMethod[$method->value]->getRouteByPath($path);
+        if (! $resolvedRoute instanceof ResolvedRoute) {
+            $otherRouteCollections = array_filter(
+                $this->routeCollectionsByMethod,
+                fn (string $currentMethod): bool => HttpMethod::from($currentMethod) !== $method,
+                ARRAY_FILTER_USE_KEY
+            );
 
-    public function getRouteByName(Name $name): ?Route
-    {
-        foreach ($this->routeCollections as $routeCollection) {
-            $route = $routeCollection->getRouteByName($name);
-            if ($route instanceof Route) {
-                return $route;
+            foreach ($otherRouteCollections as $routeCollection) {
+                if ($routeCollection->hasRouteByPath($path)) {
+                    return new Error('Method not allowed.');
+                }
             }
+
+            return new Error('Route not found.');
         }
 
-        return null;
+        return $resolvedRoute;
     }
 
-    public function getRouteByMethodAndPath(HttpMethod $method, UriPath $path): ?Route
+    public function append(self $other): void
     {
-        $routeCollection = $this->routeCollections[$method->value];
-
-        return $routeCollection->getRouteByPath($path);
-    }
-
-    public function hasRouteByPath(UriPath $path): bool
-    {
-        return array_any($this->routeCollections, fn ($routeCollection): bool => $routeCollection->hasRouteByPath($path));
-    }
-
-    public function addGroup(RouteGroup $group): void
-    {
-        foreach ($group->routes as $route) {
-            $routeCollection = $this->routeCollections[$route->method->value];
-
-            if ($routeCollection->hasRouteByPath($route->path)) {
-                throw new RuntimeException(
-                    sprintf('Route %s %s already exists.', $route->method->value, $route->path)
-                );
-            }
-
-            if ($route->name instanceof Name && $this->hasRouteByName($route->name)) {
-                throw new RuntimeException(sprintf('Route name "%s" already exists.', $route->name));
-            }
-
-            $routeCollection->addRoute($route);
+        foreach ($other->routeCollectionsByMethod as $method => $routeCollection) {
+            $this->routeCollectionsByMethod[$method]->append($routeCollection);
         }
+    }
+
+    /**
+     * @return array<Route>
+     */
+    public function getRoutes(): array
+    {
+        $collectedRoutes = [];
+
+        foreach ($this->routeCollectionsByMethod as $routeCollection) {
+            $collectedRoutes = array_merge($collectedRoutes, $routeCollection->getRoutes());
+        }
+
+        return $collectedRoutes;
     }
 }

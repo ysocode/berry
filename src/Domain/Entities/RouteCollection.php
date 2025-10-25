@@ -4,122 +4,176 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Entities;
 
-use Closure;
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\RouteCollectionEvent;
 use YSOCode\Berry\Domain\Enums\RouteEvent;
-use YSOCode\Berry\Domain\ValueObjects\Name;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
+use YSOCode\Berry\Domain\Traits\EventTrait;
+use YSOCode\Berry\Domain\Types\RouteName;
+use YSOCode\Berry\Domain\Types\UriPath;
 
+/**
+ * @phpstan-type Node array{children: array<string, mixed>, route: ?Route}
+ */
 final class RouteCollection
 {
-    /** @var array<string, array<Closure(array<string, mixed>): void>> */
-    private array $listeners = [];
+    /** @use EventTrait<self, RouteCollectionEvent> */
+    use EventTrait;
 
     /**
-     * @var array<Route>
+     * @var array<string, Node>
      */
-    public private(set) array $routes = [];
+    private array $routesBySegment = [];
 
     /**
-     * @var array<string, int>
+     * @var array<string, Route>
      */
-    private array $routeIndexesByName = [];
+    private array $routesByName = [];
 
-    /**
-     * @var array<string, int>
-     */
-    private array $routeIndexesByPath = [];
-
-    /**
-     * @param  Closure(array<string, mixed>): void  $listener
-     */
-    public function on(RouteCollectionEvent $event, Closure $listener): self
+    public function addRoute(Route $route): void
     {
-        $this->listeners[$event->name][] = $listener;
+        $segments = $route->pathPattern->getSegments();
+        $lastIndex = array_key_last($segments);
 
-        return $this;
-    }
+        $tree = &$this->routesBySegment;
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    private function emit(RouteCollectionEvent $event, array $data = []): void
-    {
-        foreach ($this->listeners[$event->name] ?? [] as $listener) {
-            $listener($data);
+        foreach ($segments as $index => $segment) {
+            $tree[$segment] ??= ['children' => [], 'route' => null];
+
+            if ($index === $lastIndex) {
+                if (isset($tree[$segment]['route'])) {
+                    throw new RuntimeException("Route conflict: {$route->pathPattern}.");
+                }
+
+                $route->on(
+                    RouteEvent::NAME_CHANGED,
+                    $this->setRouteByName(...)
+                );
+
+                if ($route->name instanceof RouteName) {
+                    $this->routesByName[(string) $route->name] = $route;
+                }
+
+                $tree[$segment]['route'] = $route;
+            }
+
+            /** @var array<string, Node> $tree */
+            $tree = &$tree[$segment]['children'];
         }
     }
 
     /**
      * @param  array<string, mixed>  $data
      */
-    private function setRouteIndexForName(Route $route, array $data): void
+    private function setRouteByName(Route $route, array $data): void
     {
-        /** @var Name $name */
-        $name = $data['name'];
+        $name = $data['name'] ?? null;
+        if (! $name instanceof RouteName) {
+            throw new RuntimeException('Route name should be an instance of RouteName.');
+        }
+
+        $this->emit(RouteCollectionEvent::ROUTE_NAME_CHANGED, ['name' => $name]);
 
         if ($this->hasRouteByName($name)) {
             throw new RuntimeException(sprintf('Route name "%s" already exists.', $name));
         }
 
-        $this->emit(RouteCollectionEvent::ROUTE_NAME_CHANGED, ['routeName' => $name]);
-
-        $this->routeIndexesByName[(string) $name] = $this->routeIndexesByPath[(string) $route->path];
+        $this->routesByName[(string) $name] = $route;
     }
 
-    public function addRoute(Route $route): self
+    public function hasRouteByName(RouteName $name): bool
     {
-        if ($this->hasRouteByPath($route->path)) {
-            throw new RuntimeException(sprintf('Route path "%s" already exists.', $route->path));
+        return isset($this->routesByName[(string) $name]);
+    }
+
+    public function getRouteByName(RouteName $name): ?Route
+    {
+        if (! $this->hasRouteByName($name)) {
+            return null;
         }
 
-        $route->on(RouteEvent::NAME_CHANGED, $this->setRouteIndexForName(...));
-
-        $this->routes[] = $route;
-
-        $lastIndex = array_key_last($this->routes);
-
-        $this->routeIndexesByPath[(string) $route->path] = $lastIndex;
-
-        if ($route->name instanceof Name) {
-            if ($this->hasRouteByName($route->name)) {
-                throw new RuntimeException(sprintf('Route name "%s" already exists.', $route->name));
-            }
-
-            $this->routeIndexesByName[(string) $route->name] = $lastIndex;
-        }
-
-        return $this;
+        return $this->routesByName[(string) $name];
     }
 
     public function hasRouteByPath(UriPath $path): bool
     {
-        return isset($this->routeIndexesByPath[(string) $path]);
+        return $this->getRouteByPath($path) instanceof ResolvedRoute;
     }
 
-    public function getRouteByPath(UriPath $path): ?Route
+    public function getRouteByPath(UriPath $path): ?ResolvedRoute
     {
-        $routeIndex = $this->routeIndexesByPath[(string) $path] ?? null;
-        if (! is_int($routeIndex)) {
-            return null;
+        $segments = $path->getSegments();
+        $lastIndex = array_key_last($segments);
+        $tree = &$this->routesBySegment;
+        $parameters = [];
+
+        foreach ($segments as $index => $segment) {
+            if (! isset($tree[$segment])) {
+                foreach (array_keys($tree) as $treeSegment) {
+                    if (
+                        str_starts_with($treeSegment, '{') &&
+                        str_ends_with($treeSegment, '}')
+                    ) {
+                        $parameters[str_replace(['{', '}'], '', $treeSegment)] = $segment;
+
+                        if ($index === $lastIndex) {
+                            $route = $tree[$treeSegment]['route'] ?? null;
+                            if (! $route instanceof Route) {
+                                return null;
+                            }
+
+                            return new ResolvedRoute($route, $parameters);
+                        }
+
+                        /** @var array<string, Node> $tree */
+                        $tree = &$tree[$treeSegment]['children'];
+
+                        continue 2;
+                    }
+                }
+
+                return null;
+            }
+
+            if ($index === $lastIndex) {
+                $route = $tree[$segment]['route'] ?? null;
+                if (! $route instanceof Route) {
+                    return null;
+                }
+
+                return new ResolvedRoute($route, $parameters);
+            }
+
+            /** @var array<string, Node> $tree */
+            $tree = &$tree[$segment]['children'];
         }
 
-        return $this->routes[$routeIndex];
+        return null;
     }
 
-    public function hasRouteByName(Name $name): bool
+    public function append(self $other): void
     {
-        return isset($this->routeIndexesByName[(string) $name]);
-    }
-
-    public function getRouteByName(Name $name): ?Route
-    {
-        $routeIndex = $this->routeIndexesByName[(string) $name] ?? null;
-        if (! is_int($routeIndex)) {
-            return null;
+        foreach ($other->getRoutes() as $route) {
+            $this->addRoute($route);
         }
+    }
 
-        return $this->routes[$routeIndex];
+    /**
+     * @return array<Route>
+     */
+    public function getRoutes(): array
+    {
+        $collectedRoutes = [];
+
+        array_walk_recursive(
+            $this->routesBySegment,
+            function (mixed $value, string $key) use (&$collectedRoutes): void {
+                if ($key === 'route' && $value instanceof Route) {
+                    $collectedRoutes[] = $value;
+                }
+            }
+        );
+
+        return $collectedRoutes;
     }
 }

@@ -31,7 +31,7 @@ To start your application, instantiate the Berry, register your routes, and invo
 use DI\Container;
 use YSOCode\Berry\Application\Berry;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\Types\UriPath;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
@@ -145,7 +145,7 @@ Each method receives a `UriPath` value object and a route handler (usually a `Cl
 use YSOCode\Berry\Domain\Enums\HttpStatus;
 use DI\Container;
 use YSOCode\Berry\Application\Berry;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\Types\UriPath;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
@@ -202,11 +202,11 @@ The `setName()` method allows you to assign a unique name to a route, useful for
 <?php
 
 use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\Types\UriPath;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
-use YSOCode\Berry\Domain\ValueObjects\Name;
+use YSOCode\Berry\Domain\Types\Name;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -229,7 +229,7 @@ Berry supports attaching middlewares specific to a single route.
 <?php
 
 use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\Types\UriPath;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -254,7 +254,7 @@ $berry->get(new UriPath('/'), function (ServerRequest $request): Response {
 <?php
 
 use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
+use YSOCode\Berry\Domain\Types\UriPath;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
@@ -325,7 +325,7 @@ use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\HeaderName;
+use YSOCode\Berry\Domain\Types\HeaderName;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -372,7 +372,7 @@ Represents the HTTP request received by the server, containing data such as meth
 <?php
 
 use YSOCode\Berry\Domain\Enums\HttpMethod;
-use YSOCode\Berry\Domain\ValueObjects\Uri;
+use YSOCode\Berry\Domain\Types\Uri;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
 $request = new ServerRequest(HttpMethod::GET, new Uri('https://example.com/users'));
@@ -383,8 +383,8 @@ You can add or modify headers immutably:
 ```php
 <?php
 
-use YSOCode\Berry\Domain\ValueObjects\Header;
-use YSOCode\Berry\Domain\ValueObjects\HeaderName;
+use YSOCode\Berry\Domain\Types\Header;
+use YSOCode\Berry\Domain\Types\HeaderName;
 
 $newRequest = $request->withHeader(
     new Header(new HeaderName('X-Request-ID'), ['abc123'])

@@ -9,9 +9,9 @@ use InvalidArgumentException;
 use ReflectionFunction;
 use ReflectionNamedType;
 use ReflectionParameter;
-use YSOCode\Berry\Domain\ValueObjects\Error;
-use YSOCode\Berry\Domain\ValueObjects\Header;
-use YSOCode\Berry\Domain\ValueObjects\HeaderName;
+use YSOCode\Berry\Domain\Types\Error;
+use YSOCode\Berry\Domain\Types\Header;
+use YSOCode\Berry\Domain\Types\HeaderName;
 
 final readonly class ResponseEmitter
 {
@@ -100,7 +100,7 @@ final readonly class ResponseEmitter
     public function emit(Response $response): void
     {
         $this->emitStatus($response);
-        $this->emitHeader($response);
+        $this->emitHeaders($response);
         $this->emitBody($response);
     }
 
@@ -108,7 +108,7 @@ final readonly class ResponseEmitter
     {
         ($this->headerEmitter)(
             sprintf(
-                'HTTP/%s %s %s',
+                'HTTP/%s %d %s',
                 $response->version,
                 $response->status->value,
                 $response->status->getReasonPhrase()
@@ -118,7 +118,7 @@ final readonly class ResponseEmitter
         );
     }
 
-    private function emitHeader(Response $response): void
+    private function emitHeaders(Response $response): void
     {
         foreach ($response->headers as $name => $header) {
             if ($name === 'set-cookie') {

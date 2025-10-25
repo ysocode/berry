@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use RuntimeException;
-use YSOCode\Berry\Domain\ValueObjects\StreamResource;
+use YSOCode\Berry\Domain\Types\StreamResource;
 use YSOCode\Berry\Infra\Stream\Stream;
 
 final class StreamTest extends TestCase

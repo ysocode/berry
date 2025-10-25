@@ -6,9 +6,9 @@ namespace Tests\Unit\Infra;
 
 use PHPUnit\Framework\TestCase;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\ValueObjects\Header;
-use YSOCode\Berry\Domain\ValueObjects\HeaderName;
-use YSOCode\Berry\Domain\ValueObjects\HttpVersion;
+use YSOCode\Berry\Domain\Types\Header;
+use YSOCode\Berry\Domain\Types\HeaderName;
+use YSOCode\Berry\Domain\Types\HttpVersion;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
 

@@ -11,6 +11,7 @@ use Tests\Fixtures\LoggingMiddleware;
 use Tests\Fixtures\PoweredByMiddleware;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
+use YSOCode\Berry\Domain\Types\Middleware;
 use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -23,7 +24,7 @@ final class MiddlewareStackBuilderTest extends TestCase
         $middlewareStackBuilder = new MiddlewareStackBuilder(new Container);
         $middlewareStack = $middlewareStackBuilder->build(
             new InspectRequestHandler,
-            [LoggingMiddleware::class, PoweredByMiddleware::class]
+            [new Middleware(LoggingMiddleware::class), new Middleware(PoweredByMiddleware::class)]
         );
 
         $response = $middlewareStack->handle(

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Infra\Http;
 
-use YSOCode\Berry\Domain\ValueObjects\Header;
-use YSOCode\Berry\Domain\ValueObjects\HeaderName;
-use YSOCode\Berry\Domain\ValueObjects\HttpVersion;
+use YSOCode\Berry\Domain\Types\Header;
+use YSOCode\Berry\Domain\Types\HeaderName;
+use YSOCode\Berry\Domain\Types\HttpVersion;
 use YSOCode\Berry\Infra\Stream\Stream;
 
 trait MessageTrait

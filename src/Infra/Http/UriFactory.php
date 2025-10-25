@@ -7,12 +7,12 @@ namespace YSOCode\Berry\Infra\Http;
 use InvalidArgumentException;
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\UriScheme;
-use YSOCode\Berry\Domain\ValueObjects\Host;
-use YSOCode\Berry\Domain\ValueObjects\Port;
-use YSOCode\Berry\Domain\ValueObjects\UriFragment;
-use YSOCode\Berry\Domain\ValueObjects\UriPath;
-use YSOCode\Berry\Domain\ValueObjects\UriQuery;
-use YSOCode\Berry\Domain\ValueObjects\UriUserInfo;
+use YSOCode\Berry\Domain\Types\Host;
+use YSOCode\Berry\Domain\Types\Port;
+use YSOCode\Berry\Domain\Types\UriFragment;
+use YSOCode\Berry\Domain\Types\UriPath;
+use YSOCode\Berry\Domain\Types\UriQuery;
+use YSOCode\Berry\Domain\Types\UriUserInfo;
 
 final readonly class UriFactory
 {
