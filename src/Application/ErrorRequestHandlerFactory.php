@@ -15,7 +15,7 @@ use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
-final readonly class ErrorHandlerFactory
+final readonly class ErrorRequestHandlerFactory
 {
     public function __construct(
         private ContainerInterface $container
