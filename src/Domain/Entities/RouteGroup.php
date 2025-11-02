@@ -11,8 +11,6 @@ final class RouteGroup
 {
     use RouteRegistryProxyTrait;
 
-    private bool $propagated = false;
-
     public function __construct(
         ?RouteRegistry $routeRegistry = null,
         ?MiddlewareCollection $middlewareCollection = null,
@@ -31,17 +29,23 @@ final class RouteGroup
 
     private function propagatePrefix(): void
     {
-        foreach ($this->routeRegistry->getRoutes() as $route) {
-            if ($this->prefix instanceof RoutePathPattern) {
+        if ($this->prefix instanceof RoutePathPattern) {
+            foreach ($this->routeRegistry->getRoutes() as $route) {
                 $route->addPrefix((string) $this->prefix);
             }
+
+            $this->prefix = null;
         }
     }
 
     private function propagateMiddlewares(): void
     {
-        foreach ($this->routeRegistry->getRoutes() as $route) {
-            $route->middlewareCollection->append($this->middlewareCollection);
+        if ($this->middlewareCollection->isNotEmpty()) {
+            foreach ($this->routeRegistry->getRoutes() as $route) {
+                $route->middlewareCollection->append($this->middlewareCollection);
+            }
+
+            $this->middlewareCollection->clear();
         }
     }
 
@@ -49,15 +53,11 @@ final class RouteGroup
     {
         $this->propagatePrefix();
         $this->propagateMiddlewares();
-
-        $this->propagated = true;
     }
 
     public function shareRoutesWith(Berry $berry): void
     {
-        if (! $this->propagated) {
-            $this->propagate();
-        }
+        $this->propagate();
 
         $berry->routeRegistry->append($this->routeRegistry);
     }

@@ -30,4 +30,14 @@ final class MiddlewareCollection
     {
         $this->addMiddlewares($other->middlewares);
     }
+
+    public function clear(): void
+    {
+        $this->middlewares = [];
+    }
+
+    public function isNotEmpty(): bool
+    {
+        return $this->middlewares !== [];
+    }
 }
