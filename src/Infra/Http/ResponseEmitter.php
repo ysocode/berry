@@ -11,7 +11,6 @@ use ReflectionNamedType;
 use ReflectionParameter;
 use YSOCode\Berry\Domain\Types\Error;
 use YSOCode\Berry\Domain\Types\Header;
-use YSOCode\Berry\Domain\Types\HeaderName;
 
 final readonly class ResponseEmitter
 {
@@ -109,7 +108,7 @@ final readonly class ResponseEmitter
         ($this->headerEmitter)(
             sprintf(
                 'HTTP/%s %d %s',
-                $response->version,
+                $response->version->value,
                 $response->status->value,
                 $response->status->getReasonPhrase()
             ),
@@ -167,7 +166,7 @@ final readonly class ResponseEmitter
 
     private function getAmountToRead(Response $response): ?int
     {
-        $contentAmountHeader = $response->getHeader(new HeaderName('Content-Length'));
+        $contentAmountHeader = $response->getHeader('Content-Length');
         if (! $contentAmountHeader instanceof Header) {
             return null;
         }

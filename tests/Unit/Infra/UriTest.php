@@ -8,9 +8,6 @@ use PHPUnit\Framework\TestCase;
 use YSOCode\Berry\Domain\Enums\UriScheme;
 use YSOCode\Berry\Domain\Types\Host;
 use YSOCode\Berry\Domain\Types\Port;
-use YSOCode\Berry\Domain\Types\UriFragment;
-use YSOCode\Berry\Domain\Types\UriPath;
-use YSOCode\Berry\Domain\Types\UriQuery;
 use YSOCode\Berry\Domain\Types\UriUserInfo;
 use YSOCode\Berry\Infra\Http\Uri;
 
@@ -61,22 +58,22 @@ final class UriTest extends TestCase
         $newUri = $uri->withScheme(UriScheme::HTTP);
         $this->assertEquals('http://ysocode:berry@example.com:8080', (string) $newUri);
 
-        $newUri = $newUri->withHost(new Host('example.org'));
+        $newUri = $newUri->withHost('example.org');
         $this->assertEquals('http://ysocode:berry@example.org:8080', (string) $newUri);
 
-        $newUri = $newUri->withPort(new Port(1234));
+        $newUri = $newUri->withPort(1234);
         $this->assertEquals('http://ysocode:berry@example.org:1234', (string) $newUri);
 
-        $newUri = $newUri->withPath(new UriPath('/newpath'));
+        $newUri = $newUri->withPath('/newpath');
         $this->assertEquals('http://ysocode:berry@example.org:1234/newpath', (string) $newUri);
 
-        $newUri = $newUri->withUserInfo(new UriUserInfo('newuser', 'newpass'));
+        $newUri = $newUri->withUserInfo('newuser', 'newpass');
         $this->assertEquals('http://newuser:newpass@example.org:1234/newpath', (string) $newUri);
 
-        $newUri = $newUri->withQuery(new UriQuery('newquery=2'));
+        $newUri = $newUri->withQuery('newquery=2');
         $this->assertEquals('http://newuser:newpass@example.org:1234/newpath?newquery=2', (string) $newUri);
 
-        $newUri = $newUri->withFragment(new UriFragment('newfrag'));
+        $newUri = $newUri->withFragment('newfrag');
         $this->assertEquals('http://newuser:newpass@example.org:1234/newpath?newquery=2#newfrag', (string) $newUri);
     }
 

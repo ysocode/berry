@@ -40,16 +40,20 @@ trait RequestTrait
         return $new;
     }
 
-    public function withUri(Uri $uri): self
+    public function withUri(string $uri): self
     {
+        $uri = new UriFactory()->createFromString($uri);
+
         $new = clone $this;
         $new->uri = $uri;
 
         return $new;
     }
 
-    public function withTarget(RequestTarget $target): self
+    public function withTarget(string $target): self
     {
+        $target = new RequestTarget($target);
+
         $new = clone $this;
         $new->target = $target;
 

@@ -6,7 +6,6 @@ namespace Tests\Factory;
 
 use PHPUnit\Framework\TestCase;
 use YSOCode\Berry\Domain\Enums\StreamMode;
-use YSOCode\Berry\Domain\Types\FilePath;
 use YSOCode\Berry\Domain\Types\StreamResource;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
 
@@ -38,7 +37,7 @@ final class StreamFactoryTest extends TestCase
     public function test_it_should_create_a_stream_from_file(): void
     {
         $tempFilePath = $this->createTempFile();
-        $stream = new StreamFactory()->createFromFile(new FilePath($tempFilePath));
+        $stream = new StreamFactory()->createFromFile($tempFilePath);
 
         try {
             $stream->write('Hello, world!');
@@ -74,7 +73,7 @@ final class StreamFactoryTest extends TestCase
                     continue;
                 }
 
-                $stream = new StreamFactory()->createFromFile(new FilePath($tempFilePath), $mode);
+                $stream = new StreamFactory()->createFromFile($tempFilePath, $mode);
                 $this->assertInstanceOf(StreamResource::class, $stream->resource);
                 $stream->close();
             }

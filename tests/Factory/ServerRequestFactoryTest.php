@@ -9,7 +9,6 @@ use Tests\Traits\ServerEnvironmentSetupTrait;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Enums\UploadFileStatus;
 use YSOCode\Berry\Domain\Types\Header;
-use YSOCode\Berry\Domain\Types\HeaderName;
 use YSOCode\Berry\Infra\Http\ServerRequestFactory;
 use YSOCode\Berry\Infra\Http\UploadedFile;
 
@@ -21,8 +20,8 @@ final class ServerRequestFactoryTest extends TestCase
     {
         $request = new ServerRequestFactory()->fromGlobals();
 
-        $acceptEncodingHeader = $request->getHeader(new HeaderName('Accept-Encoding'));
-        $acceptLanguageHeader = $request->getHeader(new HeaderName('Accept-Language'));
+        $acceptEncodingHeader = $request->getHeader('Accept-Encoding');
+        $acceptLanguageHeader = $request->getHeader('Accept-Language');
 
         $this->assertEquals(HttpMethod::GET, $request->method);
         $this->assertEquals('https://ysocode.com/?query=param', (string) $request->uri);
@@ -38,7 +37,7 @@ final class ServerRequestFactoryTest extends TestCase
 
         $request = new ServerRequestFactory()->fromGlobals();
 
-        $hostHeader = $request->getHeader(new HeaderName('Host'));
+        $hostHeader = $request->getHeader('Host');
 
         $this->assertInstanceOf(Header::class, $hostHeader);
         $this->assertEquals('Host: ysocode.com', (string) $hostHeader);
@@ -50,7 +49,7 @@ final class ServerRequestFactoryTest extends TestCase
 
         $request = new ServerRequestFactory()->fromGlobals();
 
-        $customHeader = $request->getHeader(new HeaderName('X-Custom'));
+        $customHeader = $request->getHeader('X-Custom');
 
         $this->assertInstanceOf(Header::class, $customHeader);
         $this->assertEquals('X-Custom: custom-value', (string) $customHeader);

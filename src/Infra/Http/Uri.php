@@ -58,48 +58,60 @@ final class Uri implements Stringable
         return $new;
     }
 
-    public function withHost(Host $host): self
+    public function withHost(string $host): self
     {
+        $host = new Host($host);
+
         $new = clone $this;
         $new->host = $host;
 
         return $new;
     }
 
-    public function withPort(Port $port): self
+    public function withPort(int $port): self
     {
+        $port = new Port($port);
+
         $new = clone $this;
         $new->port = $port;
 
         return $new;
     }
 
-    public function withPath(UriPath $path): self
+    public function withPath(string $path): self
     {
+        $path = new UriPath($path);
+
         $new = clone $this;
         $new->path = $path;
 
         return $new;
     }
 
-    public function withUserInfo(UriUserInfo $userInfo): self
+    public function withUserInfo(string $user, ?string $password = null): self
     {
+        $userInfo = new UriUserInfo($user, $password);
+
         $new = clone $this;
         $new->userInfo = $userInfo;
 
         return $new;
     }
 
-    public function withQuery(UriQuery $query): self
+    public function withQuery(string $query): self
     {
+        $query = new UriQuery($query);
+
         $new = clone $this;
         $new->query = $query;
 
         return $new;
     }
 
-    public function withFragment(UriFragment $fragment): self
+    public function withFragment(string $fragment): self
     {
+        $fragment = new UriFragment($fragment);
+
         $new = clone $this;
         $new->fragment = $fragment;
 

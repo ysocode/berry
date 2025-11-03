@@ -29,8 +29,10 @@ final readonly class StreamFactory
         return $stream;
     }
 
-    public function createFromFile(FilePath $filePath, StreamMode $mode = StreamMode::READ_WRITE_BINARY): Stream
+    public function createFromFile(string $filePath, StreamMode $mode = StreamMode::READ_WRITE_BINARY): Stream
     {
+        $filePath = new FilePath($filePath);
+
         $resource = fopen((string) $filePath, $mode->value);
         if (! is_resource($resource)) {
             throw new RuntimeException(

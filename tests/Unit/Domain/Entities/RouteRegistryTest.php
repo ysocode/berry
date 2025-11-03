@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domain;
+namespace Tests\Unit\Domain\Entities;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;

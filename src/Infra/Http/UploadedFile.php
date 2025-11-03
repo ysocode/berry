@@ -6,6 +6,7 @@ namespace YSOCode\Berry\Infra\Http;
 
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\UploadFileStatus;
+use YSOCode\Berry\Domain\Types\DirPath;
 use YSOCode\Berry\Domain\Types\FileName;
 use YSOCode\Berry\Domain\Types\MimeType;
 use YSOCode\Berry\Domain\Types\TargetFilePath;
@@ -23,8 +24,10 @@ final class UploadedFile
         public readonly bool $fromWebServer = false,
     ) {}
 
-    public function moveTo(TargetFilePath $targetFilePath): void
+    public function moveTo(string $dirPath, string $fileName): void
     {
+        $targetFilePath = new TargetFilePath(new DirPath($dirPath), new FileName($fileName));
+
         if ($this->isMoved) {
             throw new RuntimeException('Uploaded file has already been moved.');
         }

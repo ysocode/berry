@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Infra\Http;
 
 use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Enums\HttpVersion;
 use YSOCode\Berry\Domain\Types\Header;
-use YSOCode\Berry\Domain\Types\HttpVersion;
 use YSOCode\Berry\Infra\Stream\Stream;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
 
@@ -23,7 +23,7 @@ final class Request
         Uri $uri,
         array $headers = [],
         ?Stream $body = null,
-        HttpVersion $version = new HttpVersion('1.1'),
+        HttpVersion $version = HttpVersion::V1_1,
     ) {
         $this->method = $method;
 

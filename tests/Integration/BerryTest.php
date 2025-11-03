@@ -17,7 +17,6 @@ use YSOCode\Berry\Application\Berry;
 use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
 use YSOCode\Berry\Domain\Types\Attribute;
-use YSOCode\Berry\Domain\Types\AttributeName;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
 use YSOCode\Berry\Infra\Http\ResponseFactory;
@@ -178,8 +177,8 @@ final class BerryTest extends TestCase
     public function test_it_should_resolve_route_with_parameters(): void
     {
         $this->berry->get('/users/{user}/posts/{post}', function (ServerRequest $request): Response {
-            $user = $request->getAttribute(new AttributeName('user'));
-            $post = $request->getAttribute(new AttributeName('post'));
+            $user = $request->getAttribute('user');
+            $post = $request->getAttribute('post');
 
             if (! $user instanceof Attribute || ! $post instanceof Attribute) {
                 throw new RuntimeException('Attributes not found');

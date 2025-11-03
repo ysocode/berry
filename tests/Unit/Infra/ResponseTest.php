@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Tests\Unit\Infra;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
+use YSOCode\Berry\Domain\Enums\HttpVersion;
 use YSOCode\Berry\Domain\Types\Header;
 use YSOCode\Berry\Domain\Types\HeaderName;
-use YSOCode\Berry\Domain\Types\HttpVersion;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
 
@@ -32,8 +33,8 @@ final class ResponseTest extends TestCase
     {
         $response = $this->createResponse();
 
-        $contentTypeHeader = $response->getHeader(new HeaderName('Content-Type'));
-        $contentEncodingHeader = $response->getHeader(new HeaderName('Content-Encoding'));
+        $contentTypeHeader = $response->getHeader('Content-Type');
+        $contentEncodingHeader = $response->getHeader('Content-Encoding');
 
         $this->assertEquals(HttpStatus::OK, $response->status);
         $this->assertInstanceOf(Header::class, $contentTypeHeader);
@@ -56,18 +57,18 @@ final class ResponseTest extends TestCase
     {
         $response = $this->createResponse();
 
-        $this->assertTrue($response->hasHeader(new HeaderName('Content-Type')));
-        $this->assertFalse($response->hasHeader(new HeaderName('Content-Disposition')));
+        $this->assertTrue($response->hasHeader('Content-Type'));
+        $this->assertFalse($response->hasHeader('Content-Disposition'));
     }
 
     public function test_it_should_return_cloned_response_with_updated_or_new_header(): void
     {
         $response = $this->createResponse();
-        $newResponse = $response->withHeader(new Header(new HeaderName('Content-Type'), ['text/css']));
-        $newResponse = $newResponse->withHeader(new Header(new HeaderName('Accept'), ['text/html']));
+        $newResponse = $response->withHeader('Content-Type', ['text/css']);
+        $newResponse = $newResponse->withHeader('Accept', ['text/html']);
 
-        $contentTypeHeader = $newResponse->getHeader(new HeaderName('Content-Type'));
-        $acceptHeader = $newResponse->getHeader(new HeaderName('Accept'));
+        $contentTypeHeader = $newResponse->getHeader('Content-Type');
+        $acceptHeader = $newResponse->getHeader('Accept');
 
         $this->assertNotSame($response, $newResponse);
         $this->assertInstanceOf(Header::class, $contentTypeHeader);
@@ -79,20 +80,16 @@ final class ResponseTest extends TestCase
     public function test_it_should_return_cloned_response_with_added_header_values(): void
     {
         $response = $this->createResponse();
-        $newResponse = $response->withAddedHeader(
-            new Header(new HeaderName('Set-Cookie'), ['sessionid=38afes7a8; HttpOnly; Path=/'])
-        );
+        $newResponse = $response->withAddedHeader('Set-Cookie', ['sessionid=38afes7a8; HttpOnly; Path=/']);
         $newResponse = $newResponse->withAddedHeader(
-            new Header(
-                new HeaderName('Set-Cookie'),
-                [
-                    'id=a3fWa; Expires=Wed, 21 Oct 2015 07:28:00 GMT; Secure; HttpOnly',
-                    'qwerty=219ffwef9w0f; Domain=somecompany.co.uk; Path=/; Expires=Wed, 30 Aug 2019 00:00:00 GMT',
-                ]
-            )
+            'Set-Cookie',
+            [
+                'id=a3fWa; Expires=Wed, 21 Oct 2015 07:28:00 GMT; Secure; HttpOnly',
+                'qwerty=219ffwef9w0f; Domain=somecompany.co.uk; Path=/; Expires=Wed, 30 Aug 2019 00:00:00 GMT',
+            ]
         );
 
-        $setCookieHeader = $newResponse->getHeader(new HeaderName('Set-Cookie'));
+        $setCookieHeader = $newResponse->getHeader('Set-Cookie');
 
         $this->assertNotSame($response, $newResponse);
         $this->assertInstanceOf(Header::class, $setCookieHeader);
@@ -109,30 +106,34 @@ final class ResponseTest extends TestCase
     public function test_it_should_return_cloned_response_without_an_indicated_header(): void
     {
         $response = $this->createResponse();
-        $newResponse = $response->withoutHeader(new HeaderName('Content-Type'));
+        $newResponse = $response->withoutHeader('Content-Type');
 
         $this->assertNotSame($response, $newResponse);
-        $this->assertTrue($response->hasHeader(new HeaderName('Content-Type')));
-        $this->assertFalse($newResponse->hasHeader(new HeaderName('Content-Type')));
+        $this->assertTrue($response->hasHeader('Content-Type'));
+        $this->assertFalse($newResponse->hasHeader('Content-Type'));
     }
 
     public function test_it_should_return_cloned_response_with_updated_body(): void
     {
         $response = $this->createResponse();
 
-        $newBody = new StreamFactory()->createFromString('New body.');
-        $newResponse = $response->withBody($newBody);
+        $json = json_encode(['warning' => 'Berry is the best.']);
+        if (! is_string($json)) {
+            throw new RuntimeException('Failed to decode JSON.');
+        }
+
+        $newResponse = $response->withBody($json);
 
         $this->assertNotSame($response, $newResponse);
-        $this->assertSame($newBody, $newResponse->body);
+        $this->assertSame($json, (string) $newResponse->body);
     }
 
     public function test_it_should_return_cloned_response_with_updated_protocol_version(): void
     {
         $response = $this->createResponse();
-        $newResponse = $response->withVersion(new HttpVersion('2.0'));
+        $newResponse = $response->withVersion(HttpVersion::V2_0);
 
         $this->assertNotSame($response, $newResponse);
-        $this->assertEquals('2.0', (string) $newResponse->version);
+        $this->assertEquals(HttpVersion::V2_0, $newResponse->version);
     }
 }

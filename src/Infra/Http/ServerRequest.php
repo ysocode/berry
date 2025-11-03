@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Infra\Http;
 
 use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Enums\HttpVersion;
 use YSOCode\Berry\Domain\Types\Attribute;
 use YSOCode\Berry\Domain\Types\AttributeName;
 use YSOCode\Berry\Domain\Types\Header;
-use YSOCode\Berry\Domain\Types\HttpVersion;
 use YSOCode\Berry\Infra\Stream\Stream;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
 
@@ -42,7 +42,7 @@ final class ServerRequest
         private(set) array $parsedBody = [],
         private(set) array $uploadedFiles = [],
         array $attributes = [],
-        HttpVersion $version = new HttpVersion('1.1'),
+        HttpVersion $version = HttpVersion::V1_1,
     ) {
         $this->method = $method;
 
@@ -113,26 +113,34 @@ final class ServerRequest
         return $new;
     }
 
-    public function hasAttribute(AttributeName $name): bool
+    public function hasAttribute(string $name): bool
     {
+        $name = new AttributeName($name);
+
         return isset($this->attributes[(string) $name]);
     }
 
-    public function getAttribute(AttributeName $name): ?Attribute
+    public function getAttribute(string $name): ?Attribute
     {
+        $name = new AttributeName($name);
+
         return $this->attributes[(string) $name] ?? null;
     }
 
-    public function withAttribute(Attribute $attribute): self
+    public function withAttribute(string $name, mixed $value): self
     {
+        $attribute = new Attribute(new AttributeName($name), $value);
+
         $new = clone $this;
         $new->attributes[(string) $attribute->name] = $attribute;
 
         return $new;
     }
 
-    public function withoutAttribute(AttributeName $name): self
+    public function withoutAttribute(string $name): self
     {
+        $name = new AttributeName($name);
+
         $new = clone $this;
         unset($new->attributes[(string) $name]);
 

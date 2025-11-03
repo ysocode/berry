@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Infra\Http;
 
+use YSOCode\Berry\Domain\Enums\HttpVersion;
 use YSOCode\Berry\Domain\Types\Header;
 use YSOCode\Berry\Domain\Types\HeaderName;
-use YSOCode\Berry\Domain\Types\HttpVersion;
 use YSOCode\Berry\Infra\Stream\Stream;
+use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 trait MessageTrait
 {
@@ -31,22 +32,31 @@ trait MessageTrait
         }
     }
 
-    public function hasHeader(HeaderName $name): bool
+    public function hasHeader(string $name): bool
     {
+        $name = new HeaderName($name);
+
         $lowerHeaderName = strtolower((string) $name);
 
         return isset($this->headers[$lowerHeaderName]);
     }
 
-    public function getHeader(HeaderName $name): ?Header
+    public function getHeader(string $name): ?Header
     {
+        $name = new HeaderName($name);
+
         $lowerHeaderName = strtolower((string) $name);
 
         return $this->headers[$lowerHeaderName] ?? null;
     }
 
-    public function withHeader(Header $header): self
+    /**
+     * @param  array<string>  $values
+     */
+    public function withHeader(string $name, array $values): self
     {
+        $header = new Header(new HeaderName($name), $values);
+
         $new = clone $this;
 
         $lowerHeaderName = strtolower((string) $header->name);
@@ -56,8 +66,13 @@ trait MessageTrait
         return $new;
     }
 
-    public function withAddedHeader(Header $header): self
+    /**
+     * @param  array<string>  $values
+     */
+    public function withAddedHeader(string $name, array $values): self
     {
+        $header = new Header(new HeaderName($name), $values);
+
         $new = clone $this;
 
         $lowerHeaderName = strtolower((string) $header->name);
@@ -74,8 +89,10 @@ trait MessageTrait
         return $new;
     }
 
-    public function withoutHeader(HeaderName $name): self
+    public function withoutHeader(string $name): self
     {
+        $name = new HeaderName($name);
+
         $new = clone $this;
 
         $lowerHeaderName = strtolower((string) $name);
@@ -85,8 +102,10 @@ trait MessageTrait
         return $new;
     }
 
-    public function withBody(Stream $stream): self
+    public function withBody(string $body): self
     {
+        $stream = new StreamFactory()->createFromString($body);
+
         $new = clone $this;
         $new->body = $stream;
 

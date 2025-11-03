@@ -19,7 +19,7 @@ final class UploadedFileFactory
     {
         $stream = null;
         if (FilePath::isValid($spec['tmp_name'])) {
-            $stream = new StreamFactory()->createFromFile(new FilePath($spec['tmp_name']));
+            $stream = new StreamFactory()->createFromFile($spec['tmp_name']);
         }
 
         $name = null;

@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Tests\Fixtures;
 
 use DateTimeImmutable;
-use YSOCode\Berry\Domain\Types\Attribute;
-use YSOCode\Berry\Domain\Types\AttributeName;
 use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
@@ -21,13 +19,8 @@ final class LoggingMiddleware implements MiddlewareInterface
     {
         $fixedDate = new DateTimeImmutable('1997-08-22 00:00:00');
 
-        $request = $request->withAttribute(
-            new Attribute(
-                new AttributeName('request-logged-at'),
-                $fixedDate->format('Y-m-d H:i:s')
-            )
+        return $handler->handle(
+            $request->withAttribute('request-logged-at', $fixedDate->format('Y-m-d H:i:s'))
         );
-
-        return $handler->handle($request);
     }
 }

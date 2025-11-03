@@ -7,10 +7,9 @@ namespace Tests\Unit\Infra;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Enums\HttpVersion;
 use YSOCode\Berry\Domain\Types\Header;
 use YSOCode\Berry\Domain\Types\HeaderName;
-use YSOCode\Berry\Domain\Types\HttpVersion;
-use YSOCode\Berry\Domain\Types\RequestTarget;
 use YSOCode\Berry\Infra\Http\Request;
 use YSOCode\Berry\Infra\Http\UriFactory;
 use YSOCode\Berry\Infra\Stream\StreamFactory;
@@ -41,8 +40,8 @@ final class RequestTest extends TestCase
     {
         $request = $this->createRequest();
 
-        $contentTypeHeader = $request->getHeader(new HeaderName('Content-Type'));
-        $acceptHeader = $request->getHeader(new HeaderName('Accept'));
+        $contentTypeHeader = $request->getHeader('Content-Type');
+        $acceptHeader = $request->getHeader('Accept');
 
         $this->assertEquals(HttpMethod::GET, $request->method);
         $this->assertEquals('https://example.com', (string) $request->uri);
@@ -63,7 +62,7 @@ final class RequestTest extends TestCase
     public function test_it_should_return_cloned_request_with_updated_uri(): void
     {
         $request = $this->createRequest();
-        $newRequest = $request->withUri(new UriFactory()->createFromString('https://example.com/path/to/resource?query=param'));
+        $newRequest = $request->withUri('https://example.com/path/to/resource?query=param');
 
         $this->assertNotSame($request, $newRequest);
         $this->assertEquals('https://example.com/path/to/resource?query=param', (string) $newRequest->uri);
@@ -72,7 +71,7 @@ final class RequestTest extends TestCase
     public function test_it_should_return_cloned_request_with_updated_target(): void
     {
         $request = $this->createRequest();
-        $newRequest = $request->withTarget(new RequestTarget('/path/to/resource?query=param'));
+        $newRequest = $request->withTarget('/path/to/resource?query=param');
 
         $this->assertNotSame($request, $newRequest);
         $this->assertEquals('/path/to/resource?query=param', (string) $newRequest->target);
@@ -83,18 +82,18 @@ final class RequestTest extends TestCase
     {
         $request = $this->createRequest();
 
-        $this->assertTrue($request->hasHeader(new HeaderName('Content-Type')));
-        $this->assertFalse($request->hasHeader(new HeaderName('Origin')));
+        $this->assertTrue($request->hasHeader('Content-Type'));
+        $this->assertFalse($request->hasHeader('Origin'));
     }
 
     public function test_it_should_return_cloned_request_with_updated_or_new_header(): void
     {
         $request = $this->createRequest();
-        $newRequest = $request->withHeader(new Header(new HeaderName('Accept'), ['text/html']));
-        $newRequest = $newRequest->withHeader(new Header(new HeaderName('Origin'), ['https://ysocode.com']));
+        $newRequest = $request->withHeader('Accept', ['text/html']);
+        $newRequest = $newRequest->withHeader('Origin', ['https://ysocode.com']);
 
-        $acceptHeader = $newRequest->getHeader(new HeaderName('Accept'));
-        $originHeader = $newRequest->getHeader(new HeaderName('Origin'));
+        $acceptHeader = $newRequest->getHeader('Accept');
+        $originHeader = $newRequest->getHeader('Origin');
 
         $this->assertNotSame($request, $newRequest);
         $this->assertInstanceOf(Header::class, $acceptHeader);
@@ -106,14 +105,10 @@ final class RequestTest extends TestCase
     public function test_it_should_return_cloned_request_with_added_header_values(): void
     {
         $request = $this->createRequest();
-        $newRequest = $request->withAddedHeader(
-            new Header(new HeaderName('Accept-Language'), ['pt-BR'])
-        );
-        $newRequest = $newRequest->withAddedHeader(
-            new Header(new HeaderName('Accept-Language'), ['en-US', 'fr-FR;q=0.8'])
-        );
+        $newRequest = $request->withAddedHeader('Accept-Language', ['pt-BR']);
+        $newRequest = $newRequest->withAddedHeader('Accept-Language', ['en-US', 'fr-FR;q=0.8']);
 
-        $acceptLanguageHeader = $newRequest->getHeader(new HeaderName('Accept-Language'));
+        $acceptLanguageHeader = $newRequest->getHeader('Accept-Language');
 
         $this->assertNotSame($request, $newRequest);
         $this->assertInstanceOf(Header::class, $acceptLanguageHeader);
@@ -123,11 +118,11 @@ final class RequestTest extends TestCase
     public function test_it_should_return_cloned_request_without_an_indicated_header(): void
     {
         $request = $this->createRequest();
-        $newRequest = $request->withoutHeader(new HeaderName('Content-Type'));
+        $newRequest = $request->withoutHeader('Content-Type');
 
         $this->assertNotSame($request, $newRequest);
-        $this->assertTrue($request->hasHeader(new HeaderName('Content-Type')));
-        $this->assertFalse($newRequest->hasHeader(new HeaderName('Content-Type')));
+        $this->assertTrue($request->hasHeader('Content-Type'));
+        $this->assertFalse($newRequest->hasHeader('Content-Type'));
     }
 
     public function test_it_should_return_cloned_request_with_updated_body(): void
@@ -139,19 +134,18 @@ final class RequestTest extends TestCase
             throw new RuntimeException('Failed to decode JSON.');
         }
 
-        $newBody = new StreamFactory()->createFromString($json);
-        $newRequest = $request->withBody($newBody);
+        $newRequest = $request->withBody($json);
 
         $this->assertNotSame($request, $newRequest);
-        $this->assertSame($newBody, $newRequest->body);
+        $this->assertSame($json, (string) $newRequest->body);
     }
 
     public function test_it_should_return_cloned_request_with_updated_protocol_version(): void
     {
         $request = $this->createRequest();
-        $newRequest = $request->withVersion(new HttpVersion('2.0'));
+        $newRequest = $request->withVersion(HttpVersion::V2_0);
 
         $this->assertNotSame($request, $newRequest);
-        $this->assertEquals('2.0', (string) $newRequest->version);
+        $this->assertEquals(HttpVersion::V2_0, $newRequest->version);
     }
 }

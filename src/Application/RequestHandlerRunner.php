@@ -7,8 +7,6 @@ namespace YSOCode\Berry\Application;
 use Psr\Container\ContainerInterface;
 use YSOCode\Berry\Domain\Entities\MiddlewareCollection;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
-use YSOCode\Berry\Domain\Types\Attribute;
-use YSOCode\Berry\Domain\Types\AttributeName;
 use YSOCode\Berry\Domain\Types\RequestHandler;
 use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
 use YSOCode\Berry\Infra\Http\Response;
@@ -35,7 +33,7 @@ final readonly class RequestHandlerRunner
     public function runFromResolvedRoute(ResolvedRoute $resolvedRoute, ServerRequest $request): Response
     {
         foreach ($resolvedRoute->parameters as $parameter => $value) {
-            $request = $request->withAttribute(new Attribute(new AttributeName($parameter), $value));
+            $request = $request->withAttribute($parameter, $value);
         }
 
         $handler = $resolvedRoute->route->handler->resolve($this->container);

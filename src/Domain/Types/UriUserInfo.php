@@ -13,7 +13,7 @@ final readonly class UriUserInfo implements Stringable
 
     public ?string $password;
 
-    public function __construct(string $user, ?string $password)
+    public function __construct(string $user, ?string $password = null)
     {
         $isValid = self::validate($user, $password);
         if ($isValid instanceof Error) {

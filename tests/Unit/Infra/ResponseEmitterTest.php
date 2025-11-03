@@ -88,7 +88,7 @@ final class ResponseEmitterTest extends TestCase
         $this->assertContains(
             sprintf(
                 'HTTP/%s %s %s',
-                $response->version,
+                $response->version->value,
                 $response->status->value,
                 $response->status->getReasonPhrase()
             ),
@@ -113,7 +113,7 @@ final class ResponseEmitterTest extends TestCase
     public function test_it_should_emit_body_based_on_content_length_header(): void
     {
         $response = $this->createResponse();
-        $response = $response->withHeader(new Header(new HeaderName('Content-Length'), ['2']));
+        $response = $response->withHeader('Content-Length', ['2']);
 
         $responseEmitter = new ResponseEmitter($this->headerEmitter(...));
 
@@ -127,7 +127,7 @@ final class ResponseEmitterTest extends TestCase
     public function test_it_should_emit_set_cookie_headers_with_replace_false(): void
     {
         $response = $this->createResponse();
-        $response = $response->withHeader(new Header(new HeaderName('Set-Cookie'), ['cookie1=1', 'cookie2=2']));
+        $response = $response->withHeader('Set-Cookie', ['cookie1=1', 'cookie2=2']);
 
         $responseEmitter = new ResponseEmitter($this->headerEmitter(...));
 

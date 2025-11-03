@@ -7,11 +7,9 @@ namespace Tests\Unit\Infra;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\UploadFileStatus;
-use YSOCode\Berry\Domain\Types\DirPath;
 use YSOCode\Berry\Domain\Types\FileName;
 use YSOCode\Berry\Domain\Types\MimeType;
 use YSOCode\Berry\Domain\Types\StreamResource;
-use YSOCode\Berry\Domain\Types\TargetFilePath;
 use YSOCode\Berry\Infra\Http\UploadedFile;
 use YSOCode\Berry\Infra\Stream\Stream;
 
@@ -86,12 +84,7 @@ final class UploadedFileTest extends TestCase
                 new MimeType('text/plain'),
             );
 
-            $uploadedFile->moveTo(
-                new TargetFilePath(
-                    new DirPath($tempDir),
-                    new FileName($targetFile)
-                )
-            );
+            $uploadedFile->moveTo($tempDir, $targetFile);
 
             $resource = fopen($targetFilePath, 'r+b');
             if (! is_resource($resource)) {
@@ -122,22 +115,12 @@ final class UploadedFileTest extends TestCase
                 new MimeType('text/plain'),
             );
 
-            $uploadedFile->moveTo(
-                new TargetFilePath(
-                    new DirPath($tempDir),
-                    new FileName($targetFile)
-                )
-            );
+            $uploadedFile->moveTo($tempDir, $targetFile);
 
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Uploaded file has already been moved.');
 
-            $uploadedFile->moveTo(
-                new TargetFilePath(
-                    new DirPath($tempDir),
-                    new FileName('new-copy-test.txt')
-                )
-            );
+            $uploadedFile->moveTo($tempDir, 'new-copy-test.txt');
         } finally {
             unlink($tempFilePath);
             unlink($targetFilePath);
@@ -160,12 +143,7 @@ final class UploadedFileTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage($status->getMessage());
 
-        $uploadedFile->moveTo(
-            new TargetFilePath(
-                new DirPath($tempDir),
-                new FileName($targetFile)
-            )
-        );
+        $uploadedFile->moveTo($tempDir, $targetFile);
     }
 
     public function test_it_should_not_move_an_uploaded_file_when_stream_is_not_available(): void
@@ -186,12 +164,7 @@ final class UploadedFileTest extends TestCase
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('No stream available for uploaded file.');
 
-            $uploadedFile->moveTo(
-                new TargetFilePath(
-                    new DirPath($tempDir),
-                    new FileName($targetFile)
-                )
-            );
+            $uploadedFile->moveTo($tempDir, $targetFile);
         } finally {
             unlink($tempFilePath);
         }
@@ -216,12 +189,7 @@ final class UploadedFileTest extends TestCase
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Invalid uploaded file.');
 
-            $uploadedFile->moveTo(
-                new TargetFilePath(
-                    new DirPath($tempDir),
-                    new FileName($targetFile)
-                )
-            );
+            $uploadedFile->moveTo($tempDir, $targetFile);
         } finally {
             unlink($tempFilePath);
         }

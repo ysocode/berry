@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Fixtures;
 
-use YSOCode\Berry\Domain\Types\Header;
-use YSOCode\Berry\Domain\Types\HeaderName;
 use YSOCode\Berry\Infra\Http\MiddlewareInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
@@ -18,7 +16,7 @@ final class PoweredByMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequest $request, RequestHandlerInterface $handler): Response
     {
-        $request = $request->withHeader(new Header(new HeaderName('X-Powered-By'), ['Berry']));
+        $request = $request->withHeader('X-Powered-By', ['Berry']);
 
         return $handler->handle($request);
     }

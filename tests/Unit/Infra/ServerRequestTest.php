@@ -7,13 +7,12 @@ namespace Tests\Unit\Infra;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Enums\HttpVersion;
 use YSOCode\Berry\Domain\Enums\UploadFileStatus;
 use YSOCode\Berry\Domain\Types\Attribute;
 use YSOCode\Berry\Domain\Types\AttributeName;
 use YSOCode\Berry\Domain\Types\Header;
 use YSOCode\Berry\Domain\Types\HeaderName;
-use YSOCode\Berry\Domain\Types\HttpVersion;
-use YSOCode\Berry\Domain\Types\RequestTarget;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\UploadedFile;
 use YSOCode\Berry\Infra\Http\UploadedFileFactory;
@@ -49,8 +48,8 @@ final class ServerRequestTest extends TestCase
     {
         $request = $this->createServerRequest();
 
-        $contentTypeHeader = $request->getHeader(new HeaderName('Content-Type'));
-        $acceptHeader = $request->getHeader(new HeaderName('Accept'));
+        $contentTypeHeader = $request->getHeader('Content-Type');
+        $acceptHeader = $request->getHeader('Accept');
 
         $this->assertEquals(HttpMethod::GET, $request->method);
         $this->assertEquals('https://example.com', (string) $request->uri);
@@ -71,7 +70,7 @@ final class ServerRequestTest extends TestCase
     public function test_it_should_return_cloned_server_request_with_updated_uri(): void
     {
         $request = $this->createServerRequest();
-        $newServerRequest = $request->withUri(new UriFactory()->createFromString('https://example.com/path/to/resource?query=param'));
+        $newServerRequest = $request->withUri('https://example.com/path/to/resource?query=param');
 
         $this->assertNotSame($request, $newServerRequest);
         $this->assertEquals('https://example.com/path/to/resource?query=param', (string) $newServerRequest->uri);
@@ -80,7 +79,7 @@ final class ServerRequestTest extends TestCase
     public function test_it_should_return_cloned_server_request_with_updated_target(): void
     {
         $request = $this->createServerRequest();
-        $newServerRequest = $request->withTarget(new RequestTarget('/path/to/resource?query=param'));
+        $newServerRequest = $request->withTarget('/path/to/resource?query=param');
 
         $this->assertNotSame($request, $newServerRequest);
         $this->assertEquals('/path/to/resource?query=param', (string) $newServerRequest->target);
@@ -91,18 +90,18 @@ final class ServerRequestTest extends TestCase
     {
         $request = $this->createServerRequest();
 
-        $this->assertTrue($request->hasHeader(new HeaderName('Content-Type')));
-        $this->assertFalse($request->hasHeader(new HeaderName('Origin')));
+        $this->assertTrue($request->hasHeader('Content-Type'));
+        $this->assertFalse($request->hasHeader('Origin'));
     }
 
     public function test_it_should_return_cloned_server_request_with_updated_or_new_header(): void
     {
         $request = $this->createServerRequest();
-        $newServerRequest = $request->withHeader(new Header(new HeaderName('Accept'), ['text/html']));
-        $newServerRequest = $newServerRequest->withHeader(new Header(new HeaderName('Origin'), ['https://ysocode.com']));
+        $newServerRequest = $request->withHeader('Accept', ['text/html']);
+        $newServerRequest = $newServerRequest->withHeader('Origin', ['https://ysocode.com']);
 
-        $acceptHeader = $newServerRequest->getHeader(new HeaderName('Accept'));
-        $originHeader = $newServerRequest->getHeader(new HeaderName('Origin'));
+        $acceptHeader = $newServerRequest->getHeader('Accept');
+        $originHeader = $newServerRequest->getHeader('Origin');
 
         $this->assertNotSame($request, $newServerRequest);
         $this->assertInstanceOf(Header::class, $acceptHeader);
@@ -114,14 +113,10 @@ final class ServerRequestTest extends TestCase
     public function test_it_should_return_cloned_server_request_with_added_header_values(): void
     {
         $request = $this->createServerRequest();
-        $newServerRequest = $request->withAddedHeader(
-            new Header(new HeaderName('Accept-Language'), ['pt-BR'])
-        );
-        $newServerRequest = $newServerRequest->withAddedHeader(
-            new Header(new HeaderName('Accept-Language'), ['en-US', 'fr-FR;q=0.8'])
-        );
+        $newServerRequest = $request->withAddedHeader('Accept-Language', ['pt-BR']);
+        $newServerRequest = $newServerRequest->withAddedHeader('Accept-Language', ['en-US', 'fr-FR;q=0.8']);
 
-        $acceptLanguageHeader = $newServerRequest->getHeader(new HeaderName('Accept-Language'));
+        $acceptLanguageHeader = $newServerRequest->getHeader('Accept-Language');
 
         $this->assertNotSame($request, $newServerRequest);
         $this->assertInstanceOf(Header::class, $acceptLanguageHeader);
@@ -131,11 +126,11 @@ final class ServerRequestTest extends TestCase
     public function test_it_should_return_cloned_server_request_without_an_indicated_header(): void
     {
         $request = $this->createServerRequest();
-        $newServerRequest = $request->withoutHeader(new HeaderName('Content-Type'));
+        $newServerRequest = $request->withoutHeader('Content-Type');
 
         $this->assertNotSame($request, $newServerRequest);
-        $this->assertTrue($request->hasHeader(new HeaderName('Content-Type')));
-        $this->assertFalse($newServerRequest->hasHeader(new HeaderName('Content-Type')));
+        $this->assertTrue($request->hasHeader('Content-Type'));
+        $this->assertFalse($newServerRequest->hasHeader('Content-Type'));
     }
 
     public function test_it_should_return_cloned_server_request_with_updated_body(): void
@@ -147,20 +142,19 @@ final class ServerRequestTest extends TestCase
             throw new RuntimeException('Failed to decode JSON.');
         }
 
-        $newBody = new StreamFactory()->createFromString($json);
-        $newServerRequest = $request->withBody($newBody);
+        $newServerRequest = $request->withBody($json);
 
         $this->assertNotSame($request, $newServerRequest);
-        $this->assertSame($newBody, $newServerRequest->body);
+        $this->assertSame($json, (string) $newServerRequest->body);
     }
 
     public function test_it_should_return_cloned_server_request_with_updated_protocol_version(): void
     {
         $request = $this->createServerRequest();
-        $newServerRequest = $request->withVersion(new HttpVersion('2.0'));
+        $newServerRequest = $request->withVersion(HttpVersion::V2_0);
 
         $this->assertNotSame($request, $newServerRequest);
-        $this->assertEquals('2.0', (string) $newServerRequest->version);
+        $this->assertEquals(HttpVersion::V2_0, $newServerRequest->version);
     }
 
     public function test_it_should_return_cloned_server_request_with_updated_cookie_params(): void
@@ -250,8 +244,8 @@ final class ServerRequestTest extends TestCase
     {
         $request = $this->createServerRequest();
 
-        $this->assertTrue($request->hasAttribute(new AttributeName('generic-attribute')));
-        $this->assertFalse($request->hasAttribute(new AttributeName('missing-attribute')));
+        $this->assertTrue($request->hasAttribute('generic-attribute'));
+        $this->assertFalse($request->hasAttribute('missing-attribute'));
     }
 
     public function test_it_should_return_cloned_server_request_with_updated_or_new_attribute(): void
@@ -269,11 +263,9 @@ final class ServerRequestTest extends TestCase
             ],
         ];
 
-        $newServerRequest = $request->withAttribute(
-            new Attribute(new AttributeName('users'), $users),
-        );
+        $newServerRequest = $request->withAttribute('users', $users);
 
-        $usersAttribute = $newServerRequest->getAttribute(new AttributeName('users'));
+        $usersAttribute = $newServerRequest->getAttribute('users');
 
         $this->assertNotSame($request, $newServerRequest);
         $this->assertInstanceOf(Attribute::class, $usersAttribute);
@@ -283,10 +275,10 @@ final class ServerRequestTest extends TestCase
     public function test_it_should_return_cloned_server_request_without_an_indicated_attribute(): void
     {
         $request = $this->createServerRequest();
-        $newServerRequest = $request->withoutAttribute(new AttributeName('generic-attribute'));
+        $newServerRequest = $request->withoutAttribute('generic-attribute');
 
         $this->assertNotSame($request, $newServerRequest);
-        $this->assertTrue($request->hasAttribute(new AttributeName('generic-attribute')));
-        $this->assertFalse($newServerRequest->hasAttribute(new AttributeName('generic-attribute')));
+        $this->assertTrue($request->hasAttribute('generic-attribute'));
+        $this->assertFalse($newServerRequest->hasAttribute('generic-attribute'));
     }
 }
