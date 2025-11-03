@@ -33,6 +33,21 @@
         "php-di/php-di": "^7.0"
     },
     "minimum-stability": "stable",
+    "scripts": {
+        "pint": "vendor/bin/pint",
+        "pint:test": "@pint --test",
+        "rector": "vendor/bin/rector",
+        "rector:dry-run": "@rector --dry-run",
+        "phpstan": "vendor/bin/phpstan",
+        "phpstan:baseline": "@phpstan --generate-baseline",
+        "test": "vendor/bin/phpunit",
+        "test:coverage": "@test --coverage-html coverage",
+        "test:watch": "@test --watch",
+        "fix": [
+            "@rector",
+            "@pint"
+        ]
+    },
     "config": {
         "allow-plugins": {
             "captainhook/hook-installer": true
