@@ -62,6 +62,18 @@ final class RouteRegistry
         return false;
     }
 
+    public function getRouteByName(RouteName $name): ?Route
+    {
+        foreach ($this->routeCollectionsByMethod as $routeCollection) {
+            $route = $routeCollection->getRouteByName($name);
+            if ($route instanceof Route) {
+                return $route;
+            }
+        }
+
+        return null;
+    }
+
     public function map(HttpMethod $method, RoutePathPattern $pathPattern, RequestHandler $handler): Route
     {
         $route = new Route($method, $pathPattern, $handler);

@@ -8,35 +8,35 @@ use Closure;
 use Psr\Container\ContainerInterface;
 use YSOCode\Berry\Domain\Entities\MiddlewareCollection;
 use YSOCode\Berry\Domain\Entities\RouteGroup;
+use YSOCode\Berry\Domain\Entities\RouteGroupCollection;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Entities\RouteRegistryProxyTrait;
-use YSOCode\Berry\Domain\Enums\BerryEvent;
+use YSOCode\Berry\Domain\Enums\GroupEvent;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
-use YSOCode\Berry\Domain\Traits\EventTrait;
 use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\ServerRequestFactory;
 
-final class Berry
+final readonly class Berry
 {
-    /** @use EventTrait<self, BerryEvent> */
-    use EventTrait, RouteRegistryProxyTrait;
+    use RouteRegistryProxyTrait;
 
-    private readonly RequestHandlerRunner $requestHandlerRunner;
+    private RequestHandlerRunner $requestHandlerRunner;
 
-    private readonly RouteResolver $routeResolver;
+    private RouteResolver $routeResolver;
 
-    private readonly ErrorRequestHandlerFactory $errorRequestHandlerFactory;
+    private ErrorRequestHandlerFactory $errorRequestHandlerFactory;
 
     public function __construct(
-        private readonly ContainerInterface $container,
+        private ContainerInterface $container,
         ?RouteRegistry $routeRegistry = null,
         ?MiddlewareStackBuilder $middlewareStackBuilder = null,
         ?MiddlewareCollection $middlewareCollection = null,
+        private RouteGroupCollection $routeGroupCollection = new RouteGroupCollection,
         ?RequestHandlerRunner $requestHandlerRunner = null,
         ?RouteResolver $routeResolver = null,
-        private readonly ResponseEmitter $responseEmitter = new ResponseEmitter,
+        private ResponseEmitter $responseEmitter = new ResponseEmitter,
         ?ErrorRequestHandlerFactory $errorRequestHandlerFactory = null
     ) {
         $this->routeRegistry = $routeRegistry ?? new RouteRegistry;
@@ -63,14 +63,18 @@ final class Berry
 
         $closure($group);
 
-        $this->on(BerryEvent::BEFORE_RUN, $group->shareRoutesWith(...));
+        $group->on(GroupEvent::AFTER_PROPAGATE, function (RouteGroup $group): void {
+            $this->routeRegistry->append($group->routeRegistry);
+        });
+
+        $this->routeGroupCollection->addGroup($group);
 
         return $group;
     }
 
     public function run(?ServerRequest $request = null): void
     {
-        $this->emit(BerryEvent::BEFORE_RUN);
+        $this->routeGroupCollection->propagateAll();
 
         $request ??= new ServerRequestFactory()->fromGlobals();
         $resolvedRoute = $this->routeResolver->resolve($request);

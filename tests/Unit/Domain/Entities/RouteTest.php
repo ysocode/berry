@@ -93,7 +93,7 @@ final class RouteTest extends TestCase
         $this->assertTrue($eventTriggered);
     }
 
-    public function test_it_should_add_a_prefix_to_path_pattern(): void
+    public function test_it_should_add_prefix_to_path_pattern(): void
     {
         $route = new Route(
             HttpMethod::GET,

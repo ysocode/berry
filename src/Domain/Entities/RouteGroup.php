@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Entities;
 
-use YSOCode\Berry\Application\Berry;
+use YSOCode\Berry\Domain\Enums\GroupEvent;
+use YSOCode\Berry\Domain\Traits\EventTrait;
 use YSOCode\Berry\Domain\Types\RoutePathPattern;
 
 final class RouteGroup
 {
-    use RouteRegistryProxyTrait;
+    /** @use EventTrait<self, GroupEvent> */
+    use EventTrait, RouteRegistryProxyTrait;
 
     public function __construct(
         ?RouteRegistry $routeRegistry = null,
@@ -49,16 +51,11 @@ final class RouteGroup
         }
     }
 
-    private function propagate(): void
+    public function propagate(): void
     {
         $this->propagatePrefix();
         $this->propagateMiddlewares();
-    }
 
-    public function shareRoutesWith(Berry $berry): void
-    {
-        $this->propagate();
-
-        $berry->routeRegistry->append($this->routeRegistry);
+        $this->emit(GroupEvent::AFTER_PROPAGATE);
     }
 }

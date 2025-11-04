@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Domain\Enums;
 
-enum BerryEvent
+enum GroupEvent
 {
-    case BEFORE_RUN;
+    case AFTER_PROPAGATE;
 }
