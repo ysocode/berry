@@ -36,10 +36,10 @@ final readonly class RequestHandlerRunner
             $request = $request->withAttribute($parameter, $value);
         }
 
-        $handler = $resolvedRoute->route->handler->resolve($this->container);
+        $resolvedHandler = $resolvedRoute->route->handler->resolve($this->container);
 
         $middlewareStack = $this->middlewareStackBuilder->build(
-            $handler,
+            $resolvedHandler,
             array_merge($resolvedRoute->route->middlewareCollection->middlewares, $this->middlewareCollection->middlewares)
         );
 

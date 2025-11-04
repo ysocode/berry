@@ -18,7 +18,16 @@ final readonly class RoutePathPattern implements Stringable
             throw new InvalidArgumentException((string) $isValid);
         }
 
-        $this->value = $value;
+        $this->value = $this->normalize($value);
+    }
+
+    private function normalize(string $value): string
+    {
+        if ($value === '/') {
+            return $value;
+        }
+
+        return rtrim($value, '/');
     }
 
     public static function isValid(string $value): bool
