@@ -32,9 +32,10 @@ final class Route
 
     public function setName(string $name): self
     {
-        $this->emit(RouteEvent::NAME_CHANGED, ['name' => new RouteName($name)]);
+        $name = new RouteName($name);
+        $this->emit(RouteEvent::NAME_CHANGED, ['name' => $name]);
 
-        $this->name = new RouteName($name);
+        $this->name = $name;
 
         return $this;
     }
