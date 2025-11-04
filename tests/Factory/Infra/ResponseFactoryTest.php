@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Factory;
+namespace Tests\Factory\Infra;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
