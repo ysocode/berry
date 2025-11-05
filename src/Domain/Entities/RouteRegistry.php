@@ -7,7 +7,6 @@ namespace YSOCode\Berry\Domain\Entities;
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Enums\RouteCollectionEvent;
-use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
 use YSOCode\Berry\Domain\Types\Error;
 use YSOCode\Berry\Domain\Types\RequestHandler;
 use YSOCode\Berry\Domain\Types\RouteName;
@@ -83,10 +82,10 @@ final class RouteRegistry
         return $route;
     }
 
-    public function getRouteByMethodAndPath(HttpMethod $method, UriPath $path): ResolvedRoute|Error
+    public function getRouteByMethodAndPath(HttpMethod $method, UriPath $path): Route|Error
     {
-        $resolvedRoute = $this->routeCollectionsByMethod[$method->value]->getRouteByPath($path);
-        if (! $resolvedRoute instanceof ResolvedRoute) {
+        $route = $this->routeCollectionsByMethod[$method->value]->getRouteByPath($path);
+        if (! $route instanceof Route) {
             $otherRouteCollections = array_filter(
                 $this->routeCollectionsByMethod,
                 fn (string $currentMethod): bool => HttpMethod::from($currentMethod) !== $method,
@@ -102,7 +101,7 @@ final class RouteRegistry
             return new Error('Route not found.');
         }
 
-        return $resolvedRoute;
+        return $route;
     }
 
     public function append(self $other): void

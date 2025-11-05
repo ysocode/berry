@@ -7,10 +7,7 @@ namespace YSOCode\Berry\Domain\Entities;
 use RuntimeException;
 use YSOCode\Berry\Domain\Enums\RouteCollectionEvent;
 use YSOCode\Berry\Domain\Enums\RouteEvent;
-use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
 use YSOCode\Berry\Domain\Traits\EventTrait;
-use YSOCode\Berry\Domain\Types\PathParameter;
-use YSOCode\Berry\Domain\Types\PathParameterName;
 use YSOCode\Berry\Domain\Types\RouteName;
 use YSOCode\Berry\Domain\Types\UriPath;
 
@@ -99,32 +96,21 @@ final class RouteCollection
 
     public function hasRouteByPath(UriPath $path): bool
     {
-        return $this->getRouteByPath($path) instanceof ResolvedRoute;
+        return $this->getRouteByPath($path) instanceof Route;
     }
 
-    public function getRouteByPath(UriPath $path): ?ResolvedRoute
+    public function getRouteByPath(UriPath $path): ?Route
     {
         $segments = $path->getSegments();
         $lastIndex = array_key_last($segments);
         $tree = &$this->routesBySegment;
-        $parameters = [];
 
         foreach ($segments as $index => $segment) {
             if (! isset($tree[$segment])) {
                 foreach (array_keys($tree) as $treeSegment) {
-                    if (
-                        str_starts_with($treeSegment, '{') &&
-                        str_ends_with($treeSegment, '}')
-                    ) {
-                        $parameters[] = new PathParameter(new PathParameterName($treeSegment), $segment);
-
+                    if (str_starts_with($treeSegment, '{') && str_ends_with($treeSegment, '}')) {
                         if ($index === $lastIndex) {
-                            $route = $tree[$treeSegment]['route'] ?? null;
-                            if (! $route instanceof Route) {
-                                return null;
-                            }
-
-                            return new ResolvedRoute($route, $parameters);
+                            return $tree[$treeSegment]['route'] ?? null;
                         }
 
                         /** @var array<string, Node> $tree */
@@ -138,12 +124,7 @@ final class RouteCollection
             }
 
             if ($index === $lastIndex) {
-                $route = $tree[$segment]['route'] ?? null;
-                if (! $route instanceof Route) {
-                    return null;
-                }
-
-                return new ResolvedRoute($route, $parameters);
+                return $tree[$segment]['route'] ?? null;
             }
 
             /** @var array<string, Node> $tree */

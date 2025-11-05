@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
+use RuntimeException;
 use Stringable;
 
 final readonly class RoutePathPattern implements Stringable
@@ -58,6 +59,29 @@ final readonly class RoutePathPattern implements Stringable
         array_unshift($segments, '/');
 
         return $segments;
+    }
+
+    /**
+     * @return array<PathParameter>
+     */
+    public function getParameters(UriPath $path): array
+    {
+        $pathPatternSegments = $this->getSegments();
+        $pathSegments = $path->getSegments();
+
+        if (count($pathPatternSegments) !== count($pathSegments)) {
+            throw new RuntimeException('');
+        }
+
+        $parameters = [];
+
+        foreach ($pathPatternSegments as $index => $pathPatternSegment) {
+            if (str_starts_with($pathPatternSegment, '{') && str_ends_with($pathPatternSegment, '}')) {
+                $parameters[] = new PathParameter(new PathParameterName($pathPatternSegment), $pathSegments[$index]);
+            }
+        }
+
+        return $parameters;
     }
 
     public function prepend(self $other): self

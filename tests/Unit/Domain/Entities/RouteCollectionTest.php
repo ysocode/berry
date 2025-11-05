@@ -11,9 +11,6 @@ use Tests\Fixtures\HelloWorldHandler;
 use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteCollection;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
-use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
-use YSOCode\Berry\Domain\Types\PathParameter;
-use YSOCode\Berry\Domain\Types\PathParameterName;
 use YSOCode\Berry\Domain\Types\RequestHandler;
 use YSOCode\Berry\Domain\Types\RouteName;
 use YSOCode\Berry\Domain\Types\RoutePathPattern;
@@ -71,30 +68,6 @@ final class RouteCollectionTest extends TestCase
         $this->assertSame($expected, $routesBySegmentValue);
     }
 
-    public function test_it_should_return_resolved_route_when_route_exists(): void
-    {
-        $routeCollection = new RouteCollection;
-
-        $putProfileRoute = new Route(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), new RequestHandler(HelloWorldHandler::class));
-        $getUserRoute = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
-        $getArticleRoute = new Route(HttpMethod::GET, new RoutePathPattern('/article/{slug}'), new RequestHandler(HelloWorldHandler::class));
-
-        $routeCollection->addRoute($putProfileRoute);
-        $routeCollection->addRoute($getUserRoute);
-        $routeCollection->addRoute($getArticleRoute);
-
-        $actualPutProfileResolvedRoute = $routeCollection->getRouteByPath(new UriPath('/users/8847/profile'));
-        $actualGetUserResolvedRoute = $routeCollection->getRouteByPath(new UriPath('/users/42'));
-        $actualGetArticleResolvedRoute = $routeCollection->getRouteByPath(new UriPath('/article/example-slug'));
-
-        $this->assertInstanceOf(ResolvedRoute::class, $actualPutProfileResolvedRoute);
-        $this->assertInstanceOf(ResolvedRoute::class, $actualGetUserResolvedRoute);
-        $this->assertInstanceOf(ResolvedRoute::class, $actualGetArticleResolvedRoute);
-        $this->assertSame($putProfileRoute, $actualPutProfileResolvedRoute->route);
-        $this->assertSame($getUserRoute, $actualGetUserResolvedRoute->route);
-        $this->assertSame($getArticleRoute, $actualGetArticleResolvedRoute->route);
-    }
-
     public function test_it_should_return_null_when_route_not_exists(): void
     {
         $routeCollection = new RouteCollection;
@@ -123,9 +96,9 @@ final class RouteCollectionTest extends TestCase
             new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class))
         );
 
-        $resolvedRoute = $routeCollection->getRouteByPath(new UriPath('/users/8847'));
+        $route = $routeCollection->getRouteByPath(new UriPath('/users/8847'));
 
-        $this->assertInstanceOf(ResolvedRoute::class, $resolvedRoute);
+        $this->assertInstanceOf(Route::class, $route);
     }
 
     public function test_it_should_check_path_existence(): void
@@ -183,29 +156,5 @@ final class RouteCollectionTest extends TestCase
 
         $this->assertTrue($routeCollection->hasRouteByName(new RouteName('users.show')));
         $this->assertFalse($routeCollection->hasRouteByName(new RouteName('home')));
-    }
-
-    public function test_it_should_contain_parameters_in_resolved_route(): void
-    {
-        $routeCollection = new RouteCollection;
-
-        $route = new Route(HttpMethod::GET, new RoutePathPattern('/users/{user}/posts/{post}'), new RequestHandler(HelloWorldHandler::class));
-
-        $routeCollection->addRoute($route);
-
-        $resolvedRoute = $routeCollection->getRouteByPath(new UriPath('/users/42/posts/99'));
-
-        $this->assertInstanceOf(ResolvedRoute::class, $resolvedRoute);
-
-        $userParameter = $resolvedRoute->getParameter(new PathParameterName('user'));
-        $postParameter = $resolvedRoute->getParameter(new PathParameterName('post'));
-
-        $this->assertSame($route, $resolvedRoute->route);
-        $this->assertInstanceOf(PathParameter::class, $userParameter);
-        $this->assertEquals('user', (string) $userParameter->name);
-        $this->assertEquals('42', $userParameter->value);
-        $this->assertInstanceOf(PathParameter::class, $postParameter);
-        $this->assertEquals('post', (string) $postParameter->name);
-        $this->assertEquals('99', $postParameter->value);
     }
 }

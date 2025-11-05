@@ -7,12 +7,10 @@ namespace Tests\Unit\Domain\Entities;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Tests\Fixtures\HelloWorldHandler;
+use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
-use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
 use YSOCode\Berry\Domain\Types\Error;
-use YSOCode\Berry\Domain\Types\PathParameter;
-use YSOCode\Berry\Domain\Types\PathParameterName;
 use YSOCode\Berry\Domain\Types\RequestHandler;
 use YSOCode\Berry\Domain\Types\RoutePathPattern;
 use YSOCode\Berry\Domain\Types\UriPath;
@@ -24,20 +22,16 @@ final class RouteRegistryTest extends TestCase
         $routeRegistry = new RouteRegistry;
 
         foreach (HttpMethod::cases() as $method) {
-            $routeRegistry->map($method, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
+            $handler = new RequestHandler(HelloWorldHandler::class);
 
-            $resolvedRoute = $routeRegistry->getRouteByMethodAndPath($method, new UriPath('/users/42'));
+            $routeRegistry->map($method, new RoutePathPattern('/users/{user}'), $handler);
 
-            $this->assertInstanceOf(ResolvedRoute::class, $resolvedRoute);
+            $route = $routeRegistry->getRouteByMethodAndPath($method, new UriPath('/users/42'));
 
-            $userParameter = $resolvedRoute->getParameter(new PathParameterName('user'));
-
-            $this->assertEquals($method, $resolvedRoute->route->method);
-            $this->assertEquals('/users/{user}', (string) $resolvedRoute->route->pathPattern);
-            $this->assertEquals(new RequestHandler(HelloWorldHandler::class), $resolvedRoute->route->handler);
-            $this->assertInstanceOf(PathParameter::class, $userParameter);
-            $this->assertEquals('user', (string) $userParameter->name);
-            $this->assertEquals('42', $userParameter->value);
+            $this->assertInstanceOf(Route::class, $route);
+            $this->assertEquals($method, $route->method);
+            $this->assertEquals('/users/{user}', (string) $route->pathPattern);
+            $this->assertSame($handler, $route->handler);
         }
     }
 
