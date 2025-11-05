@@ -81,10 +81,9 @@ final class ResponseEmitterTest extends TestCase
         $responseEmitter->emit($response);
         $output = ob_get_clean();
 
-        $this->assertEquals('Hello, world!', $output);
-
         $emittedHeaders = array_column($this->emittedHeaders, 'header');
 
+        $this->assertEquals('Hello, world!', $output);
         $this->assertContains(
             sprintf(
                 'HTTP/%s %s %s',
@@ -94,7 +93,6 @@ final class ResponseEmitterTest extends TestCase
             ),
             $emittedHeaders
         );
-
         $this->assertContains('Content-Type: text/javascript; charset=utf-8', $emittedHeaders);
         $this->assertContains('Content-Encoding: deflate, gzip', $emittedHeaders);
     }
