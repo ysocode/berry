@@ -9,6 +9,8 @@ use YSOCode\Berry\Domain\Enums\RouteCollectionEvent;
 use YSOCode\Berry\Domain\Enums\RouteEvent;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
 use YSOCode\Berry\Domain\Traits\EventTrait;
+use YSOCode\Berry\Domain\Types\PathParameter;
+use YSOCode\Berry\Domain\Types\PathParameterName;
 use YSOCode\Berry\Domain\Types\RouteName;
 use YSOCode\Berry\Domain\Types\UriPath;
 
@@ -114,7 +116,7 @@ final class RouteCollection
                         str_starts_with($treeSegment, '{') &&
                         str_ends_with($treeSegment, '}')
                     ) {
-                        $parameters[str_replace(['{', '}'], '', $treeSegment)] = $segment;
+                        $parameters[] = new PathParameter(new PathParameterName($treeSegment), $segment);
 
                         if ($index === $lastIndex) {
                             $route = $tree[$treeSegment]['route'] ?? null;

@@ -11,6 +11,8 @@ use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
 use YSOCode\Berry\Domain\Types\Error;
+use YSOCode\Berry\Domain\Types\PathParameter;
+use YSOCode\Berry\Domain\Types\PathParameterName;
 use YSOCode\Berry\Domain\Types\RequestHandler;
 use YSOCode\Berry\Domain\Types\RoutePathPattern;
 use YSOCode\Berry\Domain\Types\UriPath;
@@ -26,13 +28,16 @@ final class RouteRegistryTest extends TestCase
 
             $resolvedRoute = $routeRegistry->getRouteByMethodAndPath($method, new UriPath('/users/42'));
 
-            $expectedParameters = ['user' => '42'];
-
             $this->assertInstanceOf(ResolvedRoute::class, $resolvedRoute);
+
+            $userParameter = $resolvedRoute->getParameter(new PathParameterName('user'));
+
             $this->assertEquals($method, $resolvedRoute->route->method);
             $this->assertEquals('/users/{user}', (string) $resolvedRoute->route->pathPattern);
             $this->assertEquals(new RequestHandler(HelloWorldHandler::class), $resolvedRoute->route->handler);
-            $this->assertEquals($expectedParameters, $resolvedRoute->parameters);
+            $this->assertInstanceOf(PathParameter::class, $userParameter);
+            $this->assertEquals('user', (string) $userParameter->name);
+            $this->assertEquals('42', $userParameter->value);
         }
     }
 

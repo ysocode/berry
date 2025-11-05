@@ -21,8 +21,8 @@ final class RouteParametersMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequest $request, RequestHandlerInterface $handler): Response
     {
-        foreach ($this->resolvedRoute->parameters as $parameter => $value) {
-            $request = $request->withAttribute($parameter, $value);
+        foreach ($this->resolvedRoute->parameters as $parameter) {
+            $request = $request->withAttribute((string) $parameter->name, $parameter->value);
         }
 
         return $handler->handle($request);

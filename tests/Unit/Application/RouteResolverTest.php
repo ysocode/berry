@@ -10,6 +10,8 @@ use YSOCode\Berry\Application\RouteResolver;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
+use YSOCode\Berry\Domain\Types\PathParameter;
+use YSOCode\Berry\Domain\Types\PathParameterName;
 use YSOCode\Berry\Domain\Types\RequestHandler;
 use YSOCode\Berry\Domain\Types\RoutePathPattern;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -36,9 +38,16 @@ final class RouteResolverTest extends TestCase
 
         $resolvedRoute = $resolver->resolve($request);
 
-        $expectedParameters = ['user' => '42', 'post' => '99'];
-
         $this->assertInstanceOf(ResolvedRoute::class, $resolvedRoute);
-        $this->assertSame($expectedParameters, $resolvedRoute->parameters);
+
+        $userParameter = $resolvedRoute->getParameter(new PathParameterName('user'));
+        $postParameter = $resolvedRoute->getParameter(new PathParameterName('post'));
+
+        $this->assertInstanceOf(PathParameter::class, $userParameter);
+        $this->assertEquals('user', (string) $userParameter->name);
+        $this->assertEquals('42', $userParameter->value);
+        $this->assertInstanceOf(PathParameter::class, $postParameter);
+        $this->assertEquals('post', (string) $postParameter->name);
+        $this->assertEquals('99', $postParameter->value);
     }
 }

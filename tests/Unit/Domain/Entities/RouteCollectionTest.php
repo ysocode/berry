@@ -12,6 +12,8 @@ use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteCollection;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
+use YSOCode\Berry\Domain\Types\PathParameter;
+use YSOCode\Berry\Domain\Types\PathParameterName;
 use YSOCode\Berry\Domain\Types\RequestHandler;
 use YSOCode\Berry\Domain\Types\RouteName;
 use YSOCode\Berry\Domain\Types\RoutePathPattern;
@@ -193,10 +195,17 @@ final class RouteCollectionTest extends TestCase
 
         $resolvedRoute = $routeCollection->getRouteByPath(new UriPath('/users/42/posts/99'));
 
-        $expectedParameters = ['user' => '42', 'post' => '99'];
-
         $this->assertInstanceOf(ResolvedRoute::class, $resolvedRoute);
+
+        $userParameter = $resolvedRoute->getParameter(new PathParameterName('user'));
+        $postParameter = $resolvedRoute->getParameter(new PathParameterName('post'));
+
         $this->assertSame($route, $resolvedRoute->route);
-        $this->assertSame($expectedParameters, $resolvedRoute->parameters);
+        $this->assertInstanceOf(PathParameter::class, $userParameter);
+        $this->assertEquals('user', (string) $userParameter->name);
+        $this->assertEquals('42', $userParameter->value);
+        $this->assertInstanceOf(PathParameter::class, $postParameter);
+        $this->assertEquals('post', (string) $postParameter->name);
+        $this->assertEquals('99', $postParameter->value);
     }
 }
