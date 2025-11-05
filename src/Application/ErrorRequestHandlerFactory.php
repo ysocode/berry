@@ -38,11 +38,11 @@ final readonly class ErrorRequestHandlerFactory
 
     /**
      * @param  class-string<RequestHandlerInterface>  $default
-     * @return class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response|RequestHandler
+     * @return class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response|RequestHandler
      */
-    private function getHandler(string $key, string $default): string|Closure|RequestHandler
+    private function getHandler(string $key, string $default): string|RequestHandlerInterface|Closure|RequestHandler
     {
-        /** @var class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response|RequestHandler $handler */
+        /** @var class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response|RequestHandler $handler */
         $handler = $this->container->has($key) ? $this->container->get($key) : $default;
 
         return $handler;

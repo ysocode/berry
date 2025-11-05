@@ -18,14 +18,14 @@ use YSOCode\Berry\Infra\Http\ServerRequest;
 final readonly class RequestHandler
 {
     /**
-     * @var class-string<RequestHandlerInterface>|Closure(ServerRequest): Response
+     * @var class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest): Response
      */
-    public string|Closure $value;
+    public string|RequestHandlerInterface|Closure $value;
 
     /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $value
+     * @param  class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response  $value
      */
-    public function __construct(string|Closure $value)
+    public function __construct(string|RequestHandlerInterface|Closure $value)
     {
         $isValid = self::validate($value);
         if ($isValid instanceof Error) {
@@ -36,42 +36,24 @@ final readonly class RequestHandler
     }
 
     /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $value
+     * @param  class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response  $value
      */
-    public static function isValid(string|Closure $value): bool
+    public static function isValid(string|RequestHandlerInterface|Closure $value): bool
     {
         return self::validate($value) === true;
     }
 
     /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $value
+     * @param  class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response  $value
      */
-    private static function validate(string|Closure $value): true|Error
+    private static function validate(string|RequestHandlerInterface|Closure $value): true|Error
     {
-        return match (true) {
-            $value instanceof Closure => self::validateClosure($value),
-            is_string($value) => self::validateClassName($value),
-        };
-    }
-
-    private static function validateClosure(Closure $closure): true|Error
-    {
-        $reflection = new ReflectionFunction($closure);
-
-        if ($reflection->getNumberOfParameters() !== 1) {
-            return new Error('Must accept exactly 1 parameter (ServerRequest).');
+        if (is_string($value)) {
+            return self::validateClassName($value);
         }
 
-        [$first] = $reflection->getParameters();
-
-        $firstType = $first->getType();
-        if (! $firstType instanceof ReflectionNamedType || $firstType->getName() !== ServerRequest::class) {
-            return new Error('First parameter of the request handler should be an instance of ServerRequest.');
-        }
-
-        $returnType = $reflection->getReturnType();
-        if (! $returnType instanceof ReflectionNamedType || $returnType->getName() !== Response::class) {
-            return new Error('The request handler function must return an instance of Response.');
+        if ($value instanceof Closure) {
+            return self::validateClosure($value);
         }
 
         return true;
@@ -98,8 +80,35 @@ final readonly class RequestHandler
         return true;
     }
 
+    private static function validateClosure(Closure $closure): true|Error
+    {
+        $reflection = new ReflectionFunction($closure);
+
+        if ($reflection->getNumberOfParameters() !== 1) {
+            return new Error('Must accept exactly 1 parameter (ServerRequest).');
+        }
+
+        [$first] = $reflection->getParameters();
+
+        $firstType = $first->getType();
+        if (! $firstType instanceof ReflectionNamedType || $firstType->getName() !== ServerRequest::class) {
+            return new Error('First parameter of the request handler should be an instance of ServerRequest.');
+        }
+
+        $returnType = $reflection->getReturnType();
+        if (! $returnType instanceof ReflectionNamedType || $returnType->getName() !== Response::class) {
+            return new Error('The request handler function must return an instance of Response.');
+        }
+
+        return true;
+    }
+
     public function resolve(ContainerInterface $container): RequestHandlerInterface
     {
+        if ($this->value instanceof RequestHandlerInterface) {
+            return $this->value;
+        }
+
         if ($this->value instanceof Closure) {
             return new ClosureHandlerAdapter($this->value);
         }

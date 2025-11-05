@@ -21,57 +21,57 @@ trait RouteRegistryProxyTrait
     private readonly MiddlewareCollection $middlewareCollection;
 
     /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function get(string $pathPattern, string|Closure $handler): Route
+    public function get(string $pathPattern, string|RequestHandlerInterface|Closure $handler): Route
     {
         return $this->routeRegistry->map(HttpMethod::GET, new RoutePathPattern($pathPattern), new RequestHandler($handler));
     }
 
     /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function put(string $pathPattern, string|Closure $handler): Route
+    public function put(string $pathPattern, string|RequestHandlerInterface|Closure $handler): Route
     {
         return $this->routeRegistry->map(HttpMethod::PUT, new RoutePathPattern($pathPattern), new RequestHandler($handler));
     }
 
     /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function post(string $pathPattern, string|Closure $handler): Route
+    public function post(string $pathPattern, string|RequestHandlerInterface|Closure $handler): Route
     {
         return $this->routeRegistry->map(HttpMethod::POST, new RoutePathPattern($pathPattern), new RequestHandler($handler));
     }
 
     /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function delete(string $pathPattern, string|Closure $handler): Route
+    public function delete(string $pathPattern, string|RequestHandlerInterface|Closure $handler): Route
     {
         return $this->routeRegistry->map(HttpMethod::DELETE, new RoutePathPattern($pathPattern), new RequestHandler($handler));
     }
 
     /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function patch(string $pathPattern, string|Closure $handler): Route
+    public function patch(string $pathPattern, string|RequestHandlerInterface|Closure $handler): Route
     {
         return $this->routeRegistry->map(HttpMethod::PATCH, new RoutePathPattern($pathPattern), new RequestHandler($handler));
     }
 
     /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function head(string $pathPattern, string|Closure $handler): Route
+    public function head(string $pathPattern, string|RequestHandlerInterface|Closure $handler): Route
     {
         return $this->routeRegistry->map(HttpMethod::HEAD, new RoutePathPattern($pathPattern), new RequestHandler($handler));
     }
 
     /**
-     * @param  class-string<RequestHandlerInterface>|Closure(ServerRequest $request): Response  $handler
+     * @param  class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response  $handler
      */
-    public function options(string $pathPattern, string|Closure $handler): Route
+    public function options(string $pathPattern, string|RequestHandlerInterface|Closure $handler): Route
     {
         return $this->routeRegistry->map(HttpMethod::OPTIONS, new RoutePathPattern($pathPattern), new RequestHandler($handler));
     }
