@@ -8,7 +8,7 @@ final readonly class RouteContext
 {
     const string ATTRIBUTE_ROUTE = 'ysocode.berry.route';
 
-    const string ATTRIBUTE_ROUTE_PARSER = 'ysocode.berry.route-parser';
+    const string ATTRIBUTE_ROUTE_PARSER = 'ysocode.berry.routeParser';
 
     public function __construct(
         public Route $route,
