@@ -82,7 +82,7 @@ final class RouteRegistry
         return $route;
     }
 
-    public function getRouteByMethodAndPath(HttpMethod $method, UriPath $path): Route|Error
+    public function getMatchedRoute(HttpMethod $method, UriPath $path): Route|Error
     {
         $route = $this->routeCollectionsByMethod[$method->value]->getRouteByPath($path);
         if (! $route instanceof Route) {

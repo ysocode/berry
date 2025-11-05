@@ -20,13 +20,14 @@ final readonly class RouteResolver
     {
         $path = $request->uri->path ?? new UriPath('/');
 
-        $route = $this->routeRegistry->getRouteByMethodAndPath($request->method, $path);
+        $route = $this->routeRegistry->getMatchedRoute($request->method, $path);
         if ($route instanceof Error) {
             return $route;
         }
 
-        $parameters = $route->pathPattern->getParameters($path);
-
-        return new ResolvedRoute($route, $parameters);
+        return new ResolvedRoute(
+            $route,
+            $route->pathPattern->getParameters($path)
+        );
     }
 }

@@ -26,7 +26,7 @@ final class RouteRegistryTest extends TestCase
 
             $routeRegistry->map($method, new RoutePathPattern('/users/{user}'), $handler);
 
-            $route = $routeRegistry->getRouteByMethodAndPath($method, new UriPath('/users/42'));
+            $route = $routeRegistry->getMatchedRoute($method, new UriPath('/users/42'));
 
             $this->assertInstanceOf(Route::class, $route);
             $this->assertEquals($method, $route->method);
@@ -41,7 +41,7 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->map(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
 
-        $error = $routeRegistry->getRouteByMethodAndPath(HttpMethod::DELETE, new UriPath('/users/42'));
+        $error = $routeRegistry->getMatchedRoute(HttpMethod::DELETE, new UriPath('/users/42'));
 
         $this->assertInstanceOf(Error::class, $error);
         $this->assertEquals('Method not allowed.', (string) $error);
@@ -53,7 +53,7 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry->map(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
 
-        $error = $routeRegistry->getRouteByMethodAndPath(HttpMethod::DELETE, new UriPath('/home'));
+        $error = $routeRegistry->getMatchedRoute(HttpMethod::DELETE, new UriPath('/home'));
 
         $this->assertInstanceOf(Error::class, $error);
         $this->assertEquals('Route not found.', (string) $error);
