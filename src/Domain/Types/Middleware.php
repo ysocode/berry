@@ -49,12 +49,33 @@ final readonly class Middleware
      */
     private static function validate(string|MiddlewareInterface|Closure $value): true|Error
     {
+        if (is_string($value)) {
+            return self::validateClassName($value);
+        }
+
         if ($value instanceof Closure) {
             return self::validateClosure($value);
         }
 
-        if (is_string($value)) {
-            return self::validateClassName($value);
+        return true;
+    }
+
+    private static function validateClassName(string $className): true|Error
+    {
+        if ($className === '') {
+            return new Error('Middleware cannot be empty.');
+        }
+
+        if (! class_exists($className)) {
+            return new Error(sprintf('Middleware "%s" does not exist.', $className));
+        }
+
+        if (! is_subclass_of($className, MiddlewareInterface::class)) {
+            return new Error(sprintf(
+                'Middleware "%s" must implement %s.',
+                $className,
+                MiddlewareInterface::class
+            ));
         }
 
         return true;
@@ -83,27 +104,6 @@ final readonly class Middleware
         $returnType = $reflection->getReturnType();
         if (! $returnType instanceof ReflectionNamedType || $returnType->getName() !== Response::class) {
             return new Error('The middleware function must return an instance of Response.');
-        }
-
-        return true;
-    }
-
-    private static function validateClassName(string $className): true|Error
-    {
-        if ($className === '') {
-            return new Error('Middleware cannot be empty.');
-        }
-
-        if (! class_exists($className)) {
-            return new Error(sprintf('Middleware "%s" does not exist.', $className));
-        }
-
-        if (! is_subclass_of($className, MiddlewareInterface::class)) {
-            return new Error(sprintf(
-                'Middleware "%s" must implement %s.',
-                $className,
-                MiddlewareInterface::class
-            ));
         }
 
         return true;
