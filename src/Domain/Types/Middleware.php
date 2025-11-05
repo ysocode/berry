@@ -19,14 +19,14 @@ use YSOCode\Berry\Infra\Http\ServerRequest;
 final readonly class Middleware
 {
     /**
-     * @var class-string<MiddlewareInterface>|Closure(ServerRequest, RequestHandlerInterface): Response
+     * @var class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response
      */
-    public string|Closure $value;
+    public string|MiddlewareInterface|Closure $value;
 
     /**
-     * @param  class-string<MiddlewareInterface>|Closure(ServerRequest, RequestHandlerInterface): Response  $value
+     * @param  class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response  $value
      */
-    public function __construct(string|Closure $value)
+    public function __construct(string|MiddlewareInterface|Closure $value)
     {
         $isValid = self::validate($value);
         if ($isValid instanceof Error) {
@@ -37,22 +37,27 @@ final readonly class Middleware
     }
 
     /**
-     * @param  class-string<MiddlewareInterface>|Closure(ServerRequest, RequestHandlerInterface): Response  $value
+     * @param  class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response  $value
      */
-    public static function isValid(string|Closure $value): bool
+    public static function isValid(string|MiddlewareInterface|Closure $value): bool
     {
         return self::validate($value) === true;
     }
 
     /**
-     * @param  class-string<MiddlewareInterface>|Closure(ServerRequest, RequestHandlerInterface): Response  $value
+     * @param  class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response  $value
      */
-    private static function validate(string|Closure $value): true|Error
+    private static function validate(string|MiddlewareInterface|Closure $value): true|Error
     {
-        return match (true) {
-            $value instanceof Closure => self::validateClosure($value),
-            is_string($value) => self::validateClassName($value),
-        };
+        if ($value instanceof Closure) {
+            return self::validateClosure($value);
+        }
+
+        if (is_string($value)) {
+            return self::validateClassName($value);
+        }
+
+        return true;
     }
 
     private static function validateClosure(Closure $closure): true|Error
@@ -106,6 +111,10 @@ final readonly class Middleware
 
     public function resolve(ContainerInterface $container): MiddlewareInterface
     {
+        if ($this->value instanceof MiddlewareInterface) {
+            return $this->value;
+        }
+
         if ($this->value instanceof Closure) {
             return new ClosureMiddlewareAdapter($this->value);
         }

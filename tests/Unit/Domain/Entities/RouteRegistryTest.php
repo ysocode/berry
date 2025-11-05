@@ -67,10 +67,16 @@ final class RouteRegistryTest extends TestCase
 
         $routeRegistry = new RouteRegistry;
 
-        $putProfileRoute = $routeRegistry->map(HttpMethod::PUT, new RoutePathPattern('/users/{user}/profile'), new RequestHandler(HelloWorldHandler::class));
-        $getUserRoute = $routeRegistry->map(HttpMethod::GET, new RoutePathPattern('/users/{user}'), new RequestHandler(HelloWorldHandler::class));
+        $routeRegistry->map(
+            HttpMethod::PUT,
+            new RoutePathPattern('/users/{user}/profile'),
+            new RequestHandler(HelloWorldHandler::class)
+        )->setName('users.show');
 
-        $putProfileRoute->setName('users.show');
-        $getUserRoute->setName('users.show');
+        $routeRegistry->map(
+            HttpMethod::GET,
+            new RoutePathPattern('/users/{user}'),
+            new RequestHandler(HelloWorldHandler::class)
+        )->setName('users.show');
     }
 }

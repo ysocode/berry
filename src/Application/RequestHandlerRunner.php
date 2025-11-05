@@ -32,10 +32,6 @@ final readonly class RequestHandlerRunner
 
     public function runFromResolvedRoute(ResolvedRoute $resolvedRoute, ServerRequest $request): Response
     {
-        foreach ($resolvedRoute->parameters as $parameter => $value) {
-            $request = $request->withAttribute($parameter, $value);
-        }
-
         $resolvedHandler = $resolvedRoute->route->handler->resolve($this->container);
 
         $middlewareStack = $this->middlewareStackBuilder->build(

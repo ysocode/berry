@@ -77,9 +77,9 @@ trait RouteRegistryProxyTrait
     }
 
     /**
-     * @param  class-string<MiddlewareInterface>|Closure(ServerRequest, RequestHandlerInterface): Response  $middleware
+     * @param  class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response  $middleware
      */
-    public function addMiddleware(string|Closure $middleware): self
+    public function addMiddleware(string|MiddlewareInterface|Closure $middleware): self
     {
         $this->middlewareCollection->addMiddleware(new Middleware($middleware));
 
@@ -87,7 +87,7 @@ trait RouteRegistryProxyTrait
     }
 
     /**
-     * @param  array<class-string<MiddlewareInterface>|Closure(ServerRequest, RequestHandlerInterface): Response>  $middlewares
+     * @param  array<class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response>  $middlewares
      */
     public function addMiddlewares(array $middlewares): self
     {

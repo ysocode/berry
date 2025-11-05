@@ -32,7 +32,7 @@ final readonly class AttributeName implements Stringable
             return new Error('Attribute name cannot be empty.');
         }
 
-        $pattern = '/^[a-zA-Z][a-zA-Z0-9-]*$/';
+        $pattern = '/^[a-zA-Z][a-zA-Z0-9\.-]*$/';
         if (in_array(preg_match($pattern, $value), [0, false], true)) {
             return new Error('Attribute name contains invalid characters.');
         }

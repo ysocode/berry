@@ -14,7 +14,10 @@ use Tests\Fixtures\PoweredByMiddleware;
 use Tests\Traits\HeaderEmitterTrait;
 use Tests\Traits\ServerEnvironmentSetupTrait;
 use YSOCode\Berry\Application\Berry;
+use YSOCode\Berry\Domain\Entities\Route;
+use YSOCode\Berry\Domain\Entities\RouteContextFactory;
 use YSOCode\Berry\Domain\Entities\RouteGroup;
+use YSOCode\Berry\Domain\Entities\RouteParser;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
 use YSOCode\Berry\Domain\Types\Attribute;
 use YSOCode\Berry\Infra\Http\Response;
@@ -177,14 +180,14 @@ final class BerryTest extends TestCase
     public function test_it_should_resolve_route_with_parameters(): void
     {
         $this->berry->get('/users/{user}/posts/{post}', function (ServerRequest $request): Response {
-            $user = $request->getAttribute('user');
-            $post = $request->getAttribute('post');
+            $userAttribute = $request->getAttribute('user');
+            $postAttribute = $request->getAttribute('post');
 
-            if (! $user instanceof Attribute || ! $post instanceof Attribute) {
-                throw new RuntimeException('Attributes not found');
+            if (! $userAttribute instanceof Attribute || ! $postAttribute instanceof Attribute) {
+                throw new RuntimeException('Attributes not found.');
             }
 
-            $json = json_encode(['user' => $user->value, 'post' => $post->value]);
+            $json = json_encode(['user' => $userAttribute->value, 'post' => $postAttribute->value]);
             if (! is_string($json)) {
                 throw new RuntimeException('Failed to decode JSON.');
             }
@@ -204,5 +207,26 @@ final class BerryTest extends TestCase
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals($expectedJson, $output);
+    }
+
+    public function test_it_should_retrieve_route_context(): void
+    {
+        $this->berry->get('/', function (ServerRequest $request): Response {
+            $routeContext = new RouteContextFactory()->createFromRequest($request);
+
+            $this->assertInstanceOf(Route::class, $routeContext->route);
+            $this->assertInstanceOf(RouteParser::class, $routeContext->routeParser);
+
+            return new ResponseFactory()->fromBody('Hello, world!');
+        });
+
+        ob_start();
+        $this->berry->run();
+        $output = ob_get_clean();
+
+        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals('Hello, world!', $output);
     }
 }

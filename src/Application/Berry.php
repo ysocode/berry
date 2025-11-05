@@ -6,9 +6,12 @@ namespace YSOCode\Berry\Application;
 
 use Closure;
 use Psr\Container\ContainerInterface;
+use YSOCode\Berry\Application\Middlewares\RouteContextMiddleware;
+use YSOCode\Berry\Application\Middlewares\RouteParametersMiddleware;
 use YSOCode\Berry\Domain\Entities\MiddlewareCollection;
 use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\Entities\RouteGroupCollection;
+use YSOCode\Berry\Domain\Entities\RouteParser;
 use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Entities\RouteRegistryProxyTrait;
 use YSOCode\Berry\Domain\Enums\GroupEvent;
@@ -79,9 +82,16 @@ final readonly class Berry
         $request ??= new ServerRequestFactory()->fromGlobals();
         $resolvedRoute = $this->routeResolver->resolve($request);
 
-        $response = $resolvedRoute instanceof ResolvedRoute
-        ? $this->requestHandlerRunner->runFromResolvedRoute($resolvedRoute, $request)
-        : $this->requestHandlerRunner->runFromRequestHandler($this->errorRequestHandlerFactory->createFromError($resolvedRoute), $request);
+        if ($resolvedRoute instanceof ResolvedRoute) {
+            $this->addMiddlewares([
+                new RouteContextMiddleware($resolvedRoute, new RouteParser($this->routeRegistry)),
+                new RouteParametersMiddleware($resolvedRoute),
+            ]);
+
+            $response = $this->requestHandlerRunner->runFromResolvedRoute($resolvedRoute, $request);
+        } else {
+            $response = $this->requestHandlerRunner->runFromRequestHandler($this->errorRequestHandlerFactory->createFromError($resolvedRoute), $request);
+        }
 
         $this->responseEmitter->emit($response);
     }
