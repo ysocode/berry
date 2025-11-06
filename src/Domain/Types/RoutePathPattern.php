@@ -66,15 +66,20 @@ final readonly class RoutePathPattern implements Stringable
      */
     public function getParameters(UriPath $path): array
     {
-        $pathPatternSegments = $this->getSegments();
         $pathSegments = $path->getSegments();
+        $pathPatternSegments = $this->getSegments();
 
-        if (count($pathPatternSegments) !== count($pathSegments)) {
-            throw new RuntimeException('');
+        if (count($pathSegments) !== count($pathPatternSegments)) {
+            throw new RuntimeException(sprintf(
+                'Cannot extract parameters: path "%s" does not match pattern "%s". Segment count mismatch (%d vs %d).',
+                (string) $path,
+                (string) $this,
+                count($pathSegments),
+                count($pathPatternSegments),
+            ));
         }
 
         $parameters = [];
-
         foreach ($pathPatternSegments as $index => $pathPatternSegment) {
             if (str_starts_with($pathPatternSegment, '{') && str_ends_with($pathPatternSegment, '}')) {
                 $parameters[] = new PathParameter(new PathParameterName($pathPatternSegment), $pathSegments[$index]);
