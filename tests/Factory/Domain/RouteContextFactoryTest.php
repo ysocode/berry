@@ -14,6 +14,7 @@ use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Types\RequestHandler;
 use YSOCode\Berry\Domain\Types\RoutePathPattern;
+use YSOCode\Berry\Domain\Types\UriPath;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\UriFactory;
 
@@ -28,6 +29,7 @@ final class RouteContextFactoryTest extends TestCase
         );
 
         $routeParser = new RouteParser(new RouteRegistry);
+        $basePath = new UriPath('/api/v1');
 
         $routeContext = new RouteContextFactory()->createFromRequest(
             new ServerRequest(
@@ -36,10 +38,12 @@ final class RouteContextFactoryTest extends TestCase
             )
                 ->withAttribute(RouteContext::ATTRIBUTE_ROUTE, $route)
                 ->withAttribute(RouteContext::ATTRIBUTE_ROUTE_PARSER, $routeParser)
+                ->withAttribute(RouteContext::ATTRIBUTE_BASE_PATH, $basePath)
         );
 
         $this->assertInstanceOf(RouteContext::class, $routeContext);
         $this->assertSame($route, $routeContext->route);
         $this->assertSame($routeParser, $routeContext->routeParser);
+        $this->assertSame($basePath, $routeContext->basePath);
     }
 }

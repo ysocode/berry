@@ -10,15 +10,24 @@ use YSOCode\Berry\Domain\Types\Error;
 use YSOCode\Berry\Domain\Types\UriPath;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
-final readonly class RouteResolver
+final class RouteResolver
 {
+    private ?UriPath $basePath = null;
+
     public function __construct(
-        private RouteRegistry $routeRegistry
+        private readonly RouteRegistry $routeRegistry
     ) {}
+
+    public function setBasePath(UriPath $basePath): self
+    {
+        $this->basePath = $basePath;
+
+        return $this;
+    }
 
     public function resolve(ServerRequest $request): ResolvedRoute|Error
     {
-        $path = $request->uri->path ?? new UriPath('/');
+        $path = $this->getFormattedPath($request);
 
         $route = $this->routeRegistry->getMatchedRoute($request->method, $path);
         if ($route instanceof Error) {
@@ -29,5 +38,19 @@ final readonly class RouteResolver
             $route,
             $route->pathPattern->getParameters($path)
         );
+    }
+
+    private function getFormattedPath(ServerRequest $request): UriPath
+    {
+        $path = $request->uri->path;
+        if (! $path instanceof UriPath) {
+            return new UriPath('/');
+        }
+
+        if (! $this->basePath instanceof UriPath) {
+            return $path;
+        }
+
+        return $path->strip($this->basePath);
     }
 }

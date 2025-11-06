@@ -16,30 +16,33 @@ use YSOCode\Berry\Domain\Entities\RouteRegistry;
 use YSOCode\Berry\Domain\Entities\RouteRegistryProxyTrait;
 use YSOCode\Berry\Domain\Enums\GroupEvent;
 use YSOCode\Berry\Domain\Payloads\ResolvedRoute;
+use YSOCode\Berry\Domain\Types\UriPath;
 use YSOCode\Berry\Infra\Http\MiddlewareStackBuilder;
 use YSOCode\Berry\Infra\Http\ResponseEmitter;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\ServerRequestFactory;
 
-final readonly class Berry
+final class Berry
 {
     use RouteRegistryProxyTrait;
 
-    private RequestHandlerRunner $requestHandlerRunner;
+    private readonly RequestHandlerRunner $requestHandlerRunner;
 
-    private RouteResolver $routeResolver;
+    private readonly RouteResolver $routeResolver;
 
-    private ErrorRequestHandlerFactory $errorRequestHandlerFactory;
+    private readonly ErrorRequestHandlerFactory $errorRequestHandlerFactory;
+
+    private ?UriPath $basePath = null;
 
     public function __construct(
-        private ContainerInterface $container,
+        private readonly ContainerInterface $container,
         ?RouteRegistry $routeRegistry = null,
         ?MiddlewareStackBuilder $middlewareStackBuilder = null,
         ?MiddlewareCollection $middlewareCollection = null,
-        private RouteGroupCollection $routeGroupCollection = new RouteGroupCollection,
+        private readonly RouteGroupCollection $routeGroupCollection = new RouteGroupCollection,
         ?RequestHandlerRunner $requestHandlerRunner = null,
         ?RouteResolver $routeResolver = null,
-        private ResponseEmitter $responseEmitter = new ResponseEmitter,
+        private readonly ResponseEmitter $responseEmitter = new ResponseEmitter,
         ?ErrorRequestHandlerFactory $errorRequestHandlerFactory = null
     ) {
         $this->routeRegistry = $routeRegistry ?? new RouteRegistry;
@@ -55,6 +58,16 @@ final readonly class Berry
 
         $this->routeResolver = $routeResolver ?? new RouteResolver($this->routeRegistry);
         $this->errorRequestHandlerFactory = $errorRequestHandlerFactory ?? new ErrorRequestHandlerFactory($this->container);
+    }
+
+    public function setBasePath(string $basePath): self
+    {
+        $basePath = new UriPath($basePath);
+
+        $this->basePath = $basePath;
+        $this->routeResolver->setBasePath($this->basePath);
+
+        return $this;
     }
 
     /**
@@ -84,7 +97,7 @@ final readonly class Berry
 
         if ($resolvedRoute instanceof ResolvedRoute) {
             $this->addMiddlewares([
-                new RouteContextMiddleware($resolvedRoute, new RouteParser($this->routeRegistry)),
+                new RouteContextMiddleware($resolvedRoute, new RouteParser($this->routeRegistry), $this->basePath),
                 new RouteParametersMiddleware($resolvedRoute),
             ]);
 

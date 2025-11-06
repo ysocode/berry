@@ -60,6 +60,23 @@ final readonly class UriPath implements Stringable
         return $segments;
     }
 
+    public function strip(self $other): self
+    {
+        $normalizedPrefix = rtrim((string) $other, '/');
+        if ($normalizedPrefix === '') {
+            return $this;
+        }
+
+        if (! str_starts_with($this->value, $normalizedPrefix)) {
+            return $this;
+        }
+
+        $stripped = substr($this->value, strlen($normalizedPrefix));
+        $stripped = $stripped === '' ? '/' : $stripped;
+
+        return new self($stripped);
+    }
+
     public function __toString(): string
     {
         return $this->value;

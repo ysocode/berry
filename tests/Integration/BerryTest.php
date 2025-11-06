@@ -177,7 +177,7 @@ final class BerryTest extends TestCase
         $this->assertEquals('Hello, world!', $output);
     }
 
-    public function test_it_should_resolve_route_with_parameters(): void
+    public function test_it_should_resolve_a_route_with_parameters(): void
     {
         $this->berry->get('/users/{user}/posts/{post}', function (ServerRequest $request): Response {
             $userAttribute = $request->getAttribute('user');
@@ -202,7 +202,6 @@ final class BerryTest extends TestCase
         $output = ob_get_clean();
 
         $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
-
         $expectedJson = json_encode(['user' => '42', 'post' => '99']);
 
         $this->assertEquals(HttpStatus::OK, $status);
@@ -228,5 +227,39 @@ final class BerryTest extends TestCase
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Hello, world!', $output);
+    }
+
+    public function test_it_should_resolve_a_route_with_base_path(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/api/v1/users/42';
+        $_SERVER['SCRIPT_NAME'] = '/api/v1/index.php';
+        $_SERVER['QUERY_STRING'] = '';
+
+        $this->berry->setBasePath('/api/v1');
+
+        $this->berry->get('/users/{user}', function (ServerRequest $request): Response {
+            $userAttribute = $request->getAttribute('user');
+            if (! $userAttribute instanceof Attribute) {
+                throw new RuntimeException('Attribute not found.');
+            }
+
+            $json = json_encode(['user' => $userAttribute->value]);
+            if (! is_string($json)) {
+                throw new RuntimeException('Failed to decode JSON.');
+            }
+
+            return new ResponseFactory()->fromBody($json);
+        });
+
+        ob_start();
+        $this->berry->run();
+        $output = ob_get_clean();
+
+        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $expectedJson = json_encode(['user' => '42']);
+
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals($expectedJson, $output);
+
     }
 }

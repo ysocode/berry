@@ -10,7 +10,7 @@ use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
-final class RouteParametersMiddleware implements MiddlewareInterface
+final readonly class RouteParametersMiddleware implements MiddlewareInterface
 {
     public function __construct(
         public ResolvedRoute $resolvedRoute
