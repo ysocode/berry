@@ -41,7 +41,7 @@ final class UploadedFile
         }
 
         $uri = $this->stream->meta['uri'] ?? null;
-        if (! is_string($uri)) {
+        if (! is_string($uri) || $uri === '') {
             throw new RuntimeException('Stream URI is missing or invalid.');
         }
 

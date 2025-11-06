@@ -43,7 +43,7 @@ final class ServerRequestFactory
     private function getMethodFromGlobals(): HttpMethod
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? null;
-        if (! is_string($method)) {
+        if (! is_string($method) || $method === '') {
             throw new RuntimeException('Unable to retrieve request method.');
         }
 

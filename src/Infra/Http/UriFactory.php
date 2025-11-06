@@ -28,14 +28,14 @@ final readonly class UriFactory
         }
 
         $scheme = $parts['scheme'] ?? null;
-        if (! is_string($scheme)) {
+        if (! is_string($scheme) || $scheme === '') {
             throw new InvalidArgumentException('URL scheme is missing.');
         }
 
         $scheme = UriScheme::from($scheme);
 
         $host = $parts['host'] ?? null;
-        if (! is_string($host)) {
+        if (! is_string($host) || $host === '') {
             throw new InvalidArgumentException('URL host is missing.');
         }
 
@@ -109,7 +109,7 @@ final readonly class UriFactory
     private function getHostAndPortFromGlobals(): array
     {
         $httpHost = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? null;
-        if (! is_string($httpHost)) {
+        if (! is_string($httpHost) || $httpHost === '') {
             throw new RuntimeException('Unable to retrieve http host.');
         }
 
@@ -130,7 +130,7 @@ final readonly class UriFactory
     private function getSchemeFromGlobals(): UriScheme
     {
         $requestScheme = $_SERVER['REQUEST_SCHEME'] ?? null;
-        if (! is_string($requestScheme)) {
+        if (! is_string($requestScheme) || $requestScheme === '') {
             throw new RuntimeException('Unable to retrieve request scheme.');
         }
 
@@ -140,14 +140,14 @@ final readonly class UriFactory
     private function getPathFromGlobals(): ?UriPath
     {
         $requestUri = $_SERVER['REQUEST_URI'] ?? null;
-        if (! is_string($requestUri)) {
+        if (! is_string($requestUri) || $requestUri === '') {
             throw new RuntimeException('Unable to retrieve request URI.');
         }
 
         $parts = parse_url($requestUri);
 
         $partPath = $parts['path'] ?? null;
-        if (! is_string($partPath)) {
+        if (! is_string($partPath) || $partPath === '') {
             return null;
         }
 
@@ -157,7 +157,7 @@ final readonly class UriFactory
     private function getQueryFromGlobals(): ?UriQuery
     {
         $queryString = $_SERVER['QUERY_STRING'] ?? null;
-        if (! is_string($queryString)) {
+        if (! is_string($queryString) || $queryString === '') {
             return null;
         }
 

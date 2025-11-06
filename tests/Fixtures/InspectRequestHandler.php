@@ -16,7 +16,7 @@ final class InspectRequestHandler implements RequestHandlerInterface
     {
         $loggedAtAttribute = $request->getAttribute('request-logged-at');
         $loggedAt = $loggedAtAttribute->value ?? 'No log available';
-        if (! is_string($loggedAt)) {
+        if (! is_string($loggedAt) || $loggedAt === '') {
             return new ResponseFactory()
                 ->fromBody('Invalid request-logged-at attribute value.')
                 ->withStatus(HttpStatus::INTERNAL_SERVER_ERROR);
@@ -24,7 +24,7 @@ final class InspectRequestHandler implements RequestHandlerInterface
 
         $poweredByHeader = $request->getHeader('X-Powered-By');
         [$poweredBy] = $poweredByHeader->values ?? ['Not powered'];
-        if (! is_string($poweredBy)) {
+        if (! is_string($poweredBy) || $poweredBy === '') {
             return new ResponseFactory()
                 ->fromBody('Invalid X-Powered-By header value.')
                 ->withStatus(HttpStatus::INTERNAL_SERVER_ERROR);
