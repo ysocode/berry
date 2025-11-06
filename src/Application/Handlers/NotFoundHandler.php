@@ -9,7 +9,7 @@ use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
-final class NotFoundHandler implements RequestHandlerInterface
+final readonly class NotFoundHandler implements RequestHandlerInterface
 {
     /**
      * {@inheritDoc}

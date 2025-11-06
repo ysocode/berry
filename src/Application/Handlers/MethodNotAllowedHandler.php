@@ -9,7 +9,7 @@ use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
-final class MethodNotAllowedHandler implements RequestHandlerInterface
+final readonly class MethodNotAllowedHandler implements RequestHandlerInterface
 {
     /**
      * {@inheritDoc}
