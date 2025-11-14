@@ -69,13 +69,16 @@ final readonly class RoutePathPattern implements Stringable
         $pathSegments = $path->getSegments();
         $pathPatternSegments = $this->getSegments();
 
-        if (count($pathSegments) !== count($pathPatternSegments)) {
+        $pathSegmentsCount = count($pathSegments);
+        $pathPatternSegmentsCount = count($pathPatternSegments);
+
+        if ($pathSegmentsCount !== $pathPatternSegmentsCount) {
             throw new RuntimeException(sprintf(
                 'Cannot extract parameters: path "%s" does not match pattern "%s". Segment count mismatch (%d vs %d).',
                 (string) $path,
                 (string) $this,
-                count($pathSegments),
-                count($pathPatternSegments),
+                $pathSegmentsCount,
+                $pathPatternSegmentsCount,
             ));
         }
 
