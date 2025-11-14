@@ -64,7 +64,7 @@ final readonly class RoutePathPattern implements Stringable
     /**
      * @return array<PathParameter>
      */
-    public function getParameters(UriPath $path): array
+    public function extractParameters(UriPath $path): array
     {
         $pathSegments = $path->getSegments();
         $pathPatternSegments = $this->getSegments();
@@ -90,6 +90,20 @@ final readonly class RoutePathPattern implements Stringable
         }
 
         return $parameters;
+    }
+
+    /**
+     * @param  array<PathParameter>  $parameters
+     */
+    public function buildPath(array $parameters): UriPath
+    {
+        $path = $this->value;
+
+        foreach ($parameters as $parameter) {
+            $path = str_replace($parameter->name->getValueWithBraces(), $parameter->value, $path);
+        }
+
+        return new UriPath($path);
     }
 
     public function prepend(self $other): self

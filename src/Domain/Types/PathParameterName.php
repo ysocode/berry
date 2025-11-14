@@ -13,7 +13,7 @@ final readonly class PathParameterName implements Stringable
 
     public function __construct(string $value)
     {
-        $sanitizedValue = $this->sanitizeBracedName($value);
+        $sanitizedValue = self::sanitize($value);
 
         $isValid = self::validate($sanitizedValue);
         if ($isValid instanceof Error) {
@@ -23,7 +23,7 @@ final readonly class PathParameterName implements Stringable
         $this->value = $sanitizedValue;
     }
 
-    public function sanitizeBracedName(string $value): string
+    public static function sanitize(string $value): string
     {
         if (str_starts_with($value, '{') && str_ends_with($value, '}')) {
             return substr($value, 1, -1);
@@ -49,6 +49,11 @@ final readonly class PathParameterName implements Stringable
         }
 
         return true;
+    }
+
+    public function getValueWithBraces(): string
+    {
+        return '{'.$this->value.'}';
     }
 
     public function __toString(): string

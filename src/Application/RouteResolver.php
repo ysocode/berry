@@ -36,7 +36,7 @@ final class RouteResolver
 
         return new ResolvedRoute(
             $route,
-            $route->pathPattern->getParameters($path)
+            $route->pathPattern->extractParameters($path)
         );
     }
 

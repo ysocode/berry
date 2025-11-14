@@ -77,6 +77,14 @@ final readonly class UriPath implements Stringable
         return new self($stripped);
     }
 
+    public function prepend(self $other): self
+    {
+        $otherValue = rtrim($other->value, '/');
+        $current = '/'.ltrim($this->value, '/');
+
+        return new self($otherValue.$current);
+    }
+
     public function __toString(): string
     {
         return $this->value;

@@ -8,6 +8,6 @@ final readonly class PathParameter
 {
     public function __construct(
         public PathParameterName $name,
-        public mixed $value
+        public string $value
     ) {}
 }
