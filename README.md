@@ -2,7 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/ysocode/berry.svg?style=flat)](https://packagist.org/packages/ysocode/berry)
 [![Downloads on Packagist](https://img.shields.io/packagist/dt/ysocode/berry.svg?style=flat)](https://packagist.org/packages/ysocode/berry)
-[![License](https://img.shields.io/packagist/l/ysocode/berry)](https://packagist.org/packages/ysocode/berry)
+[![License](https://img.shields.io/packagist/l/ysocode/berry)](LICENSE)
 
 ## Introduction
 
@@ -21,67 +21,56 @@ The result is a minimal, elegant, and extensible router that keeps type safety a
 composer require ysocode/berry
 ```
 
-### Initial Configuration
+### Overview
 
-To start your application, instantiate the Berry, register your routes, and invoke the `run()` method to process the incoming HTTP request:
+#### Apache Configuration
+
+Ensure your `.htaccess` and `index.php` files are in the same public-accessible directory. The `.htaccess` file should contain this code:
+
+```apacheconf
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+```
+
+To ensure that the `public/` directory does not appear in the URL, you should add a second `.htaccess` file above the `public/` directory with the following internal redirect rule:
+
+```apacheconf
+RewriteEngine on
+RewriteRule ^$ public/ [L]
+RewriteRule (.*) public/$1 [L]
+```
+
+#### Bootstrapping Berry with a PSR-11 Container
+
+Berry requires a PSR-11 compatible container (such as PHP-DI) to handle dependencies.
+Once the container is ready, you can instantiate Berry, register routes, and run the application.
 
 ```php
 <?php
 
 use DI\Container;
 use YSOCode\Berry\Application\Berry;
-use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\Types\UriPath;
 use YSOCode\Berry\Infra\Http\Response;
+use YSOCode\Berry\Infra\Http\ResponseFactory;
 use YSOCode\Berry\Infra\Http\ServerRequest;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 require_once __DIR__.'/vendor/autoload.php';
 
 $berry = new Berry(new Container);
 
-$berry->get(new UriPath('/'), function (ServerRequest $request): Response {
-    return new Response(
-        HttpStatus::OK,
-        body: new StreamFactory()->createFromString('Hello, world!')
-    );
+$berry->get('/', function (ServerRequest $request): Response {
+    return new ResponseFactory()->fromBody('Hello, world!');
 });
 
 $berry->run();
 ```
 
-#### Constructor Parameters
-
-The `Berry` constructor accepts several parameters that allow full customization of its internal behavior and dependency management.
-
-```php
-public function __construct(
-    ContainerInterface $container,
-    Router $router = new Router,
-    ?MiddlewareStackBuilder $middlewareStackBuilder = null,
-    ?Dispatcher $dispatcher = null,
-    ResponseEmitter $responseEmitter = new ResponseEmitter,
-    array $middlewares = []
-)
-```
-
-#### Parameters
-
-| Parameter | Type | Description |
-|------------|------|-------------|
-| **`$container`** | `Psr\Container\ContainerInterface` | A PSR-11 compatible container (e.g. PHP-DI, League\Container). Used to automatically resolve route handlers and middlewares defined as class strings. |
-| **`$router`** | `YSOCode\Berry\Application\Router` | *(Optional)* The router responsible for managing route definitions and lookups. If omitted, Berry creates a default router internally. |
-| **`$middlewareStackBuilder`** | `YSOCode\Berry\Infra\Http\MiddlewareStackBuilder` | *(Optional)* Builds the middleware execution stack. If not provided, Berry creates a default instance using the same container. |
-| **`$dispatcher`** | `YSOCode\Berry\Application\Dispatcher` | *(Optional)* Handles route dispatching and resolution. If omitted, a default dispatcher is created automatically. |
-| **`$responseEmitter`** | `YSOCode\Berry\Infra\Http\ResponseEmitter` | *(Optional)* Sends the final response to the client. You can provide a custom emitter for specific environments (SAPI, CLI, or testing). |
-| **`$middlewares`** | `array<class-string<MiddlewareInterface>\|Closure(ServerRequest $request, RequestHandlerInterface $handler): Response>` | *(Optional)* A list of global middlewares executed for every request. Each middleware can be a class name (resolved via container) or an inline closure. |
-
 #### Global Middlewares
 
-Berry comes with **no default middlewares**.  
-By design, it is completely minimal and does not impose any middleware on your application.  
-
 Berry allows you to attach middlewares that will run for all routes globally.
+All middlewares and handlers follow the PSR-7 HTTP message interface standard, ensuring full interoperability and compliance with modern PHP practices.
 
 ##### Adding a single global middleware:
 
@@ -90,8 +79,8 @@ Berry allows you to attach middlewares that will run for all routes globally.
 
 use DI\Container;
 use YSOCode\Berry\Application\Berry;
-use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
+use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
 require_once __DIR__.'/vendor/autoload.php';
@@ -110,8 +99,8 @@ $berry->addMiddleware(
 
 use DI\Container;
 use YSOCode\Berry\Application\Berry;
-use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
+use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
 
 require_once __DIR__.'/vendor/autoload.php';
@@ -131,93 +120,68 @@ Each route maps a specific HTTP method and path to a handler responsible for pro
 
 The core routing methods available are:
 
-- `get()`  
-- `put()`  
-- `post()`  
+- `get()`
+- `put()`
+- `post()`
 - `delete()`
-- `patch()`  
+- `patch()`
+- `head()`
+- `options()`
 
-Each method receives a `UriPath` value object and a route handler (usually a `Closure` or a class name).
+Each method receives a path and a route handler (usually a closure or a class name).
+All handlers follow PSR-7 for HTTP messages.
 
 ```php
 <?php
 
-use YSOCode\Berry\Domain\Enums\HttpStatus;
 use DI\Container;
 use YSOCode\Berry\Application\Berry;
-use YSOCode\Berry\Domain\Types\UriPath;
-use YSOCode\Berry\Infra\Http\Response;
-use YSOCode\Berry\Infra\Http\ServerRequest;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
+use App\Handlers\User\ListUsersHandler;
+use App\Handlers\User\UpdateUserHandler;
+use App\Handlers\User\CreateUserHandler;
+use App\Handlers\User\DeleteUserHandler;
+use App\Handlers\User\PatchUserHandler;
+use App\Handlers\User\UserHeadHandler;
+use App\Handlers\User\UserOptionsHandler;
 
 require_once __DIR__.'/vendor/autoload.php';
 
 $berry = new Berry(new Container);
 
-$berry->get(new UriPath('/users'), function (ServerRequest $request): Response {
-    return new Response(
-        HttpStatus::OK,
-        body: new StreamFactory()->createFromString('Listing all users.')
-    );
-});
+$berry->get('/users', ListUsersHandler::class);
+$berry->put('/users/{id}', UpdateUserHandler::class);
+$berry->post('/users', CreateUserHandler::class);
+$berry->delete('/users/{id}', DeleteUserHandler::class);
+$berry->patch('/users/{id}', PatchUserHandler::class);
+$berry->head('/users/{id}', UserHeadHandler::class);
+$berry->options('/users', UserOptionsHandler::class);
 
-$berry->put(new UriPath('/users/1'), function (ServerRequest $request): Response {
-    return new Response(
-        HttpStatus::OK,
-        body: new StreamFactory()->createFromString('User #1 replaced successfully.')
-    );
-});
-
-$berry->post(new UriPath('/users'), function (ServerRequest $request): Response {
-    return new Response(
-        HttpStatus::CREATED,
-        body: new StreamFactory()->createFromString('User created successfully.')
-    );
-});
-
-$berry->delete(new UriPath('/users/1'), function (ServerRequest $request): Response {
-    return new Response(
-        HttpStatus::NO_CONTENT
-    );
-});
-
-$berry->patch(new UriPath('/users/1'), function (ServerRequest $request): Response {
-    return new Response(
-        HttpStatus::OK,
-        body: new StreamFactory()->createFromString('User #1 updated successfully.')
-    );
-});
+$berry->run();
 ```
 
 ### Modifying Routes
 
 Once a route is defined, Berry allows further configuration through the `Route` entity.  
-This includes setting a name, adding middlewares, or modifying the path dynamically.
+This includes setting a name, adding middlewares, or add a prefix.
 
 #### Setting a Route Name
 
 The `setName()` method allows you to assign a unique name to a route, useful for route referencing or generating URLs.
 
 ```php
-<?php
+<?php 
 
-use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\Types\UriPath;
-use YSOCode\Berry\Infra\Http\Response;
-use YSOCode\Berry\Infra\Http\ServerRequest;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
-use YSOCode\Berry\Domain\Types\Name;
+use DI\Container;
+use YSOCode\Berry\Application\Berry;
+use App\Handlers\HelloWorldHandler;
 
 require_once __DIR__.'/vendor/autoload.php';
 
 $berry = new Berry(new Container);
 
-$berry->get(new UriPath('/'), function (ServerRequest $request): Response {
-    return new Response(
-        HttpStatus::OK,
-        body: new StreamFactory()->createFromString('Hello, world!')
-    );
-})->setName(new Name('home'));
+$berry->get('/', HelloWorldHandler::class)->setName('home');
+
+$berry->run();
 ```
 
 #### Adding Middlewares to a Route
@@ -226,200 +190,152 @@ Berry supports attaching middlewares specific to a single route.
 
 ##### Adding a single middleware:
 ```php
-<?php
+<?php 
 
-use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\Types\UriPath;
-use YSOCode\Berry\Infra\Http\Response;
+use App\Handlers\HelloWorldHandler;
+use DI\Container;
+use YSOCode\Berry\Application\Berry;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
+use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 require_once __DIR__.'/vendor/autoload.php';
 
 $berry = new Berry(new Container);
 
-$berry->get(new UriPath('/'), function (ServerRequest $request): Response {
-    return new Response(
-        HttpStatus::OK,
-        body: new StreamFactory()->createFromString('Hello, world!')
+$berry->get('/', HelloWorldHandler::class)
+    ->addMiddleware(
+        fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
     );
-})->addMiddleware(
-    fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
-);
+
+$berry->run();
 ```
 
 ##### Adding a multiple middlewares:
 ```php
-<?php
+<?php 
 
-use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\Types\UriPath;
-use YSOCode\Berry\Infra\Http\Response;
-use YSOCode\Berry\Infra\Http\ServerRequest;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
-
-require_once __DIR__.'/vendor/autoload.php';
-
-$berry = new Berry(new Container);
-
-$berry->get(new UriPath('/'), function (ServerRequest $request): Response {
-    return new Response(
-        HttpStatus::OK,
-        body: new StreamFactory()->createFromString('Hello, world!')
-    );
-})->addMiddlewares([
-    fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
-    fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
-]);
-```
-
-### Using Handlers and Middlewares as Classes
-
-Berry allows you to define **handlers** and **middlewares** as standalone classes, ensuring type safety and consistent architecture.
-
-#### Route Handlers as Classes
-
-A route handler class must implement the `RequestHandlerInterface`:
-
-```php
-<?php
-
+use App\Handlers\HelloWorldHandler;
+use DI\Container;
+use YSOCode\Berry\Application\Berry;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
-use YSOCode\Berry\Infra\Http\ServerRequest;
 use YSOCode\Berry\Infra\Http\Response;
-use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
+use YSOCode\Berry\Infra\Http\ServerRequest;
 
 require_once __DIR__.'/vendor/autoload.php';
 
 $berry = new Berry(new Container);
 
-final class ProfileHandler implements RequestHandlerInterface
-{
-    public function handle(ServerRequest $request): Response
-    {
-        return new Response(
-            HttpStatus::OK,
-            body: new StreamFactory()->createFromString('User profile data.')
-        );
-    }
-}
-```
+$berry->get('/', HelloWorldHandler::class)
+    ->addMiddlewares([
+        fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
+        fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
+    ]);
 
-You can then register it to a route:
-
-```php
-$berry->get(new UriPath('/profile'), ProfileHandler::class);
-```
-
-#### Middlewares as Classes
-
-A middleware class must implement the `MiddlewareInterface`:
-
-```php
-<?php
-
-use YSOCode\Berry\Infra\Http\MiddlewareInterface;
-use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
-use YSOCode\Berry\Infra\Http\ServerRequest;
-use YSOCode\Berry\Infra\Http\Response;
-use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Domain\Types\HeaderName;
-
-require_once __DIR__.'/vendor/autoload.php';
-
-$berry = new Berry(new Container);
-
-final class AuthMiddleware implements MiddlewareInterface
-{
-    public function process(ServerRequest $request, RequestHandlerInterface $handler): Response
-    {
-        $authorizationHeader = $request->getHeader(new HeaderName('Authorization'));
-        [$authorization] = $authorizationHeader->values ?? [null];
-        if (! is_string($authorization)) {
-            return new Response(HttpStatus::UNAUTHORIZED);
-        }
-
-        return $handler->handle($request);
-    }
-}
-```
-
-You can attach it globally:
-
-```php
-$berry->addMiddleware(AuthMiddleware::class);
-```
-
-Or attach it to a specific route:
-
-```php
-$berry->get(new UriPath('/profile'), ProfileHandler::class)
-    ->addMiddleware(AuthMiddleware::class);
+$berry->run();
 ```
 
 ### ServerRequest and Response
 
 Berry provides its own implementations of `ServerRequest` and `Response`, inspired by PSR-7 but improved for clarity and stronger typing.
-These classes follow the principle of immutability and use Value Objects to ensure consistency across headers, body, and HTTP version.
 
 #### ServerRequest
 
-Represents the HTTP request received by the server, containing data such as method, URI, headers, body, and parameters (query, cookies, etc).
+Represents the HTTP request received by the server. Automatically populates data from `$_SERVER`, `$_GET`, `$_POST`, `$_COOKIE`, `$_FILES`, and the request body.
 
-```php
-<?php
+**Key properties:**
 
-use YSOCode\Berry\Domain\Enums\HttpMethod;
-use YSOCode\Berry\Domain\Types\Uri;
-use YSOCode\Berry\Infra\Http\ServerRequest;
+| Property | Description |
+|----------|-------------|
+| `method` | HTTP method (`GET`, `POST`, etc.) |
+| `uri` | `Uri` object with scheme, host, path, and query |
+| `target` | Request target string (path + query) |
+| `headers` | Collection of `Header` objects |
+| `body` | Request body as a `Stream` |
+| `serverParams` | Data from `$_SERVER` |
+| `cookieParams` | Data from `$_COOKIE` |
+| `queryParams` | Data from `$_GET` |
+| `parsedBody` | Data from `$_POST` |
+| `uploadedFiles` | Uploaded files (`UploadedFile`) |
+| `attributes` | Custom attributes that can be added dynamically |
 
-$request = new ServerRequest(HttpMethod::GET, new Uri('https://example.com/users'));
-```
+**Key methods (immutable):**
 
-You can add or modify headers immutably:
+| Method | Returns | Description |
+|--------|---------|------------|
+| `withMethod(HttpMethod $method)` | `self` | Change HTTP method |
+| `withUri(string $uri)` | `self` | Change URI |
+| `withTarget(string $target)` | `self` | Change request target |
+| `hasHeader(string $name)` | `bool` | Check if a header exists |
+| `getHeader(string $name)` | `?Header` | Get a specific header |
+| `withHeader(string $name, array $values)` | `self` | Set a header (overwrites if exists) |
+| `withAddedHeader(string $name, array $values)` | `self` | Add values to an existing header |
+| `withoutHeader(string $name)` | `self` | Remove a header |
+| `withBody(string $body)` | `self` | Change the request body |
+| `withVersion(HttpVersion $version)` | `self` | Change HTTP version |
+| `withCookieParams(array $cookieParams)` | `self` | Replace cookies |
+| `withQueryParams(array $queryParams)` | `self` | Replace query parameters |
+| `withParsedBody(array $parsedBody)` | `self` | Replace parsed body |
+| `withUploadedFiles(array $uploadedFiles)` | `self` | Replace uploaded files |
+| `hasAttribute(string $name)` | `bool` | Check if a custom attribute exists |
+| `getAttribute(string $name)` | `?Attribute` | Get a custom attribute |
+| `withAttribute(string $name, mixed $value)` | `self` | Add a custom attribute |
+| `withoutAttribute(string $name)` | `self` | Remove a custom attribute |
 
-```php
-<?php
+> Note: Methods like `withHeader`, `withAddedHeader`, `withoutHeader`, `withBody`, and `withVersion` also exist in the `Response` class (`MessageTrait`), ensuring a consistent API for both requests and responses.
 
-use YSOCode\Berry\Domain\Types\Header;
-use YSOCode\Berry\Domain\Types\HeaderName;
-
-$newRequest = $request->withHeader(
-    new Header(new HeaderName('X-Request-ID'), ['abc123'])
-);
-```
+---
 
 #### Response
 
-The `Response` class represents the HTTP response sent to the client.
-It defines the status, headers, and body, maintaining immutability and simplicity.
+Represents the HTTP response sent to the client. Maintains **immutability** and simplicity.
+
+**Key properties:**
+
+| Property | Description |
+|----------|-------------|
+| `status` | HTTP status (`HttpStatus`) |
+| `headers` | Collection of `Header` objects |
+| `body` | Response body as a `Stream` |
+
+**Key methods (immutable):**
+
+| Method | Returns | Description |
+|--------|---------|------------|
+| `withStatus(HttpStatus $status)` | `self` | Change HTTP status code |
+| `withHeader(string $name, array $values)` | `self` | Set a header (overwrites if exists) |
+| `withAddedHeader(string $name, array $values)` | `self` | Add values to an existing header |
+| `withoutHeader(string $name)` | `self` | Remove a header |
+| `withBody(string $body)` | `self` | Change response body |
+| `withVersion(HttpVersion $version)` | `self` | Change HTTP version |
+
+> These methods mirror `ServerRequest` methods, providing a unified interface for HTTP message manipulation.
+
+---
+
+#### ResponseFactory
+
+Provides a simple way to create a `Response` from a string body.
+
+**Example usage in a handler:**
 
 ```php
 <?php
 
-use YSOCode\Berry\Domain\Enums\HttpStatus;
+namespace App\Handlers;
+
+use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
+use YSOCode\Berry\Infra\Http\ResponseFactory;
+use YSOCode\Berry\Infra\Http\ServerRequest;
 
-$response = new Response(
-    HttpStatus::OK,
-    body: new StreamFactory()->createFromString('Hello, world!')
-);
-```
-
-You can also change the status or body while preserving immutability:
-
-```php
-<?php
-
-use YSOCode\Berry\Domain\Enums\HttpStatus;
-use YSOCode\Berry\Infra\Stream\StreamFactory;
-
-$newResponse = $response
-    ->withStatus(HttpStatus::CREATED)
-    ->withBody((new StreamFactory())->createFromString('Created!'));
+final readonly class HelloWorldHandler implements RequestHandlerInterface
+{
+    public function handle(ServerRequest $request): Response
+    {
+        return (new ResponseFactory())->fromBody('Hello, world!');
+    }
+}
 ```
 
 ## License
