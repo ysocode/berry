@@ -92,7 +92,7 @@ $berry->addMiddleware(
 );
 ```
 
-##### Adding a multiple global middlewares:
+##### Adding multiple global middlewares:
 
 ```php
 <?php
@@ -234,6 +234,49 @@ $berry->get('/', HelloWorldHandler::class)
 
 $berry->run();
 ```
+
+### Route Groups
+
+Berry allows grouping routes using `RouteGroup`, useful when you want to apply a prefix
+or shared middlewares to a set of routes. You configure the group via a closure passed
+to `$berry->group(...)`. Before `run()` all groups are propagated automatically and
+their routes are registered in the application.
+
+Example usage:
+
+```php
+<?php
+
+use DI\Container;
+use YSOCode\Berry\Application\Berry;
+use YSOCode\Berry\Domain\Entities\RouteGroup;
+use App\Handlers\User\ListUsersHandler;
+use App\Handlers\User\CreateUserHandler;
+use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
+use YSOCode\Berry\Infra\Http\Response;
+use YSOCode\Berry\Infra\Http\ServerRequest;
+
+require_once __DIR__.'/vendor/autoload.php';
+
+$berry = new Berry(new Container);
+
+$berry->group(function (RouteGroup $group): void {
+        $group->get('/users', ListUsersHandler::class);
+        $group->post('/users', CreateUserHandler::class);
+})
+    ->addPrefix('/api/v1')
+    ->addMiddlewares([
+        fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
+        fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
+    ]);
+
+$berry->run();
+```
+
+Important behavior:
+- The `prefix` defined on a `RouteGroup` is propagated to each route when groups are processed before route resolution.
+- Middlewares added to the group are attached to the group's routes during propagation.
+- Use the `get`, `post`, `put`, etc. methods directly on the `$group` (provided by the `RouteRegistryProxyTrait`).
 
 ### ServerRequest and Response
 
