@@ -18,7 +18,7 @@ final class ServerRequestFactoryTest extends TestCase
 
     public function test_it_should_create_a_server_request_from_globals(): void
     {
-        $request = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->createFromGlobals();
 
         $acceptEncodingHeader = $request->getHeader('Accept-Encoding');
         $acceptLanguageHeader = $request->getHeader('Accept-Language');
@@ -35,7 +35,7 @@ final class ServerRequestFactoryTest extends TestCase
     {
         $_SERVER['REDIRECT_HTTP_HOST'] = 'ignored.com';
 
-        $request = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->createFromGlobals();
 
         $hostHeader = $request->getHeader('Host');
 
@@ -47,7 +47,7 @@ final class ServerRequestFactoryTest extends TestCase
     {
         $_SERVER['REDIRECT_HTTP_X_CUSTOM'] = 'custom-value';
 
-        $request = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->createFromGlobals();
 
         $customHeader = $request->getHeader('X-Custom');
 
@@ -58,7 +58,7 @@ final class ServerRequestFactoryTest extends TestCase
 
     public function test_it_should_include_server_params_from_globals(): void
     {
-        $request = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->createFromGlobals();
 
         $this->assertEquals('GET', $request->serverParams['REQUEST_METHOD']);
         $this->assertEquals('https', $request->serverParams['REQUEST_SCHEME']);
@@ -70,7 +70,7 @@ final class ServerRequestFactoryTest extends TestCase
 
     public function test_it_should_include_cookie_params_from_globals(): void
     {
-        $request = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->createFromGlobals();
 
         $this->assertEquals('GA1.1.700403314.1753901012', $request->cookieParams['_ga']);
         $this->assertEquals('GS2.1.s1754575621$o1$g1$t1754577353$j60$l0$h0', $request->cookieParams['_ga_GBVEKN2FFG']);
@@ -83,7 +83,7 @@ final class ServerRequestFactoryTest extends TestCase
 
     public function test_it_should_include_query_params_from_globals(): void
     {
-        $request = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->createFromGlobals();
 
         $this->assertEquals('param', $request->queryParams['query']);
     }
@@ -96,7 +96,7 @@ final class ServerRequestFactoryTest extends TestCase
             'password' => 'berryIsTheBest',
         ];
 
-        $request = new ServerRequestFactory()->fromGlobals();
+        $request = new ServerRequestFactory()->createFromGlobals();
 
         $this->assertEquals('John Doe', $request->parsedBody['name']);
         $this->assertEquals('john.doe@ysocode.com', $request->parsedBody['email']);
@@ -122,7 +122,7 @@ final class ServerRequestFactoryTest extends TestCase
         ];
 
         try {
-            $request = new ServerRequestFactory()->fromGlobals();
+            $request = new ServerRequestFactory()->createFromGlobals();
             $docUploadedFile = $request->uploadedFiles['doc'];
 
             $this->assertInstanceOf(UploadedFile::class, $docUploadedFile);

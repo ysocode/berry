@@ -92,7 +92,7 @@ final class Berry
     {
         $this->routeGroupCollection->propagateAll();
 
-        $request ??= new ServerRequestFactory()->fromGlobals();
+        $request ??= new ServerRequestFactory()->createFromGlobals();
         $resolvedRoute = $this->routeResolver->resolve($request);
 
         if ($resolvedRoute instanceof ResolvedRoute) {

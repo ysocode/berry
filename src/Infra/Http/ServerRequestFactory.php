@@ -19,7 +19,7 @@ final class ServerRequestFactory
         'CONTENT_MD5',
     ];
 
-    public function fromGlobals(): ServerRequest
+    public function createFromGlobals(): ServerRequest
     {
         /**
          * @var array<string, mixed> $_SERVER
