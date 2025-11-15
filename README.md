@@ -383,7 +383,7 @@ final readonly class HelloWorldHandler implements RequestHandlerInterface
 ### Route Context and RouteParser
 
 During request processing Berry attaches a `RouteContext` to the `ServerRequest` via the `RouteContextMiddleware`.
-The recommended way to obtain a validated `RouteContext` inside a handler or middleware is to use `RouteContextFactory::createFromRequest($request)`.
+The recommended way to obtain a validated `RouteContext` inside a handler or middleware is to use `RouteContextFactory::createFromRequest(ServerRequest $request)`.
 
 What `RouteContext` provides:
 - `route`: the matched `Route` instance.
