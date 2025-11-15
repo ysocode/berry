@@ -376,10 +376,58 @@ final readonly class HelloWorldHandler implements RequestHandlerInterface
 {
     public function handle(ServerRequest $request): Response
     {
-        return (new ResponseFactory())->fromBody('Hello, world!');
+        return new ResponseFactory()->fromBody('Hello, world!');
     }
 }
 ```
+
+### Route Context and RouteParser
+
+During request processing Berry attaches a `RouteContext` to the `ServerRequest` via the `RouteContextMiddleware`.
+The recommended way to obtain a validated `RouteContext` inside a handler or middleware is to use `RouteContextFactory::createFromRequest($request)`.
+
+What `RouteContext` provides:
+- `route`: the matched `Route` instance.
+- `routeParser`: a `RouteParser` instance that can be used to inspect routes or build paths.
+- `basePath`: optional `UriPath` if the application has a base path set.
+
+`RouteParametersMiddleware` also injects each route parameter into the request as an attribute
+so you can access parameters directly with `$request->getAttribute('{name}')`.
+
+Useful `RouteParser` methods:
+- `hasRouteByName(string $name): bool` — returns whether a named route exists.
+- `getRouteByName(string $name): ?Route` — returns the `Route` for a name (or `null`).
+- `resolvePathForRouteByName(string $name, array $parameters = [], bool $withBasePath = true): ?UriPath` — builds a `UriPath` for a named route using parameters.
+
+```php
+<?php
+
+namespace App\Handlers;
+
+use YSOCode\Berry\Domain\Entities\RouteContextFactory;
+use YSOCode\Berry\Domain\Enums\HttpStatus;
+use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
+use YSOCode\Berry\Infra\Http\Response;
+use YSOCode\Berry\Infra\Http\ServerRequest;
+
+final readonly class HelloWorldHandler implements RequestHandlerInterface
+{
+    public function handle(ServerRequest $request): Response
+    {
+        $routeContext = new RouteContextFactory()->createFromRequest($request);
+
+        $routeParser = $routeContext->routeParser;
+        $path = $routeParser->resolvePathForRouteByName('user.show', ['id' => '42']);
+
+        return new Response(HttpStatus::MOVED_PERMANENTLY)
+            ->withHeader('Location', [(string) $path]);
+    }
+}
+```
+
+Notes:
+- `RouteContextFactory::createFromRequest()` validates attributes and throws a `RuntimeException` if the expected attributes are missing or invalid.- 
+- If you only need route parameters, they are available as request attributes (injected by `RouteParametersMiddleware`).
 
 ## License
 
