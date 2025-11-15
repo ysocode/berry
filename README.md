@@ -15,15 +15,9 @@ The result is a minimal, elegant, and extensible router that keeps type safety a
 
 ## Official Documentation
 
-### Install Berry using Composer:
+### Web Servers
 
-```shell
-composer require ysocode/berry
-```
-
-### Overview
-
-#### Apache Configuration
+#### Apache Configurations
 
 Ensure your `.htaccess` and `index.php` files are in the same public-accessible directory. The `.htaccess` file should contain this code:
 
@@ -40,6 +34,16 @@ To ensure that the `public/` directory does not appear in the URL, you should ad
 RewriteEngine on
 RewriteRule ^$ public/ [L]
 RewriteRule (.*) public/$1 [L]
+```
+
+### Installation
+
+#### Install Berry:
+
+We recommend installing Berry via Composer. Navigate to your project’s root directory and run the following command:
+
+```shell
+composer require ysocode/berry
 ```
 
 #### Bootstrapping Berry with a PSR-11 Container
@@ -67,12 +71,14 @@ $berry->get('/', function (ServerRequest $request): Response {
 $berry->run();
 ```
 
-#### Global Middlewares
+### Global Configurations
 
-Berry allows you to attach middlewares that will run for all routes globally.
-All middlewares and handlers follow the PSR-7 HTTP message interface standard, ensuring full interoperability and compliance with modern PHP practices.
+#### Adding Global Middlewares
 
-##### Adding a single global middleware:
+Middlewares are inspired by PSR-15 concepts and work with request and response objects based on PSR-7, with refinements
+for stronger typing and usability.
+
+**Adding a single global middleware:**
 
 ```php
 <?php
@@ -92,7 +98,7 @@ $berry->addMiddleware(
 );
 ```
 
-##### Adding multiple global middlewares:
+**Adding multiple global middlewares:**
 
 ```php
 <?php
@@ -129,7 +135,8 @@ The core routing methods available are:
 - `options()`
 
 Each method receives a path and a route handler (usually a closure or a class name).
-All handlers follow PSR-7 for HTTP messages.
+Handlers are inspired by PSR-15 concepts and work with request and response objects based on PSR-7, with refinements
+for stronger typing and usability.
 
 ```php
 <?php
@@ -188,7 +195,8 @@ $berry->run();
 
 Berry supports attaching middlewares specific to a single route.
 
-##### Adding a single middleware:
+**Adding a single middleware:**
+
 ```php
 <?php 
 
@@ -211,7 +219,8 @@ $berry->get('/', HelloWorldHandler::class)
 $berry->run();
 ```
 
-##### Adding a multiple middlewares:
+**Adding a multiple middlewares:**
+
 ```php
 <?php 
 
@@ -238,10 +247,10 @@ $berry->run();
 ### Route Groups
 
 Berry allows grouping routes using `RouteGroup`, useful when you want to apply a prefix or shared middlewares to a set of routes.
-You configure the group via a closure passed to `$berry->group(...)`.
+You configure the group via a closure passed to `Berry::group(RouteGroup)`.
 Before `run()` all groups are propagated automatically and their routes are registered in the application.
 
-Example usage:
+**Example usage:**
 
 ```php
 <?php
@@ -260,8 +269,8 @@ require_once __DIR__.'/vendor/autoload.php';
 $berry = new Berry(new Container);
 
 $berry->group(function (RouteGroup $group): void {
-        $group->get('/users', ListUsersHandler::class);
-        $group->post('/users', CreateUserHandler::class);
+    $group->get('/users', ListUsersHandler::class);
+    $group->post('/users', CreateUserHandler::class);
 })
     ->addPrefix('/api/v1')
     ->addMiddlewares([
@@ -273,9 +282,10 @@ $berry->run();
 ```
 
 Important behavior:
-- The `prefix` defined on a `RouteGroup` is propagated to each route when groups are processed before route resolution.
-- Middlewares added to the group are attached to the group's routes during propagation.
-- Use the `get`, `post`, `put`, etc. methods directly on the `$group` (provided by the `RouteRegistryProxyTrait`).
+
+- The `prefix` set on a `RouteGroup` is applied to each route when the group is propagated.
+- Middlewares added to a `RouteGroup` are attached to all of its routes during propagation.
+- Use the HTTP methods (`get`, `post`, `put`, etc.) directly on the `$group` object (provided by the `RouteRegistryProxyTrait`).
 
 ### ServerRequest and Response
 
@@ -283,77 +293,75 @@ Berry provides its own implementations of `ServerRequest` and `Response`, inspir
 
 #### ServerRequest
 
-Represents the HTTP request received by the server. Automatically populates data from `$_SERVER`, `$_GET`, `$_POST`, `$_COOKIE`, `$_FILES`, and the request body.
+Represents an immutable HTTP request received by the server.  
+It is automatically populated from PHP superglobals and structured using strongly-typed value objects for method, URI, headers, body, parameters, and attributes.
 
 **Key properties:**
 
-| Property | Description |
-|----------|-------------|
-| `method` | HTTP method (`GET`, `POST`, etc.) |
-| `uri` | `Uri` object with scheme, host, path, and query |
-| `target` | Request target string (path + query) |
-| `headers` | Collection of `Header` objects |
-| `body` | Request body as a `Stream` |
-| `serverParams` | Data from `$_SERVER` |
-| `cookieParams` | Data from `$_COOKIE` |
-| `queryParams` | Data from `$_GET` |
-| `parsedBody` | Data from `$_POST` |
-| `uploadedFiles` | Uploaded files (`UploadedFile`) |
-| `attributes` | Custom attributes that can be added dynamically |
+| Property        | Description |
+|-----------------|-------------|
+| `method`        | HTTP method of the request |
+| `uri`           | The request URI |
+| `target`        | Full request target (path + query string) |
+| `headers`       | Normalized header collection |
+| `body`          | Stream representing the request body |
+| `serverParams`  | Server environment parameters (`$_SERVER`) |
+| `cookieParams`  | Cookies sent by the client (`$_COOKIE`) |
+| `queryParams`   | Query string parameters (`$_GET`) |
+| `parsedBody`    | Parsed body data (`$_POST`) |
+| `uploadedFiles` | Files uploaded with the request (`$_FILES`) |
+| `attributes`    | Arbitrary user-defined attributes |
 
 **Key methods (immutable):**
 
 | Method | Returns | Description |
-|--------|---------|------------|
-| `withMethod(HttpMethod $method)` | `self` | Change HTTP method |
-| `withUri(string $uri)` | `self` | Change URI |
-| `withTarget(string $target)` | `self` | Change request target |
-| `hasHeader(string $name)` | `bool` | Check if a header exists |
-| `getHeader(string $name)` | `?Header` | Get a specific header |
-| `withHeader(string $name, array $values)` | `self` | Set a header (overwrites if exists) |
+|--------|---------|-------------|
+| `withMethod(HttpMethod $method)` | `self` | Change the HTTP method |
+| `withUri(string $uri)` | `self` | Change the URI |
+| `withTarget(string $target)` | `self` | Change the request target |
+| `hasHeader(string $name)` | `bool` | Determine whether a header exists |
+| `getHeader(string $name)` | `?Header` | Retrieve a specific header |
+| `withHeader(string $name, array $values)` | `self` | Set a header (replaces existing value) |
 | `withAddedHeader(string $name, array $values)` | `self` | Add values to an existing header |
 | `withoutHeader(string $name)` | `self` | Remove a header |
-| `withBody(string $body)` | `self` | Change the request body |
-| `withVersion(HttpVersion $version)` | `self` | Change HTTP version |
-| `withCookieParams(array $cookieParams)` | `self` | Replace cookies |
+| `withBody(string $body)` | `self` | Replace the request body |
+| `withVersion(HttpVersion $version)` | `self` | Change the HTTP protocol version |
+| `withCookieParams(array $cookieParams)` | `self` | Replace cookie parameters |
 | `withQueryParams(array $queryParams)` | `self` | Replace query parameters |
-| `withParsedBody(array $parsedBody)` | `self` | Replace parsed body |
+| `withParsedBody(array $parsedBody)` | `self` | Replace parsed body data |
 | `withUploadedFiles(array $uploadedFiles)` | `self` | Replace uploaded files |
-| `hasAttribute(string $name)` | `bool` | Check if a custom attribute exists |
-| `getAttribute(string $name)` | `?Attribute` | Get a custom attribute |
-| `withAttribute(string $name, mixed $value)` | `self` | Add a custom attribute |
-| `withoutAttribute(string $name)` | `self` | Remove a custom attribute |
+| `hasAttribute(string $name)` | `bool` | Determine whether an attribute exists |
+| `getAttribute(string $name)` | `?Attribute` | Retrieve an attribute |
+| `withAttribute(string $name, mixed $value)` | `self` | Add a new attribute |
+| `withoutAttribute(string $name)` | `self` | Remove an attribute |
 
-> Note: Methods like `withHeader`, `withAddedHeader`, `withoutHeader`, `withBody`, and `withVersion` also exist in the `Response` class (`MessageTrait`), ensuring a consistent API for both requests and responses.
-
----
+> Methods involving headers, body, and HTTP version come from `MessageTrait`, which is shared with the `Response` class.
 
 #### Response
 
-Represents the HTTP response sent to the client. Maintains **immutability** and simplicity.
+Represents the HTTP response sent back to the client.  
+Like all core Berry objects, it is fully immutable.
 
 **Key properties:**
 
 | Property | Description |
 |----------|-------------|
-| `status` | HTTP status (`HttpStatus`) |
-| `headers` | Collection of `Header` objects |
-| `body` | Response body as a `Stream` |
+| `status` | Response status |
+| `headers` | Normalized header collection |
+| `body` | Stream containing the response body |
 
 **Key methods (immutable):**
 
 | Method | Returns | Description |
-|--------|---------|------------|
-| `withStatus(HttpStatus $status)` | `self` | Change HTTP status code |
-| `withHeader(string $name, array $values)` | `self` | Set a header (overwrites if exists) |
+|--------|---------|-------------|
+| `withStatus(HttpStatus $status)` | `self` | Change the response status |
+| `withHeader(string $name, array $values)` | `self` | Set a header (replaces existing value) |
 | `withAddedHeader(string $name, array $values)` | `self` | Add values to an existing header |
 | `withoutHeader(string $name)` | `self` | Remove a header |
-| `withBody(string $body)` | `self` | Change response body |
-| `withVersion(HttpVersion $version)` | `self` | Change HTTP version |
+| `withBody(string $body)` | `self` | Replace the response body |
+| `withVersion(HttpVersion $version)` | `self` | Change the HTTP protocol version |
 
-> These methods mirror `ServerRequest` methods, providing a unified interface for HTTP message manipulation.
-
----
+> These methods are provided by the shared `MessageTrait`, ensuring a consistent API across `ServerRequest` and `Response`.
 
 #### ResponseFactory
 
@@ -383,20 +391,22 @@ final readonly class HelloWorldHandler implements RequestHandlerInterface
 ### Route Context and RouteParser
 
 During request processing Berry attaches a `RouteContext` to the `ServerRequest` via the `RouteContextMiddleware`.
-The recommended way to obtain a validated `RouteContext` inside a handler or middleware is to use `RouteContextFactory::createFromRequest(ServerRequest $request)`.
+The recommended way to obtain a validated `RouteContext` inside a handler or middleware is to use `RouteContextFactory::createFromRequest(ServerRequest)`.
 
 What `RouteContext` provides:
+
 - `route`: the matched `Route` instance.
 - `routeParser`: a `RouteParser` instance that can be used to inspect routes or build paths.
 - `basePath`: optional `UriPath` if the application has a base path set.
 
 `RouteParametersMiddleware` also injects each route parameter into the request as an attribute
-so you can access parameters directly with `$request->getAttribute('{name}')`.
+so you can access parameters directly with `ServerRequest::getAttribute(string)`.
 
 Useful `RouteParser` methods:
-- `hasRouteByName(string $name): bool` — returns whether a named route exists.
-- `getRouteByName(string $name): ?Route` — returns the `Route` for a name (or `null`).
-- `resolvePathForRouteByName(string $name, array $parameters = [], bool $withBasePath = true): ?UriPath` — builds a `UriPath` for a named route using parameters.
+
+- `hasRouteByName(string): bool` — returns whether a named route exists.
+- `getRouteByName(string): ?Route` — returns the `Route` for a name (or `null`).
+- `resolvePathForRouteByName(string, array, bool): ?UriPath` — builds a `UriPath` for a named route using parameters.
 
 ```php
 <?php
@@ -425,7 +435,9 @@ final readonly class HelloWorldHandler implements RequestHandlerInterface
 ```
 
 Notes:
-- `RouteContextFactory::createFromRequest(ServerRequest $request)` validates attributes and throws a `RuntimeException` if the expected attributes are missing or invalid.- 
+
+- `RouteContextFactory::createFromRequest(ServerRequest)` validates attributes and throws a `RuntimeException` if the expected
+attributes are missing or invalid.
 - If you only need route parameters, they are available as request attributes (injected by `RouteParametersMiddleware`).
 
 ### Customizing Error Handlers (via Container)
@@ -438,15 +450,16 @@ from the application's container. The factory looks for container entries with t
 - `internal_server_error` (fallback for other errors)
 
 Accepted handler types (what the container may return):
+
 - a class name implementing `RequestHandlerInterface` (class-string)
 - an instance of `RequestHandlerInterface`
 - a `Closure(ServerRequest): Response` callable
 - a `RequestHandler` value object
 
 If a key is not present in the container the factory will use the default handler class
-(see `ErrorRequestHandlerFactory::getHandler()` logic).
+(see `ErrorRequestHandlerFactory::getHandler(string, string)` logic).
 
-Example (PHP-DI) registering custom handlers by container keys:
+**Example (PHP-DI) registering custom handlers by container keys:**
 
 ```php
 <?php
@@ -470,11 +483,6 @@ $berry = new Berry($container);
 
 $berry->run();
 ```
-
-Notes:
-- The factory accepts class names, instances, callables or `RequestHandler` objects.
-When the resolved value is not already a `RequestHandler`, the factory will wrap it accordingly.
-- This allows you to replace any of the default error handlers with your own implementations without modifying Berry's source code.
 
 ## License
 
