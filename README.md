@@ -135,14 +135,14 @@ All handlers follow PSR-7 for HTTP messages.
 <?php
 
 use DI\Container;
-use YSOCode\Berry\Application\Berry;
-use App\Handlers\User\ListUsersHandler;
-use App\Handlers\User\UpdateUserHandler;
 use App\Handlers\User\CreateUserHandler;
 use App\Handlers\User\DeleteUserHandler;
+use App\Handlers\User\ListUsersHandler;
 use App\Handlers\User\PatchUserHandler;
+use App\Handlers\User\UpdateUserHandler;
 use App\Handlers\User\UserHeadHandler;
 use App\Handlers\User\UserOptionsHandler;
+use YSOCode\Berry\Application\Berry;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -171,9 +171,9 @@ The `setName()` method allows you to assign a unique name to a route, useful for
 ```php
 <?php 
 
+use App\Handlers\HelloWorldHandler;
 use DI\Container;
 use YSOCode\Berry\Application\Berry;
-use App\Handlers\HelloWorldHandler;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -247,10 +247,10 @@ Example usage:
 <?php
 
 use DI\Container;
+use App\Handlers\User\CreateUserHandler;
+use App\Handlers\User\ListUsersHandler;
 use YSOCode\Berry\Application\Berry;
 use YSOCode\Berry\Domain\Entities\RouteGroup;
-use App\Handlers\User\ListUsersHandler;
-use App\Handlers\User\CreateUserHandler;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 use YSOCode\Berry\Infra\Http\Response;
 use YSOCode\Berry\Infra\Http\ServerRequest;
@@ -453,9 +453,9 @@ Example (PHP-DI) registering custom handlers by container keys:
 
 use DI\ContainerBuilder;
 use YSOCode\Berry\Application\Berry;
-use App\Handlers\CustomNotFoundHandler;
-use App\Handlers\CustomMethodNotAllowedHandler;
 use App\Handlers\CustomInternalErrorHandler;
+use App\Handlers\CustomMethodNotAllowedHandler;
+use App\Handlers\CustomNotFoundHandler;
 
 $builder = new ContainerBuilder();
 $builder->addDefinitions([
