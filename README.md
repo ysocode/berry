@@ -425,7 +425,7 @@ final readonly class HelloWorldHandler implements RequestHandlerInterface
 ```
 
 Notes:
-- `RouteContextFactory::createFromRequest()` validates attributes and throws a `RuntimeException` if the expected attributes are missing or invalid.- 
+- `RouteContextFactory::createFromRequest(ServerRequest $request)` validates attributes and throws a `RuntimeException` if the expected attributes are missing or invalid.- 
 - If you only need route parameters, they are available as request attributes (injected by `RouteParametersMiddleware`).
 
 ## License
