@@ -237,10 +237,9 @@ $berry->run();
 
 ### Route Groups
 
-Berry allows grouping routes using `RouteGroup`, useful when you want to apply a prefix
-or shared middlewares to a set of routes. You configure the group via a closure passed
-to `$berry->group(...)`. Before `run()` all groups are propagated automatically and
-their routes are registered in the application.
+Berry allows grouping routes using `RouteGroup`, useful when you want to apply a prefix or shared middlewares to a set of routes.
+You configure the group via a closure passed to `$berry->group(...)`.
+Before `run()` all groups are propagated automatically and their routes are registered in the application.
 
 Example usage:
 
