@@ -9,7 +9,7 @@ use YSOCode\Berry\Infra\Stream\StreamFactory;
 
 final class ResponseFactory
 {
-    public function fromBody(?string $body = null): Response
+    public function createFromString(?string $body = null): Response
     {
         if (is_string($body)) {
             $body = new StreamFactory()->createFromString($body);

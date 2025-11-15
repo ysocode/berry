@@ -192,7 +192,7 @@ final class BerryTest extends TestCase
                 throw new RuntimeException('Failed to decode JSON.');
             }
 
-            return new ResponseFactory()->fromBody($json);
+            return new ResponseFactory()->createFromString($json);
         });
 
         $_SERVER['REQUEST_URI'] = '/users/42/posts/99?query=param';
@@ -216,7 +216,7 @@ final class BerryTest extends TestCase
             $this->assertInstanceOf(Route::class, $routeContext->route);
             $this->assertInstanceOf(RouteParser::class, $routeContext->routeParser);
 
-            return new ResponseFactory()->fromBody('Hello, world!');
+            return new ResponseFactory()->createFromString('Hello, world!');
         });
 
         ob_start();
@@ -248,7 +248,7 @@ final class BerryTest extends TestCase
                 throw new RuntimeException('Failed to decode JSON.');
             }
 
-            return new ResponseFactory()->fromBody($json);
+            return new ResponseFactory()->createFromString($json);
         });
 
         ob_start();

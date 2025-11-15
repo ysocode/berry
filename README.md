@@ -65,7 +65,7 @@ require_once __DIR__.'/vendor/autoload.php';
 $berry = new Berry(new Container);
 
 $berry->get('/', function (ServerRequest $request): Response {
-    return new ResponseFactory()->fromBody('Hello, world!');
+    return new ResponseFactory()->createFromString('Hello, world!');
 });
 
 $berry->run();
@@ -365,7 +365,7 @@ Like all core Berry objects, it is fully immutable.
 
 #### ResponseFactory
 
-Provides a simple way to create a `Response` from a string body.
+Provides a simple way to create a `Response` from a string.
 
 **Example usage in a handler:**
 
@@ -383,7 +383,7 @@ final readonly class HelloWorldHandler implements RequestHandlerInterface
 {
     public function handle(ServerRequest $request): Response
     {
-        return new ResponseFactory()->fromBody('Hello, world!');
+        return new ResponseFactory()->createFromString('Hello, world!');
     }
 }
 ```

@@ -17,7 +17,7 @@ final class ResponseFactoryTest extends TestCase
             throw new RuntimeException('Failed to decode JSON.');
         }
 
-        $response = new ResponseFactory()->fromBody($json);
+        $response = new ResponseFactory()->createFromString($json);
 
         $this->assertEquals($json, (string) $response->body);
     }

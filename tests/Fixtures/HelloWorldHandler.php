@@ -13,6 +13,6 @@ final class HelloWorldHandler implements RequestHandlerInterface
 {
     public function handle(ServerRequest $request): Response
     {
-        return new ResponseFactory()->fromBody('Hello, world!');
+        return new ResponseFactory()->createFromString('Hello, world!');
     }
 }
