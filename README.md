@@ -428,6 +428,54 @@ Notes:
 - `RouteContextFactory::createFromRequest(ServerRequest $request)` validates attributes and throws a `RuntimeException` if the expected attributes are missing or invalid.- 
 - If you only need route parameters, they are available as request attributes (injected by `RouteParametersMiddleware`).
 
+### Customizing Error Handlers (via Container)
+
+Berry's `ErrorRequestHandlerFactory` selects an error handler based on the `Error` value and attempts to resolve a replacement
+from the application's container. The factory looks for container entries with these keys:
+
+- `method_not_allowed` (used when the error is `new Error('Method not allowed.')`)
+- `not_found` (used when the error is `new Error('Route not found.')`)
+- `internal_server_error` (fallback for other errors)
+
+Accepted handler types (what the container may return):
+- a class name implementing `RequestHandlerInterface` (class-string)
+- an instance of `RequestHandlerInterface`
+- a `Closure(ServerRequest): Response` callable
+- a `RequestHandler` value object
+
+If a key is not present in the container the factory will use the default handler class
+(see `ErrorRequestHandlerFactory::getHandler()` logic).
+
+Example (PHP-DI) registering custom handlers by container keys:
+
+```php
+<?php
+
+use DI\ContainerBuilder;
+use YSOCode\Berry\Application\Berry;
+use App\Handlers\CustomNotFoundHandler;
+use App\Handlers\CustomMethodNotAllowedHandler;
+use App\Handlers\CustomInternalErrorHandler;
+
+$builder = new ContainerBuilder();
+$builder->addDefinitions([
+        'not_found' => CustomNotFoundHandler::class,
+        'method_not_allowed' => new CustomMethodNotAllowedHandler(),
+        'internal_server_error' => new CustomInternalServerErrorHandler(),
+]);
+
+$container = $builder->build();
+
+$berry = new Berry($container);
+
+$berry->run();
+```
+
+Notes:
+- The factory accepts class names, instances, callables or `RequestHandler` objects.
+When the resolved value is not already a `RequestHandler`, the factory will wrap it accordingly.
+- This allows you to replace any of the default error handlers with your own implementations without modifying Berry's source code.
+
 ## License
 
 Berry is open-sourced software licensed under the [MIT license](LICENSE).
