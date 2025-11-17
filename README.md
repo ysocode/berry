@@ -472,9 +472,9 @@ use App\Handlers\CustomNotFoundHandler;
 
 $builder = new ContainerBuilder();
 $builder->addDefinitions([
-        'not_found' => CustomNotFoundHandler::class,
-        'method_not_allowed' => new CustomMethodNotAllowedHandler(),
-        'internal_server_error' => new CustomInternalServerErrorHandler(),
+    'not_found' => CustomNotFoundHandler::class,
+    'method_not_allowed' => new CustomMethodNotAllowedHandler(),
+    'internal_server_error' => new CustomInternalServerErrorHandler(),
 ]);
 
 $container = $builder->build();
