@@ -442,39 +442,33 @@ attributes are missing or invalid.
 
 ### Customizing Error Handlers (via Container)
 
-Berry's `ErrorRequestHandlerFactory` selects an error handler based on the `Error` value and attempts to resolve a replacement
-from the application's container. The factory looks for container entries with these keys:
+Berry allows customizing how three categories of errors are handled. This is done by providing implementations
+for the following interfaces:
 
-- `method_not_allowed` (used when the error is `new Error('Method not allowed.')`)
-- `not_found` (used when the error is `new Error('Route not found.')`)
-- `internal_server_error` (fallback for other errors)
+- `MethodNotAllowedHandlerInterface` (used when the error is "Method not allowed")
+- `NotFoundHandlerInterface` (used when the error is "Not found")
+- `InternalServerErrorHandlerInterface` (fallback for all other errors)
 
-Accepted handler types (what the container may return):
-
-- a class name implementing `RequestHandlerInterface` (class-string)
-- an instance of `RequestHandlerInterface`
-- a `Closure(ServerRequest): Response` callable
-- a `RequestHandler` value object
-
-If a key is not present in the container the factory will use the default handler class
-(see `ErrorRequestHandlerFactory::getHandler(string, string)` logic).
-
-**Example (PHP-DI) registering custom handlers by container keys:**
+By binding your own implementations to these interfaces in the container, you can fully replace the default behavior for each error type.
+If an interface is not bound in the container, the factory will use the appropriate default handler class.
 
 ```php
 <?php
 
 use DI\ContainerBuilder;
 use YSOCode\Berry\Application\Berry;
-use App\Handlers\CustomInternalErrorHandler;
+use App\Handlers\CustomInternalServerErrorHandler;
 use App\Handlers\CustomMethodNotAllowedHandler;
 use App\Handlers\CustomNotFoundHandler;
+use YSOCode\Berry\Infra\Http\InternalServerErrorHandlerInterface;
+use YSOCode\Berry\Infra\Http\MethodNotAllowedHandlerInterface;
+use YSOCode\Berry\Infra\Http\NotFoundHandlerInterface;
 
 $builder = new ContainerBuilder();
 $builder->addDefinitions([
-    'not_found' => CustomNotFoundHandler::class,
-    'method_not_allowed' => new CustomMethodNotAllowedHandler(),
-    'internal_server_error' => new CustomInternalServerErrorHandler(),
+    NotFoundHandlerInterface::class => CustomNotFoundHandler::class,
+    MethodNotAllowedHandlerInterface::class => CustomMethodNotAllowedHandler::class,
+    InternalServerErrorHandlerInterface::class => CustomInternalServerErrorHandler::class,
 ]);
 
 $container = $builder->build();
