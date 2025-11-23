@@ -13,7 +13,6 @@ use YSOCode\Berry\Domain\Types\RequestHandler;
 use YSOCode\Berry\Infra\Http\InternalServerErrorHandlerInterface;
 use YSOCode\Berry\Infra\Http\MethodNotAllowedHandlerInterface;
 use YSOCode\Berry\Infra\Http\NotFoundHandlerInterface;
-use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
 
 final readonly class ErrorRequestHandlerFactory
 {
@@ -33,15 +32,25 @@ final readonly class ErrorRequestHandlerFactory
     }
 
     /**
-     * @param  class-string<RequestHandlerInterface>  $id
-     * @param  class-string<RequestHandlerInterface>  $default
-     * @return class-string<RequestHandlerInterface>|RequestHandlerInterface
+     * @template T of MethodNotAllowedHandlerInterface|NotFoundHandlerInterface|InternalServerErrorHandlerInterface
+     *
+     * @param  class-string<T>  $id
+     * @param  class-string<T>  $default
+     * @return class-string<T>|T
      */
-    private function getHandler(string $id, string $default): string|RequestHandlerInterface
+    private function getHandler(string $id, string $default): string|MethodNotAllowedHandlerInterface|NotFoundHandlerInterface|InternalServerErrorHandlerInterface
     {
         if ($this->container->has($id)) {
             $handler = $this->container->get($id);
-            if ($handler instanceof RequestHandlerInterface) {
+            if (
+                is_string($handler) &&
+                class_exists($handler) &&
+                is_subclass_of($handler, $id)
+            ) {
+                return $handler;
+            }
+
+            if ($handler instanceof $id) {
                 return $handler;
             }
         }
