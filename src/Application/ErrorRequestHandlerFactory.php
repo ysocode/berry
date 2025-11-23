@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace YSOCode\Berry\Application;
 
 use Psr\Container\ContainerInterface;
+use RuntimeException;
 use YSOCode\Berry\Application\Handlers\InternalServerErrorHandler;
 use YSOCode\Berry\Application\Handlers\MethodNotAllowedHandler;
 use YSOCode\Berry\Application\Handlers\NotFoundHandler;
@@ -40,21 +41,41 @@ final readonly class ErrorRequestHandlerFactory
      */
     private function getHandler(string $id, string $default): string|MethodNotAllowedHandlerInterface|NotFoundHandlerInterface|InternalServerErrorHandlerInterface
     {
-        if ($this->container->has($id)) {
-            $handler = $this->container->get($id);
-            if (
-                is_string($handler) &&
-                class_exists($handler) &&
-                is_subclass_of($handler, $id)
-            ) {
-                return $handler;
-            }
-
-            if ($handler instanceof $id) {
-                return $handler;
-            }
+        if (! $this->container->has($id)) {
+            return $default;
         }
 
-        return $default;
+        $handler = $this->container->get($id);
+
+        if (is_string($handler)) {
+            if (! class_exists($handler)) {
+                throw new RuntimeException(sprintf(
+                    'The container returned a string for "%s", but the class "%s" does not exist.',
+                    $id,
+                    $handler
+                ));
+            }
+
+            if (! is_subclass_of($handler, $id)) {
+                throw new RuntimeException(sprintf(
+                    'The class "%s" returned for "%s" does not implement %s.',
+                    $handler,
+                    $id,
+                    $id
+                ));
+            }
+
+            return $handler;
+        }
+
+        if (! $handler instanceof $id) {
+            throw new RuntimeException(sprintf(
+                'The instance returned for "%s" must implement %s.',
+                $id,
+                $id
+            ));
+        }
+
+        return $handler;
     }
 }
