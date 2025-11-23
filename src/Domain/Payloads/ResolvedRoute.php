@@ -35,11 +35,6 @@ final class ResolvedRoute
         }
     }
 
-    public function hasParameter(PathParameterName $name): bool
-    {
-        return isset($this->parameters[(string) $name]);
-    }
-
     public function getParameter(PathParameterName $name): ?PathParameter
     {
         return $this->parameters[(string) $name] ?? null;
