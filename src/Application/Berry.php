@@ -103,7 +103,10 @@ final class Berry
 
             $response = $this->requestHandlerRunner->runFromResolvedRoute($resolvedRoute, $request);
         } else {
-            $response = $this->requestHandlerRunner->runFromRequestHandler($this->errorRequestHandlerFactory->createFromError($resolvedRoute), $request);
+            $response = $this->requestHandlerRunner->runFromRequestHandler(
+                $this->errorRequestHandlerFactory->createFromError($resolvedRoute),
+                $request
+            );
         }
 
         $this->responseEmitter->emit($response);

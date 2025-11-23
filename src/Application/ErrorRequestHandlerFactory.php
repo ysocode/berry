@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Application;
 
-use Closure;
 use Psr\Container\ContainerInterface;
 use YSOCode\Berry\Application\Handlers\InternalServerErrorHandler;
 use YSOCode\Berry\Application\Handlers\MethodNotAllowedHandler;
 use YSOCode\Berry\Application\Handlers\NotFoundHandler;
 use YSOCode\Berry\Domain\Types\Error;
 use YSOCode\Berry\Domain\Types\RequestHandler;
+use YSOCode\Berry\Infra\Http\InternalServerErrorHandlerInterface;
+use YSOCode\Berry\Infra\Http\MethodNotAllowedHandlerInterface;
+use YSOCode\Berry\Infra\Http\NotFoundHandlerInterface;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
-use YSOCode\Berry\Infra\Http\Response;
-use YSOCode\Berry\Infra\Http\ServerRequest;
 
 final readonly class ErrorRequestHandlerFactory
 {
@@ -24,27 +24,28 @@ final readonly class ErrorRequestHandlerFactory
     public function createFromError(Error $error): RequestHandler
     {
         $handler = match (true) {
-            $error->equals(new Error('Method not allowed.')) => $this->getHandler('method_not_allowed', MethodNotAllowedHandler::class),
-            $error->equals(new Error('Route not found.')) => $this->getHandler('not_found', NotFoundHandler::class),
-            default => $this->getHandler('internal_server_error', InternalServerErrorHandler::class),
+            $error->equals(new Error('Method not allowed.')) => $this->getHandler(MethodNotAllowedHandlerInterface::class, MethodNotAllowedHandler::class),
+            $error->equals(new Error('Route not found.')) => $this->getHandler(NotFoundHandlerInterface::class, NotFoundHandler::class),
+            default => $this->getHandler(InternalServerErrorHandlerInterface::class, InternalServerErrorHandler::class),
         };
-
-        if ($handler instanceof RequestHandler) {
-            return $handler;
-        }
 
         return new RequestHandler($handler);
     }
 
     /**
+     * @param  class-string<RequestHandlerInterface>  $id
      * @param  class-string<RequestHandlerInterface>  $default
-     * @return class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response|RequestHandler
+     * @return class-string<RequestHandlerInterface>|RequestHandlerInterface
      */
-    private function getHandler(string $key, string $default): string|RequestHandlerInterface|Closure|RequestHandler
+    private function getHandler(string $id, string $default): string|RequestHandlerInterface
     {
-        /** @var class-string<RequestHandlerInterface>|RequestHandlerInterface|Closure(ServerRequest $request): Response|RequestHandler $handler */
-        $handler = $this->container->has($key) ? $this->container->get($key) : $default;
+        if ($this->container->has($id)) {
+            $handler = $this->container->get($id);
+            if ($handler instanceof RequestHandlerInterface) {
+                return $handler;
+            }
+        }
 
-        return $handler;
+        return $default;
     }
 }
