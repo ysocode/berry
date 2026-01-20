@@ -31,7 +31,7 @@ RewriteRule ^ index.php [QSA,L]
 To ensure that the `public/` directory does not appear in the URL, you should add a second `.htaccess` file above the `public/` directory with the following internal redirect rule:
 
 ```apacheconf
-RewriteEngine on
+RewriteEngine On
 RewriteRule ^$ public/ [L]
 RewriteRule (.*) public/$1 [L]
 ```
