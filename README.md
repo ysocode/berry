@@ -93,7 +93,7 @@ require_once __DIR__.'/vendor/autoload.php';
 
 $berry = new Berry(new Container);
 
-$berry->addMiddleware(
+$berry->appendMiddleware(
     fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
 );
 ```
@@ -113,7 +113,7 @@ require_once __DIR__.'/vendor/autoload.php';
 
 $berry = new Berry(new Container);
 
-$berry->addMiddlewares([
+$berry->appendMiddlewares([
     fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
     fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
 ]);
@@ -212,7 +212,7 @@ require_once __DIR__.'/vendor/autoload.php';
 $berry = new Berry(new Container);
 
 $berry->get('/', HelloWorldHandler::class)
-    ->addMiddleware(
+    ->appendMiddleware(
         fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request)
     );
 
@@ -236,7 +236,7 @@ require_once __DIR__.'/vendor/autoload.php';
 $berry = new Berry(new Container);
 
 $berry->get('/', HelloWorldHandler::class)
-    ->addMiddlewares([
+    ->appendMiddlewares([
         fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
         fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
     ]);
@@ -273,7 +273,7 @@ $berry->group(function (RouteGroup $group): void {
     $group->post('/users', CreateUserHandler::class);
 })
     ->addPrefix('/api/v1')
-    ->addMiddlewares([
+    ->appendMiddlewares([
         fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
         fn (ServerRequest $request, RequestHandlerInterface $handler): Response => $handler->handle($request),
     ]);

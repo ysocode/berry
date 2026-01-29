@@ -43,9 +43,9 @@ final class Route
     /**
      * @param  class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response  $middleware
      */
-    public function addMiddleware(string|MiddlewareInterface|Closure $middleware): self
+    public function appendMiddleware(string|MiddlewareInterface|Closure $middleware): self
     {
-        $this->middlewareCollection->addMiddleware(new Middleware($middleware));
+        $this->middlewareCollection->appendMiddleware(new Middleware($middleware));
 
         return $this;
     }
@@ -53,9 +53,9 @@ final class Route
     /**
      * @param  array<class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response>  $middlewares
      */
-    public function addMiddlewares(array $middlewares): self
+    public function appendMiddlewares(array $middlewares): self
     {
-        $this->middlewareCollection->addMiddlewares(
+        $this->middlewareCollection->appendMiddlewares(
             array_map(fn (string|MiddlewareInterface|Closure $middleware): Middleware => new Middleware($middleware), $middlewares)
         );
 

@@ -79,9 +79,19 @@ trait RouteRegistryProxyTrait
     /**
      * @param  class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response  $middleware
      */
-    public function addMiddleware(string|MiddlewareInterface|Closure $middleware): self
+    public function appendMiddleware(string|MiddlewareInterface|Closure $middleware): self
     {
-        $this->middlewareCollection->addMiddleware(new Middleware($middleware));
+        $this->middlewareCollection->appendMiddleware(new Middleware($middleware));
+
+        return $this;
+    }
+
+    /**
+     * @param  class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response  $middleware
+     */
+    public function prependMiddleware(string|MiddlewareInterface|Closure $middleware): self
+    {
+        $this->middlewareCollection->prependMiddleware(new Middleware($middleware));
 
         return $this;
     }
@@ -89,11 +99,23 @@ trait RouteRegistryProxyTrait
     /**
      * @param  array<class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response>  $middlewares
      */
-    public function addMiddlewares(array $middlewares): self
+    public function appendMiddlewares(array $middlewares): self
     {
-        foreach ($middlewares as $middleware) {
-            $this->middlewareCollection->addMiddleware(new Middleware($middleware));
-        }
+        $this->middlewareCollection->appendMiddlewares(
+            array_map(fn (string|MiddlewareInterface|Closure $middleware): Middleware => new Middleware($middleware), $middlewares)
+        );
+
+        return $this;
+    }
+
+    /**
+     * @param  array<class-string<MiddlewareInterface>|MiddlewareInterface|Closure(ServerRequest, RequestHandlerInterface): Response>  $middlewares
+     */
+    public function prependMiddlewares(array $middlewares): self
+    {
+        $this->middlewareCollection->prependMiddlewares(
+            array_map(fn (string|MiddlewareInterface|Closure $middleware): Middleware => new Middleware($middleware), $middlewares)
+        );
 
         return $this;
     }

@@ -57,7 +57,7 @@ final class BerryTest extends TestCase
 
     public function test_it_should_handle_single_global_middleware(): void
     {
-        $this->berry->addMiddleware(LoggingMiddleware::class);
+        $this->berry->appendMiddleware(LoggingMiddleware::class);
 
         $this->berry->get('/', InspectRequestHandler::class);
 
@@ -73,7 +73,7 @@ final class BerryTest extends TestCase
 
     public function test_it_should_handle_multiple_global_middlewares(): void
     {
-        $this->berry->addMiddlewares([LoggingMiddleware::class, PoweredByMiddleware::class]);
+        $this->berry->appendMiddlewares([LoggingMiddleware::class, PoweredByMiddleware::class]);
 
         $this->berry->get('/', InspectRequestHandler::class);
 
@@ -131,7 +131,7 @@ final class BerryTest extends TestCase
     {
         $this->berry->group(function (RouteGroup $group): void {
             $group->get('/', InspectRequestHandler::class);
-        })->addMiddleware(LoggingMiddleware::class);
+        })->appendMiddleware(LoggingMiddleware::class);
 
         ob_start();
         $this->berry->run();
@@ -147,7 +147,7 @@ final class BerryTest extends TestCase
     {
         $this->berry->group(function (RouteGroup $group): void {
             $group->get('/', InspectRequestHandler::class);
-        })->addMiddlewares([LoggingMiddleware::class, PoweredByMiddleware::class]);
+        })->appendMiddlewares([LoggingMiddleware::class, PoweredByMiddleware::class]);
 
         ob_start();
         $this->berry->run();

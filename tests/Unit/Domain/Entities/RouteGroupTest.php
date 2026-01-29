@@ -28,7 +28,7 @@ final class RouteGroupTest extends TestCase
     {
         $route = $this->routeGroup->routeRegistry->getRouteByName(new RouteName('home'));
 
-        $this->routeGroup->addMiddleware(LoggingMiddleware::class);
+        $this->routeGroup->appendMiddleware(LoggingMiddleware::class);
         $this->routeGroup->propagate();
 
         $this->assertInstanceOf(Route::class, $route);
@@ -41,7 +41,7 @@ final class RouteGroupTest extends TestCase
     {
         $route = $this->routeGroup->routeRegistry->getRouteByName(new RouteName('home'));
 
-        $this->routeGroup->addMiddlewares([LoggingMiddleware::class, PoweredByMiddleware::class]);
+        $this->routeGroup->appendMiddlewares([LoggingMiddleware::class, PoweredByMiddleware::class]);
         $this->routeGroup->propagate();
 
         $this->assertInstanceOf(Route::class, $route);

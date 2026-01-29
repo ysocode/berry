@@ -96,7 +96,7 @@ final class Berry
         $resolvedRoute = $this->routeResolver->resolve($request);
 
         if ($resolvedRoute instanceof ResolvedRoute) {
-            $this->addMiddlewares([
+            $this->prependMiddlewares([
                 new RouteContextMiddleware($resolvedRoute, new RouteParser($this->routeRegistry, $this->basePath), $this->basePath),
                 new RouteParametersMiddleware($resolvedRoute),
             ]);

@@ -13,22 +13,35 @@ final class MiddlewareCollection
      */
     public private(set) array $middlewares = [];
 
-    public function addMiddleware(Middleware $middleware): void
+    public function appendMiddleware(Middleware $middleware): void
     {
         $this->middlewares[] = $middleware;
+    }
+
+    public function prependMiddleware(Middleware $middleware): void
+    {
+        array_unshift($this->middlewares, $middleware);
     }
 
     /**
      * @param  array<Middleware>  $middlewares
      */
-    public function addMiddlewares(array $middlewares): void
+    public function appendMiddlewares(array $middlewares): void
     {
         $this->middlewares = array_merge($this->middlewares, $middlewares);
     }
 
+    /**
+     * @param  array<Middleware>  $middlewares
+     */
+    public function prependMiddlewares(array $middlewares): void
+    {
+        $this->middlewares = array_merge($middlewares, $this->middlewares);
+    }
+
     public function append(self $other): void
     {
-        $this->addMiddlewares($other->middlewares);
+        $this->appendMiddlewares($other->middlewares);
     }
 
     public function clear(): void

@@ -49,7 +49,7 @@ final class RouteTest extends TestCase
             HttpMethod::GET,
             new RoutePathPattern('/'),
             new RequestHandler(HelloWorldHandler::class)
-        )->addMiddleware(LoggingMiddleware::class);
+        )->appendMiddleware(LoggingMiddleware::class);
 
         $this->assertNotEmpty($route->middlewareCollection->isNotEmpty());
     }
@@ -60,7 +60,7 @@ final class RouteTest extends TestCase
             HttpMethod::GET,
             new RoutePathPattern('/'),
             new RequestHandler(HelloWorldHandler::class)
-        )->addMiddlewares([LoggingMiddleware::class, PoweredByMiddleware::class]);
+        )->appendMiddlewares([LoggingMiddleware::class, PoweredByMiddleware::class]);
 
         $this->assertNotEmpty($route->middlewareCollection->isNotEmpty());
     }
