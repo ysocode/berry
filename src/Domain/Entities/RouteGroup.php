@@ -44,7 +44,7 @@ final class RouteGroup
     {
         if ($this->middlewareCollection->isNotEmpty()) {
             foreach ($this->routeRegistry->getRoutes() as $route) {
-                $route->middlewareCollection->append($this->middlewareCollection);
+                $route->middlewareCollection->prepend($this->middlewareCollection);
             }
 
             $this->middlewareCollection->clear();

@@ -36,7 +36,7 @@ final readonly class RequestHandlerRunner
 
         $middlewareStack = $this->middlewareStackBuilder->build(
             $resolvedHandler,
-            array_merge($resolvedRoute->route->middlewareCollection->middlewares, $this->middlewareCollection->middlewares)
+            array_merge($this->middlewareCollection->middlewares, $resolvedRoute->route->middlewareCollection->middlewares)
         );
 
         return $middlewareStack->handle($request);

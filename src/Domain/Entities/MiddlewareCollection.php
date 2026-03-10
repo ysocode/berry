@@ -44,6 +44,11 @@ final class MiddlewareCollection
         $this->appendMiddlewares($other->middlewares);
     }
 
+    public function prepend(self $other): void
+    {
+        $this->prependMiddlewares($other->middlewares);
+    }
+
     public function clear(): void
     {
         $this->middlewares = [];
