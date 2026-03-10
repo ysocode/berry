@@ -61,4 +61,21 @@ final class RouteGroupTest extends TestCase
         $this->assertEquals(HttpMethod::GET, $route->method);
         $this->assertEquals('/api/v1', (string) $route->pathPattern);
     }
+
+    public function test_it_should_prepend_group_middlewares_before_route_middlewares(): void
+    {
+        $route = $this->routeGroup->routeRegistry->getRouteByName(new RouteName('home'));
+        $this->assertInstanceOf(Route::class, $route);
+
+        $route->appendMiddleware(PoweredByMiddleware::class);
+
+        $this->routeGroup->appendMiddleware(LoggingMiddleware::class);
+        $this->routeGroup->propagate();
+
+        $middlewares = $route->middlewareCollection->middlewares;
+
+        $this->assertCount(2, $middlewares);
+        $this->assertSame(LoggingMiddleware::class, $middlewares[0]->value);
+        $this->assertSame(PoweredByMiddleware::class, $middlewares[1]->value);
+    }
 }

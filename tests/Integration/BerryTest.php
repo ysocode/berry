@@ -7,10 +7,15 @@ namespace Tests\Integration;
 use DI\Container;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use Tests\Fixtures\AuthOrderMiddleware;
 use Tests\Fixtures\HelloWorldHandler;
 use Tests\Fixtures\InspectRequestHandler;
 use Tests\Fixtures\LoggingMiddleware;
+use Tests\Fixtures\PermissionOrderMiddleware;
 use Tests\Fixtures\PoweredByMiddleware;
+use Tests\Fixtures\RoutePolicyOrderMiddleware;
+use Tests\Fixtures\SessionOrderMiddleware;
+use Tests\Fixtures\TraceLogOrderMiddleware;
 use Tests\Traits\HeaderEmitterTrait;
 use Tests\Traits\ServerEnvironmentSetupTrait;
 use YSOCode\Berry\Application\Berry;
@@ -85,6 +90,45 @@ final class BerryTest extends TestCase
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Log: 1997-08-22 00:00:00. Powered by: Berry.', $output);
+    }
+
+    public function test_it_should_execute_middlewares_with_globals_before_group_and_route(): void
+    {
+        $this->berry->appendMiddlewares([
+            SessionOrderMiddleware::class,
+            TraceLogOrderMiddleware::class,
+        ]);
+
+        $this->berry->group(function (RouteGroup $group): void {
+            $group->get('/', function (ServerRequest $request): Response {
+                $orderAttribute = $request->getAttribute('middleware-order');
+                $order = $orderAttribute->value ?? [];
+
+                if (! is_array($order)) {
+                    throw new RuntimeException('Invalid middleware-order attribute value.');
+                }
+
+                $json = json_encode($order);
+                if (! is_string($json)) {
+                    throw new RuntimeException('Failed to encode middleware-order as JSON.');
+                }
+
+                return new ResponseFactory()->createFromString($json);
+            })->appendMiddleware(RoutePolicyOrderMiddleware::class);
+        })->appendMiddlewares([
+            AuthOrderMiddleware::class,
+            PermissionOrderMiddleware::class,
+        ]);
+
+        ob_start();
+        $this->berry->run();
+        $output = ob_get_clean();
+
+        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $expectedJson = json_encode(['session', 'trace-log', 'auth', 'permission', 'route-policy']);
+
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals($expectedJson, $output);
     }
 
     public function test_it_should_handle_method_not_allowed_error(): void
