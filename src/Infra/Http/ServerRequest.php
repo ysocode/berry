@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Infra\Http;
 
+use NoDiscard;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
 use YSOCode\Berry\Domain\Enums\HttpVersion;
 use YSOCode\Berry\Domain\Types\Attribute;
@@ -72,45 +73,37 @@ final class ServerRequest
     /**
      * @param  array<string, string>  $cookieParams
      */
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withCookieParams(array $cookieParams): self
     {
-        $new = clone $this;
-        $new->cookieParams = $cookieParams;
-
-        return $new;
+        return clone ($this, ['cookieParams' => $cookieParams]);
     }
 
     /**
      * @param  array<string, string|array<int|string, mixed>>  $queryParams
      */
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withQueryParams(array $queryParams): self
     {
-        $new = clone $this;
-        $new->queryParams = $queryParams;
-
-        return $new;
+        return clone ($this, ['queryParams' => $queryParams]);
     }
 
     /**
      * @param  array<string, string|array<int|string, mixed>>  $parsedBody
      */
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withParsedBody(array $parsedBody): self
     {
-        $new = clone $this;
-        $new->parsedBody = $parsedBody;
-
-        return $new;
+        return clone ($this, ['parsedBody' => $parsedBody]);
     }
 
     /**
      * @param  array<string, UploadedFile|array<int|string, mixed>>  $uploadedFiles
      */
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withUploadedFiles(array $uploadedFiles): self
     {
-        $new = clone $this;
-        $new->uploadedFiles = $uploadedFiles;
-
-        return $new;
+        return clone ($this, ['uploadedFiles' => $uploadedFiles]);
     }
 
     public function hasAttribute(string $name): bool
@@ -127,23 +120,23 @@ final class ServerRequest
         return $this->attributes[(string) $name] ?? null;
     }
 
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withAttribute(string $name, mixed $value): self
     {
         $attribute = new Attribute(new AttributeName($name), $value);
+        $attributes = $this->attributes;
+        $attributes[(string) $attribute->name] = $attribute;
 
-        $new = clone $this;
-        $new->attributes[(string) $attribute->name] = $attribute;
-
-        return $new;
+        return clone ($this, ['attributes' => $attributes]);
     }
 
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withoutAttribute(string $name): self
     {
         $name = new AttributeName($name);
+        $attributes = $this->attributes;
+        unset($attributes[(string) $name]);
 
-        $new = clone $this;
-        unset($new->attributes[(string) $name]);
-
-        return $new;
+        return clone ($this, ['attributes' => $attributes]);
     }
 }

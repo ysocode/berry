@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Infra\Http;
 
+use NoDiscard;
 use Stringable;
 use YSOCode\Berry\Domain\Enums\UriScheme;
 use YSOCode\Berry\Domain\Types\Host;
@@ -50,72 +51,58 @@ final class Uri implements Stringable
         return $authority;
     }
 
+    #[NoDiscard('Uri instances are immutable; use the returned clone.')]
     public function withScheme(UriScheme $scheme): self
     {
-        $new = clone $this;
-        $new->scheme = $scheme;
-
-        return $new;
+        return clone ($this, ['scheme' => $scheme]);
     }
 
+    #[NoDiscard('Uri instances are immutable; use the returned clone.')]
     public function withHost(string $host): self
     {
         $host = new Host($host);
 
-        $new = clone $this;
-        $new->host = $host;
-
-        return $new;
+        return clone ($this, ['host' => $host]);
     }
 
+    #[NoDiscard('Uri instances are immutable; use the returned clone.')]
     public function withPort(int $port): self
     {
         $port = new Port($port);
 
-        $new = clone $this;
-        $new->port = $port;
-
-        return $new;
+        return clone ($this, ['port' => $port]);
     }
 
+    #[NoDiscard('Uri instances are immutable; use the returned clone.')]
     public function withPath(string $path): self
     {
         $path = new UriPath($path);
 
-        $new = clone $this;
-        $new->path = $path;
-
-        return $new;
+        return clone ($this, ['path' => $path]);
     }
 
+    #[NoDiscard('Uri instances are immutable; use the returned clone.')]
     public function withUserInfo(string $user, ?string $password = null): self
     {
         $userInfo = new UriUserInfo($user, $password);
 
-        $new = clone $this;
-        $new->userInfo = $userInfo;
-
-        return $new;
+        return clone ($this, ['userInfo' => $userInfo]);
     }
 
+    #[NoDiscard('Uri instances are immutable; use the returned clone.')]
     public function withQuery(string $query): self
     {
         $query = new UriQuery($query);
 
-        $new = clone $this;
-        $new->query = $query;
-
-        return $new;
+        return clone ($this, ['query' => $query]);
     }
 
+    #[NoDiscard('Uri instances are immutable; use the returned clone.')]
     public function withFragment(string $fragment): self
     {
         $fragment = new UriFragment($fragment);
 
-        $new = clone $this;
-        $new->fragment = $fragment;
-
-        return $new;
+        return clone ($this, ['fragment' => $fragment]);
     }
 
     public function __toString(): string

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Infra\Http;
 
+use NoDiscard;
 use YSOCode\Berry\Domain\Enums\HttpStatus;
 use YSOCode\Berry\Domain\Enums\HttpVersion;
 use YSOCode\Berry\Domain\Types\Header;
@@ -30,11 +31,9 @@ final class Response
         $this->version = $version;
     }
 
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withStatus(HttpStatus $status): self
     {
-        $new = clone $this;
-        $new->status = $status;
-
-        return $new;
+        return clone ($this, ['status' => $status]);
     }
 }

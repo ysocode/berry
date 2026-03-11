@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace YSOCode\Berry\Infra\Http;
 
+use NoDiscard;
 use YSOCode\Berry\Domain\Enums\HttpVersion;
 use YSOCode\Berry\Domain\Types\Header;
 use YSOCode\Berry\Domain\Types\HeaderName;
@@ -53,70 +54,63 @@ trait MessageTrait
     /**
      * @param  array<string>  $values
      */
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withHeader(string $name, array $values): self
     {
         $header = new Header(new HeaderName($name), $values);
 
-        $new = clone $this;
-
         $lowerHeaderName = strtolower((string) $header->name);
+        $headers = $this->headers;
+        $headers[$lowerHeaderName] = $header;
 
-        $new->headers[$lowerHeaderName] = $header;
-
-        return $new;
+        return clone ($this, ['headers' => $headers]);
     }
 
     /**
      * @param  array<string>  $values
      */
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withAddedHeader(string $name, array $values): self
     {
         $header = new Header(new HeaderName($name), $values);
 
-        $new = clone $this;
-
         $lowerHeaderName = strtolower((string) $header->name);
+        $headers = $this->headers;
 
         $mergedHeader = null;
-
-        $currentHeader = $new->headers[$lowerHeaderName] ?? null;
+        $currentHeader = $headers[$lowerHeaderName] ?? null;
         if ($currentHeader instanceof Header) {
             $mergedHeader = new Header($header->name, [...$currentHeader->values, ...$header->values]);
         }
 
-        $new->headers[$lowerHeaderName] = $mergedHeader ?? $header;
+        $headers[$lowerHeaderName] = $mergedHeader ?? $header;
 
-        return $new;
+        return clone ($this, ['headers' => $headers]);
     }
 
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withoutHeader(string $name): self
     {
         $name = new HeaderName($name);
-
-        $new = clone $this;
+        $headers = $this->headers;
 
         $lowerHeaderName = strtolower((string) $name);
+        unset($headers[$lowerHeaderName]);
 
-        unset($new->headers[$lowerHeaderName]);
-
-        return $new;
+        return clone ($this, ['headers' => $headers]);
     }
 
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withBody(string $body): self
     {
         $stream = new StreamFactory()->createFromString($body);
 
-        $new = clone $this;
-        $new->body = $stream;
-
-        return $new;
+        return clone ($this, ['body' => $stream]);
     }
 
+    #[NoDiscard('HTTP messages are immutable; use the returned clone.')]
     public function withVersion(HttpVersion $version): self
     {
-        $new = clone $this;
-        $new->version = $version;
-
-        return $new;
+        return clone ($this, ['version' => $version]);
     }
 }
