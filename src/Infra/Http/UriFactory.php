@@ -6,6 +6,7 @@ namespace YSOCode\Berry\Infra\Http;
 
 use InvalidArgumentException;
 use RuntimeException;
+use Uri\Rfc3986\Uri as NativeUri;
 use YSOCode\Berry\Domain\Enums\UriScheme;
 use YSOCode\Berry\Domain\Types\Host;
 use YSOCode\Berry\Domain\Types\Port;
@@ -18,73 +19,40 @@ final readonly class UriFactory
 {
     public function createFromString(string $uri): Uri
     {
-        if (! filter_var($uri, FILTER_VALIDATE_URL)) {
-            throw new InvalidArgumentException('Invalid URL format.');
-        }
-
-        $parts = parse_url($uri);
-        if (! is_array($parts)) {
+        $nativeUri = NativeUri::parse($uri);
+        if (! $nativeUri instanceof NativeUri) {
             throw new InvalidArgumentException('Failed to parse URL.');
         }
 
-        $scheme = $parts['scheme'] ?? null;
+        $scheme = $nativeUri->getScheme();
         if (! is_string($scheme) || $scheme === '') {
             throw new InvalidArgumentException('URL scheme is missing.');
         }
 
         $scheme = UriScheme::from($scheme);
 
-        $host = $parts['host'] ?? null;
+        $host = $nativeUri->getHost();
         if (! is_string($host) || $host === '') {
             throw new InvalidArgumentException('URL host is missing.');
         }
 
         $host = new Host($host);
 
-        $port = null;
-
-        $partPort = $parts['port'] ?? null;
-        if (is_int($partPort)) {
-            $port = new Port($partPort);
-        }
-
-        $path = null;
-
-        $partPath = $parts['path'] ?? null;
-        if (is_string($partPath)) {
-            $path = new UriPath($partPath);
-        }
-
-        $userInfo = null;
-
-        $user = $parts['user'] ?? null;
-        $pass = $parts['pass'] ?? null;
-        if (is_string($user)) {
-            $userInfo = new UriUserInfo($user, $pass);
-        }
-
-        $query = null;
-
-        $partQuery = $parts['query'] ?? null;
-        if (is_string($partQuery)) {
-            $query = new UriQuery($partQuery);
-        }
-
-        $fragment = null;
-
-        $partFragment = $parts['fragment'] ?? null;
-        if (is_string($partFragment)) {
-            $fragment = new UriFragment($partFragment);
-        }
+        $port = $nativeUri->getPort();
+        $path = $nativeUri->getPath();
+        $username = $nativeUri->getUsername();
+        $password = $nativeUri->getPassword();
+        $query = $nativeUri->getQuery();
+        $fragment = $nativeUri->getFragment();
 
         return new Uri(
             $scheme,
             $host,
-            $port,
-            $path,
-            $userInfo,
-            $query,
-            $fragment,
+            $port ? new Port($port) : null,
+            $path !== '' && $path !== '0' ? new UriPath($path) : null,
+            $username ? new UriUserInfo($username, $password) : null,
+            $query ? new UriQuery($query) : null,
+            $fragment ? new UriFragment($fragment) : null,
         );
     }
 
@@ -99,7 +67,6 @@ final readonly class UriFactory
             $this->getPathFromGlobals(),
             null,
             $this->getQueryFromGlobals(),
-            null,
         );
     }
 
@@ -113,18 +80,25 @@ final readonly class UriFactory
             throw new RuntimeException('Unable to retrieve http host.');
         }
 
-        if (str_contains($httpHost, ':')) {
-            [$extractedHost, $extractedPort] = explode(':', $httpHost, 2);
-
-            return [new Host($extractedHost), new Port((int) $extractedPort)];
+        $nativeUri = NativeUri::parse('//'.$httpHost);
+        if (! $nativeUri instanceof NativeUri) {
+            throw new RuntimeException('Unable to parse http host.');
         }
 
-        $serverPort = $_SERVER['SERVER_PORT'] ?? null;
-        if (! is_int($serverPort)) {
-            throw new RuntimeException('Unable to retrieve server port.');
+        $extractedHost = $nativeUri->getHost();
+        if (! is_string($extractedHost) || $extractedHost === '') {
+            throw new RuntimeException('Unable to retrieve http host.');
         }
 
-        return [new Host($httpHost), new Port($serverPort)];
+        $extractedPort = $nativeUri->getPort();
+        if (! is_int($extractedPort)) {
+            $serverPort = $_SERVER['SERVER_PORT'] ?? null;
+            if (! is_int($serverPort)) {
+                throw new RuntimeException('Unable to retrieve server port.');
+            }
+        }
+
+        return [new Host($extractedHost), new Port($extractedPort ?? $serverPort)];
     }
 
     private function getSchemeFromGlobals(): UriScheme
@@ -144,10 +118,13 @@ final readonly class UriFactory
             throw new RuntimeException('Unable to retrieve request URI.');
         }
 
-        $parts = parse_url($requestUri);
+        $nativeUri = NativeUri::parse($requestUri);
+        if (! $nativeUri instanceof NativeUri) {
+            throw new RuntimeException('Unable to parse request URI.');
+        }
 
-        $partPath = $parts['path'] ?? null;
-        if (! is_string($partPath) || $partPath === '') {
+        $partPath = $nativeUri->getPath();
+        if ($partPath === '' || $partPath === '0') {
             return null;
         }
 

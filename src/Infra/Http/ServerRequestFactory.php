@@ -59,8 +59,8 @@ final class ServerRequestFactory
 
         foreach ($_SERVER as $name => $values) {
             if (
-                str_starts_with($name, 'HTTP_') ||
-                str_starts_with($name, 'REDIRECT_') ||
+                str_starts_with((string) $name, 'HTTP_') ||
+                str_starts_with((string) $name, 'REDIRECT_') ||
                 in_array($name, self::HEADERS_WITHOUT_HTTP_PREFIX)
             ) {
                 if ($this->isShadowedByOriginalHeader($name)) {
@@ -77,7 +77,7 @@ final class ServerRequestFactory
 
                 $headers[] = new Header(
                     new HeaderName($headerName),
-                    array_map(fn (string $value): string => trim($value), explode(',', $values)),
+                    array_map(trim(...), explode(',', $values)),
                 );
             }
         }
@@ -103,7 +103,12 @@ final class ServerRequestFactory
         $nameWithHyphens = str_replace('_', '-', $nameWithoutHttp);
 
         $parts = explode('-', $nameWithHyphens);
-        $capitalizedParts = array_map(fn (string $part): string => ucfirst(strtolower($part)), $parts);
+        $capitalizedParts = array_map(
+            fn (string $part): string => $part
+                |> strtolower(...)
+                |> ucfirst(...),
+            $parts
+        );
 
         return implode('-', $capitalizedParts);
     }

@@ -6,6 +6,7 @@ namespace YSOCode\Berry\Domain\Types;
 
 use InvalidArgumentException;
 use Stringable;
+use Uri\Rfc3986\Uri as NativeUri;
 
 final readonly class RequestTarget implements Stringable
 {
@@ -55,7 +56,14 @@ final readonly class RequestTarget implements Stringable
 
     public static function validateAbsoluteForm(string $value): true|Error
     {
-        if (filter_var($value, FILTER_VALIDATE_URL) === false) {
+        $nativeUri = NativeUri::parse($value);
+        if (! $nativeUri instanceof NativeUri) {
+            return new Error('Invalid absolute-form request target.');
+        }
+
+        $scheme = $nativeUri->getScheme();
+        $host = $nativeUri->getHost();
+        if (! is_string($scheme) || $scheme === '' || ! is_string($host) || $host === '') {
             return new Error('Invalid absolute-form request target.');
         }
 
@@ -84,7 +92,10 @@ final readonly class RequestTarget implements Stringable
     public static function isAuthorityFormCandidate(string $value): bool
     {
         $parts = explode('@', $value, 2);
-        $hostPart = $parts[array_key_last($parts)];
+        $hostPart = array_last($parts);
+        if (! is_string($hostPart) || $hostPart === '') {
+            return false;
+        }
 
         [$host] = explode(':', $hostPart, 2);
 
