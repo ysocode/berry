@@ -53,7 +53,7 @@ final readonly class Header implements Stringable
             }
 
             if ($value === '') {
-                return new Error("Header value at index {$index} cannot be empty.");
+                return new Error(sprintf('Header value at index %s cannot be empty.', $index));
             }
 
             $pattern = '/[\0\r\n]/';

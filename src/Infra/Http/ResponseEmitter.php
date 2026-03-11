@@ -171,7 +171,7 @@ final readonly class ResponseEmitter
             return null;
         }
 
-        [$amountToRead] = $contentAmountHeader->values;
+        $amountToRead = array_first($contentAmountHeader->values);
         if (is_numeric($amountToRead)) {
             return (int) $amountToRead;
         }

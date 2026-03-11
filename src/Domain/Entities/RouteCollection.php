@@ -41,7 +41,7 @@ final class RouteCollection
 
             if ($index === $lastIndex) {
                 if (isset($tree[$segment]['route'])) {
-                    throw new RuntimeException("Route conflict: {$route->pathPattern}.");
+                    throw new RuntimeException(sprintf('Route conflict: %s.', $route->pathPattern));
                 }
 
                 $route->on(

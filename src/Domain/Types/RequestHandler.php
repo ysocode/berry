@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use ReflectionFunction;
 use ReflectionNamedType;
+use ReflectionParameter;
 use RuntimeException;
 use YSOCode\Berry\Infra\Http\ClosureHandlerAdapter;
 use YSOCode\Berry\Infra\Http\RequestHandlerInterface;
@@ -88,7 +89,10 @@ final readonly class RequestHandler
             return new Error('Must accept exactly 1 parameter (ServerRequest).');
         }
 
-        [$first] = $reflection->getParameters();
+        $first = array_first($reflection->getParameters());
+        if (! $first instanceof ReflectionParameter) {
+            return new Error('Must accept exactly 1 parameter (ServerRequest).');
+        }
 
         $firstType = $first->getType();
         if (! $firstType instanceof ReflectionNamedType || $firstType->getName() !== ServerRequest::class) {

@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use ReflectionFunction;
 use ReflectionNamedType;
+use ReflectionParameter;
 use RuntimeException;
 use YSOCode\Berry\Infra\Http\ClosureMiddlewareAdapter;
 use YSOCode\Berry\Infra\Http\MiddlewareInterface;
@@ -89,7 +90,10 @@ final readonly class Middleware
             return new Error('Must accept exactly 2 parameters (ServerRequest, RequestHandlerInterface).');
         }
 
-        [$first, $second] = $reflection->getParameters();
+        [$first, $second] = array_pad($reflection->getParameters(), 2, null);
+        if (! $first instanceof ReflectionParameter || ! $second instanceof ReflectionParameter) {
+            return new Error('Must accept exactly 2 parameters (ServerRequest, RequestHandlerInterface).');
+        }
 
         $firstType = $first->getType();
         if (! $firstType instanceof ReflectionNamedType || $firstType->getName() !== ServerRequest::class) {

@@ -52,13 +52,7 @@ final class RouteRegistry
 
     public function hasRouteByName(RouteName $name): bool
     {
-        foreach ($this->routeCollectionsByMethod as $routeCollection) {
-            if ($routeCollection->hasRouteByName($name)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->routeCollectionsByMethod, fn (RouteCollection $routeCollection): bool => $routeCollection->hasRouteByName($name));
     }
 
     public function getRouteByName(RouteName $name): ?Route

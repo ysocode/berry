@@ -40,11 +40,15 @@ final class Stream implements Stringable
         }
 
         $meta = stream_get_meta_data($this->resource->value);
+        $uri = $meta['uri'] ?? null;
+        if (! is_string($uri)) {
+            throw new RuntimeException('Unable to retrieve stream URI.');
+        }
 
         $this->meta = [
             'stream_type' => $meta['stream_type'],
             'wrapper_type' => $meta['wrapper_type'],
-            'uri' => $meta['uri'],
+            'uri' => $uri,
         ];
 
         $streamMode = StreamMode::from($meta['mode']);

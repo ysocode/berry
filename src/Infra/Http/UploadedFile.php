@@ -50,6 +50,7 @@ final class UploadedFile
                 if (! is_uploaded_file($uri)) {
                     throw new RuntimeException('Invalid uploaded file.');
                 }
+
                 if (! move_uploaded_file($uri, (string) $targetFilePath)) {
                     throw new RuntimeException('Failed to move uploaded file.');
                 }

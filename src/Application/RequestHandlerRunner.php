@@ -15,9 +15,9 @@ use YSOCode\Berry\Infra\Http\ServerRequest;
 final readonly class RequestHandlerRunner
 {
     public function __construct(
-        private readonly ContainerInterface $container,
-        private readonly MiddlewareStackBuilder $middlewareStackBuilder,
-        private readonly MiddlewareCollection $middlewareCollection
+        private ContainerInterface $container,
+        private MiddlewareStackBuilder $middlewareStackBuilder,
+        private MiddlewareCollection $middlewareCollection
     ) {}
 
     public function runFromRequestHandler(RequestHandler $handler, ServerRequest $request): Response

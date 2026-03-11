@@ -62,7 +62,7 @@ final readonly class UriUserInfo implements Stringable
     public function __toString(): string
     {
         if (is_string($this->password)) {
-            return "{$this->user}:{$this->password}";
+            return sprintf('%s:%s', $this->user, $this->password);
         }
 
         return $this->user;

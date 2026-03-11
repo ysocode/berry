@@ -11,7 +11,9 @@ use YSOCode\Berry\Domain\Types\RoutePathPattern;
 final class RouteGroup
 {
     /** @use EventTrait<self, GroupEvent> */
-    use EventTrait, RouteRegistryProxyTrait;
+    use EventTrait;
+
+    use RouteRegistryProxyTrait;
 
     public function __construct(
         ?RouteRegistry $routeRegistry = null,

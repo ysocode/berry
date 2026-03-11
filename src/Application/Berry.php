@@ -46,10 +46,9 @@ final class Berry
         ?ErrorRequestHandlerFactory $errorRequestHandlerFactory = null
     ) {
         $this->routeRegistry = $routeRegistry ?? new RouteRegistry;
-
         $middlewareStackBuilder ??= new MiddlewareStackBuilder($this->container);
-
         $this->middlewareCollection = $middlewareCollection ?? new MiddlewareCollection;
+
         $this->requestHandlerRunner = $requestHandlerRunner ?? new RequestHandlerRunner(
             $this->container,
             $middlewareStackBuilder,
@@ -63,8 +62,8 @@ final class Berry
     public function setBasePath(string $basePath): self
     {
         $basePath = new UriPath($basePath);
-
         $this->basePath = $basePath;
+
         $this->routeResolver->setBasePath($this->basePath);
 
         return $this;
