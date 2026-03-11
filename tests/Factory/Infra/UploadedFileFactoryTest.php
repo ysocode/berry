@@ -151,8 +151,8 @@ final class UploadedFileFactoryTest extends TestCase
                 throw new RuntimeException('Expected "docs" to be an array.');
             }
 
-            $firstUploadedImage = $images[0] ?? null;
-            $firstUploadedDoc = $docs[0] ?? null;
+            $firstUploadedImage = array_first($images);
+            $firstUploadedDoc = array_first($docs);
 
             $this->assertInstanceOf(UploadedFile::class, $firstUploadedImage);
             $this->assertInstanceOf(UploadedFile::class, $firstUploadedDoc);
@@ -231,7 +231,7 @@ final class UploadedFileFactoryTest extends TestCase
                 throw new RuntimeException('Expected "docs" to be an array.');
             }
 
-            $firstUploadedDoc = $docs[0] ?? null;
+            $firstUploadedDoc = array_first($docs);
             $uploadedImage = $files['image'] ?? null;
 
             $this->assertInstanceOf(UploadedFile::class, $firstUploadedDoc);

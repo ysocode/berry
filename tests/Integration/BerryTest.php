@@ -32,7 +32,8 @@ use YSOCode\Berry\Infra\Http\ServerRequest;
 
 final class BerryTest extends TestCase
 {
-    use HeaderEmitterTrait, ServerEnvironmentSetupTrait;
+    use HeaderEmitterTrait;
+    use ServerEnvironmentSetupTrait;
 
     private Berry $berry;
 
@@ -46,6 +47,21 @@ final class BerryTest extends TestCase
         );
     }
 
+    private function getEmittedStatus(): HttpStatus
+    {
+        $firstEmittedHeader = array_first($this->emittedHeaders);
+        if (! is_array($firstEmittedHeader)) {
+            throw new RuntimeException('No emitted headers found.');
+        }
+
+        $statusCode = $firstEmittedHeader['statusCode'] ?? null;
+        if (! is_int($statusCode)) {
+            throw new RuntimeException('Invalid emitted status code.');
+        }
+
+        return HttpStatus::from($statusCode);
+    }
+
     public function test_it_should_run_a_route(): void
     {
         $this->berry->get('/', HelloWorldHandler::class);
@@ -54,7 +70,7 @@ final class BerryTest extends TestCase
         $this->berry->run();
         $output = ob_get_clean();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Hello, world!', $output);
@@ -70,7 +86,7 @@ final class BerryTest extends TestCase
         $this->berry->run();
         $output = ob_get_clean();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Log: 1997-08-22 00:00:00. Powered by: Not powered.', $output);
@@ -86,7 +102,7 @@ final class BerryTest extends TestCase
         $this->berry->run();
         $output = ob_get_clean();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Log: 1997-08-22 00:00:00. Powered by: Berry.', $output);
@@ -124,7 +140,7 @@ final class BerryTest extends TestCase
         $this->berry->run();
         $output = ob_get_clean();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
         $expectedJson = json_encode(['session', 'trace-log', 'auth', 'permission', 'route-policy']);
 
         $this->assertEquals(HttpStatus::OK, $status);
@@ -139,7 +155,7 @@ final class BerryTest extends TestCase
 
         $this->berry->run();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
 
         $this->assertEquals(HttpStatus::METHOD_NOT_ALLOWED, $status);
     }
@@ -150,7 +166,7 @@ final class BerryTest extends TestCase
 
         $this->berry->run();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
 
         $this->assertEquals(HttpStatus::NOT_FOUND, $status);
     }
@@ -165,7 +181,7 @@ final class BerryTest extends TestCase
         $this->berry->run();
         $output = ob_get_clean();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Hello, world!', $output);
@@ -181,7 +197,7 @@ final class BerryTest extends TestCase
         $this->berry->run();
         $output = ob_get_clean();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Log: 1997-08-22 00:00:00. Powered by: Not powered.', $output);
@@ -197,7 +213,7 @@ final class BerryTest extends TestCase
         $this->berry->run();
         $output = ob_get_clean();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Log: 1997-08-22 00:00:00. Powered by: Berry.', $output);
@@ -215,7 +231,7 @@ final class BerryTest extends TestCase
         $this->berry->run();
         $output = ob_get_clean();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Hello, world!', $output);
@@ -245,7 +261,7 @@ final class BerryTest extends TestCase
         $this->berry->run();
         $output = ob_get_clean();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
         $expectedJson = json_encode(['user' => '42', 'post' => '99']);
 
         $this->assertEquals(HttpStatus::OK, $status);
@@ -267,7 +283,7 @@ final class BerryTest extends TestCase
         $this->berry->run();
         $output = ob_get_clean();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Hello, world!', $output);
@@ -299,7 +315,7 @@ final class BerryTest extends TestCase
         $this->berry->run();
         $output = ob_get_clean();
 
-        $status = HttpStatus::from($this->emittedHeaders[0]['statusCode']);
+        $status = $this->getEmittedStatus();
         $expectedJson = json_encode(['user' => '42']);
 
         $this->assertEquals(HttpStatus::OK, $status);

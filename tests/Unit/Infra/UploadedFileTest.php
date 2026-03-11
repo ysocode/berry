@@ -136,8 +136,6 @@ final class UploadedFileTest extends TestCase
         $uploadedFile = new UploadedFile(
             null,
             $status,
-            null,
-            null,
         );
 
         $this->expectException(RuntimeException::class);

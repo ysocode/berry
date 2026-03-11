@@ -133,12 +133,17 @@ final class ResponseEmitterTest extends TestCase
         $responseEmitter->emit($response);
         ob_get_clean();
 
-        [$firstSetCookieEmittedHeader, $secondSetCookieEmittedHeader] = array_values(
+        $setCookieEmittedHeaders = array_values(
             array_filter(
                 $this->emittedHeaders,
-                fn (array $header): bool => str_contains($header['header'], 'Set-Cookie')
+                fn (array $header): bool => str_contains((string) $header['header'], 'Set-Cookie')
             )
         );
+        $firstSetCookieEmittedHeader = array_first($setCookieEmittedHeaders);
+        $secondSetCookieEmittedHeader = array_last($setCookieEmittedHeaders);
+
+        $this->assertIsArray($firstSetCookieEmittedHeader);
+        $this->assertIsArray($secondSetCookieEmittedHeader);
 
         $this->assertEquals('Set-Cookie: cookie1=1', $firstSetCookieEmittedHeader['header']);
         $this->assertFalse($firstSetCookieEmittedHeader['replace']);

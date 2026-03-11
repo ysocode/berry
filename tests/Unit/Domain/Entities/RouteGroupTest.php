@@ -11,6 +11,7 @@ use Tests\Fixtures\PoweredByMiddleware;
 use YSOCode\Berry\Domain\Entities\Route;
 use YSOCode\Berry\Domain\Entities\RouteGroup;
 use YSOCode\Berry\Domain\Enums\HttpMethod;
+use YSOCode\Berry\Domain\Types\Middleware;
 use YSOCode\Berry\Domain\Types\RouteName;
 
 final class RouteGroupTest extends TestCase
@@ -73,9 +74,13 @@ final class RouteGroupTest extends TestCase
         $this->routeGroup->propagate();
 
         $middlewares = $route->middlewareCollection->middlewares;
+        $firstMiddleware = array_first($middlewares);
+        $lastMiddleware = array_last($middlewares);
 
         $this->assertCount(2, $middlewares);
-        $this->assertSame(LoggingMiddleware::class, $middlewares[0]->value);
-        $this->assertSame(PoweredByMiddleware::class, $middlewares[1]->value);
+        $this->assertInstanceOf(Middleware::class, $firstMiddleware);
+        $this->assertInstanceOf(Middleware::class, $lastMiddleware);
+        $this->assertSame(LoggingMiddleware::class, $firstMiddleware->value);
+        $this->assertSame(PoweredByMiddleware::class, $lastMiddleware->value);
     }
 }

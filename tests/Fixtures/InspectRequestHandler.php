@@ -23,13 +23,13 @@ final class InspectRequestHandler implements RequestHandlerInterface
         }
 
         $poweredByHeader = $request->getHeader('X-Powered-By');
-        [$poweredBy] = $poweredByHeader->values ?? ['Not powered'];
+        $poweredBy = array_first($poweredByHeader->values ?? ['Not powered']);
         if (! is_string($poweredBy) || $poweredBy === '') {
             return new ResponseFactory()
                 ->createFromString('Invalid X-Powered-By header value.')
                 ->withStatus(HttpStatus::INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseFactory()->createFromString("Log: {$loggedAt}. Powered by: {$poweredBy}.");
+        return new ResponseFactory()->createFromString(sprintf('Log: %s. Powered by: %s.', $loggedAt, $poweredBy));
     }
 }
