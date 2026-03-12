@@ -8,6 +8,9 @@ use DI\Container;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Tests\Fixtures\AuthOrderMiddleware;
+use Tests\Fixtures\ContainerResolvedHandler;
+use Tests\Fixtures\ContainerResolvedMessage;
+use Tests\Fixtures\ContainerResolvedMiddleware;
 use Tests\Fixtures\HelloWorldHandler;
 use Tests\Fixtures\InspectRequestHandler;
 use Tests\Fixtures\LoggingMiddleware;
@@ -41,8 +44,13 @@ final class BerryTest extends TestCase
     {
         $this->initializeFakeEnvironment();
 
-        $this->berry = new Berry(
-            new Container,
+        $this->berry = $this->createBerry(new Container);
+    }
+
+    private function createBerry(Container $container): Berry
+    {
+        return new Berry(
+            $container,
             responseEmitter: new ResponseEmitter($this->headerEmitter(...)),
         );
     }
@@ -74,6 +82,44 @@ final class BerryTest extends TestCase
 
         $this->assertEquals(HttpStatus::OK, $status);
         $this->assertEquals('Hello, world!', $output);
+    }
+
+    public function test_it_should_resolve_route_handler_from_container_with_constructor_dependency(): void
+    {
+        $container = new Container;
+        $container->set(ContainerResolvedMessage::class, new ContainerResolvedMessage('resolved-by-container'));
+
+        $this->berry = $this->createBerry($container);
+
+        $this->berry->get('/', ContainerResolvedHandler::class);
+
+        ob_start();
+        $this->berry->run();
+        $output = ob_get_clean();
+
+        $status = $this->getEmittedStatus();
+
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals('resolved-by-container', $output);
+    }
+
+    public function test_it_should_resolve_route_middleware_from_container_with_constructor_dependency(): void
+    {
+        $container = new Container;
+        $container->set(ContainerResolvedMessage::class, new ContainerResolvedMessage('resolved-by-route-middleware'));
+
+        $this->berry = $this->createBerry($container);
+
+        $this->berry->get('/', InspectRequestHandler::class)->appendMiddleware(ContainerResolvedMiddleware::class);
+
+        ob_start();
+        $this->berry->run();
+        $output = ob_get_clean();
+
+        $status = $this->getEmittedStatus();
+
+        $this->assertEquals(HttpStatus::OK, $status);
+        $this->assertEquals('Log: resolved-by-route-middleware. Powered by: Not powered.', $output);
     }
 
     public function test_it_should_handle_single_global_middleware(): void
